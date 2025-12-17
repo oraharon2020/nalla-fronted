@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import type { Product } from '@/lib/types';
 
 // Color mapping for visual display
 const colorMap: Record<string, string> = {
@@ -43,43 +44,8 @@ const getColorStyle = (colorName: string): React.CSSProperties => {
   };
 };
 
-interface ProductVariation {
-  id: string;
-  colorName: string;
-  image?: {
-    sourceUrl: string;
-    altText?: string;
-  };
-}
-
-interface ProductAttribute {
-  name: string;
-  options: string[];
-}
-
 interface ProductCardProps {
-  product: {
-    id: string;
-    databaseId: number;
-    name: string;
-    slug: string;
-    price: string;
-    regularPrice?: string;
-    salePrice?: string;
-    onSale: boolean;
-    image?: {
-      sourceUrl: string;
-      altText?: string;
-    };
-    galleryImages?: {
-      sourceUrl: string;
-      altText?: string;
-    }[];
-    variations?: ProductVariation[];
-    attributes?: {
-      nodes: ProductAttribute[];
-    };
-  };
+  product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {

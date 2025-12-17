@@ -39,7 +39,7 @@ export default async function HomePage() {
     ]);
     
     categories = wooCategories.map(transformCategory);
-    products = wooProducts.map(transformProduct);
+    products = wooProducts.map((p) => transformProduct(p));
   } catch (error) {
     console.error('Error fetching data:', error);
   }

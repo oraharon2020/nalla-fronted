@@ -41,18 +41,14 @@ export interface Product {
   onSale: boolean;
   sku?: string;
   image?: ProductImage;
-  galleryImages?: {
-    nodes: ProductImage[];
-  };
+  galleryImages?: ProductImage[];
   productCategories?: {
     nodes: ProductCategory[];
   };
   attributes?: {
     nodes: ProductAttribute[];
   };
-  variations?: {
-    nodes: ProductVariation[];
-  };
+  variations?: ProductVariation[];
   related?: {
     nodes: Product[];
   };
