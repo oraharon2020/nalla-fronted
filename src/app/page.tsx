@@ -215,18 +215,21 @@ async function CategoriesSection() {
                   src={category.image.sourceUrl}
                   alt={category.name}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
               )}
               
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              {/* Overlay - darker gradient */}
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-300" />
               
-              {/* Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white">
-                <h3 className="text-xl md:text-2xl font-bold mb-2">{category.name}</h3>
-                <span className="font-english text-xs tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              {/* Content - title at top, button at bottom */}
+              <div className="absolute inset-0 flex flex-col items-center justify-between py-8 text-white">
+                {/* Title at top */}
+                <h3 className="text-lg md:text-xl font-bold">{category.name}</h3>
+                
+                {/* Discover button at bottom */}
+                <span className="font-english text-xs tracking-[0.2em] uppercase border border-white/70 px-6 py-2 hover:bg-white hover:text-black transition-all duration-300">
                   DISCOVER
                 </span>
               </div>
