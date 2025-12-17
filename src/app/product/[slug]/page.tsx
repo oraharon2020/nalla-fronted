@@ -1,10 +1,23 @@
 import { ProductPageClient } from './ProductPageClient';
-import { getProductBySlug, getProductVariations, transformProduct } from '@/lib/woocommerce/api';
+import { getProductBySlug, getProductVariations, getProducts, transformProduct } from '@/lib/woocommerce/api';
 import { notFound } from 'next/navigation';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
+
+// Generate static pages for popular products at build time
+export async function generateStaticParams() {
+  try {
+    const products = await getProducts({ per_page: 50 });
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
+
+// Revalidate every 5 minutes
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: ProductPageProps) {
   const { slug } = await params;

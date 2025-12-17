@@ -5,6 +5,9 @@ import { ProductGrid } from '@/components/products';
 import { Truck, ShieldCheck, CreditCard, Headphones } from 'lucide-react';
 import { getCategories, getProducts, transformCategory, transformProduct } from '@/lib/woocommerce';
 
+// Revalidate homepage every 5 minutes
+export const revalidate = 300;
+
 const features = [
   {
     icon: Truck,

@@ -1,9 +1,22 @@
 import { ProductGrid } from '@/components/products';
-import { getProductsByCategorySlug, getCategoryBySlug, transformProduct } from '@/lib/woocommerce';
+import { getProductsByCategorySlug, getCategoryBySlug, getCategories, transformProduct } from '@/lib/woocommerce';
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
+
+// Generate static pages for all categories at build time
+export async function generateStaticParams() {
+  try {
+    const categories = await getCategories({ per_page: 50 });
+    return categories.map((cat) => ({ slug: cat.slug }));
+  } catch {
+    return [];
+  }
+}
+
+// Revalidate every 5 minutes
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: CategoryPageProps) {
   const { slug } = await params;

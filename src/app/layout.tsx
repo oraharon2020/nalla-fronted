@@ -46,6 +46,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl">
+      <head>
+        {/* Preconnect to external resources */}
+        <link rel="preconnect" href="https://bellano.co.il" />
+        <link rel="dns-prefetch" href="https://bellano.co.il" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className={`${rubik.variable} ${inter.variable} font-sans antialiased`}>
         <Header />
         <main className="min-h-screen">{children}</main>

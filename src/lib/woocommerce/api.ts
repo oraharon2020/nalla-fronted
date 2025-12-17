@@ -3,6 +3,13 @@ const WOOCOMMERCE_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://bellan
 const CONSUMER_KEY = process.env.WOOCOMMERCE_CONSUMER_KEY || '';
 const CONSUMER_SECRET = process.env.WOOCOMMERCE_CONSUMER_SECRET || '';
 
+// Debug log (remove in production)
+console.log('WooCommerce Config:', {
+  url: WOOCOMMERCE_URL,
+  hasKey: !!CONSUMER_KEY,
+  hasSecret: !!CONSUMER_SECRET,
+});
+
 // Base fetch function with authentication
 async function wooFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = new URL(`${WOOCOMMERCE_URL}/wp-json/wc/v3/${endpoint}`);
@@ -19,7 +26,7 @@ async function wooFetch<T>(endpoint: string, options: RequestInit = {}): Promise
       'Content-Type': 'application/json',
       ...options.headers,
     },
-    next: { revalidate: 60 }, // Cache for 60 seconds
+    next: { revalidate: 300 }, // Cache for 5 minutes
   });
 
   if (!response.ok) {
