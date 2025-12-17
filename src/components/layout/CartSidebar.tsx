@@ -134,12 +134,13 @@ export function CartSidebar() {
               </div>
               
               {/* Checkout Button */}
-              <a 
-                href="https://bellano.co.il/checkout"
+              <Link 
+                href="/checkout"
+                onClick={closeCart}
                 className="block w-full py-3.5 bg-black text-white text-center font-medium rounded-md hover:bg-gray-800 transition-colors active:scale-[0.98]"
               >
                 מעבר לתשלום
-              </a>
+              </Link>
               
               {/* Continue Shopping */}
               <button 

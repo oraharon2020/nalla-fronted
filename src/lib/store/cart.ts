@@ -32,6 +32,7 @@ interface CartStore {
   closeCart: () => void;
   getTotal: () => number;
   getItemCount: () => number;
+  getCheckoutUrl: () => string;
   setHydrated: () => void;
 }
 
@@ -96,6 +97,43 @@ export const useCartStore = create<CartStore>()(
 
       getItemCount: () => {
         return get().items.reduce((count, item) => count + item.quantity, 0);
+      },
+
+      getCheckoutUrl: () => {
+        const items = get().items;
+        if (items.length === 0) return 'https://bellano.co.il/checkout';
+        
+        // For single item - simple add-to-cart URL
+        if (items.length === 1) {
+          const item = items[0];
+          const productId = item.variation?.id 
+            ? parseInt(item.variation.id.replace('variation-', ''))
+            : item.databaseId;
+          return `https://bellano.co.il/?add-to-cart=${productId}&quantity=${item.quantity}`;
+        }
+        
+        // For multiple items - add first item, the rest will be handled by a special page
+        // This is a WooCommerce limitation
+        const firstItem = items[0];
+        const firstProductId = firstItem.variation?.id 
+          ? parseInt(firstItem.variation.id.replace('variation-', ''))
+          : firstItem.databaseId;
+        
+        // Encode remaining items
+        const remainingItems = items.slice(1).map(item => ({
+          id: item.variation?.id 
+            ? parseInt(item.variation.id.replace('variation-', ''))
+            : item.databaseId,
+          qty: item.quantity
+        }));
+        
+        const baseUrl = `https://bellano.co.il/?add-to-cart=${firstProductId}&quantity=${firstItem.quantity}`;
+        
+        if (remainingItems.length > 0) {
+          return `${baseUrl}&bellano_more=${encodeURIComponent(JSON.stringify(remainingItems))}`;
+        }
+        
+        return baseUrl;
       },
     }),
     {

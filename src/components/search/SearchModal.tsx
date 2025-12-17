@@ -17,7 +17,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Focus input when modal opens
   useEffect(() => {
