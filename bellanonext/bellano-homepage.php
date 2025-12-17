@@ -138,15 +138,48 @@ function bellano_homepage_settings_page() {
                         <!-- Common Fields -->
                         <tr>
                             <th><label>כותרת</label></th>
-                            <td><input type="text" name="bellano_banners[<?php echo $index; ?>][title]" value="<?php echo esc_attr($banner['title'] ?? ''); ?>" class="regular-text" /></td>
+                            <td>
+                                <input type="text" name="bellano_banners[<?php echo $index; ?>][title]" value="<?php echo esc_attr($banner['title'] ?? ''); ?>" class="regular-text" />
+                                <br><br>
+                                <select name="bellano_banners[<?php echo $index; ?>][titleFont]" style="width: 120px;">
+                                    <option value="hebrew" <?php selected($banner['titleFont'] ?? 'hebrew', 'hebrew'); ?>>עברית (Ping)</option>
+                                    <option value="english" <?php selected($banner['titleFont'] ?? 'hebrew', 'english'); ?>>אנגלית (Amandine)</option>
+                                </select>
+                                <select name="bellano_banners[<?php echo $index; ?>][titleWeight]" style="width: 100px;">
+                                    <option value="normal" <?php selected($banner['titleWeight'] ?? 'bold', 'normal'); ?>>רגיל (400)</option>
+                                    <option value="bold" <?php selected($banner['titleWeight'] ?? 'bold', 'bold'); ?>>בולד (700)</option>
+                                </select>
+                            </td>
                         </tr>
                         <tr>
                             <th><label>תת כותרת</label></th>
-                            <td><input type="text" name="bellano_banners[<?php echo $index; ?>][subtitle]" value="<?php echo esc_attr($banner['subtitle'] ?? ''); ?>" class="regular-text" /></td>
+                            <td>
+                                <input type="text" name="bellano_banners[<?php echo $index; ?>][subtitle]" value="<?php echo esc_attr($banner['subtitle'] ?? ''); ?>" class="regular-text" />
+                                <br><br>
+                                <select name="bellano_banners[<?php echo $index; ?>][subtitleFont]" style="width: 120px;">
+                                    <option value="hebrew" <?php selected($banner['subtitleFont'] ?? 'hebrew', 'hebrew'); ?>>עברית (Ping)</option>
+                                    <option value="english" <?php selected($banner['subtitleFont'] ?? 'hebrew', 'english'); ?>>אנגלית (Amandine)</option>
+                                </select>
+                                <select name="bellano_banners[<?php echo $index; ?>][subtitleWeight]" style="width: 100px;">
+                                    <option value="normal" <?php selected($banner['subtitleWeight'] ?? 'normal', 'normal'); ?>>רגיל (400)</option>
+                                    <option value="bold" <?php selected($banner['subtitleWeight'] ?? 'normal', 'bold'); ?>>בולד (700)</option>
+                                </select>
+                            </td>
                         </tr>
                         <tr>
                             <th><label>טקסט כפתור</label></th>
-                            <td><input type="text" name="bellano_banners[<?php echo $index; ?>][buttonText]" value="<?php echo esc_attr($banner['buttonText'] ?? ''); ?>" class="regular-text" /></td>
+                            <td>
+                                <input type="text" name="bellano_banners[<?php echo $index; ?>][buttonText]" value="<?php echo esc_attr($banner['buttonText'] ?? ''); ?>" class="regular-text" />
+                                <br><br>
+                                <select name="bellano_banners[<?php echo $index; ?>][buttonFont]" style="width: 120px;">
+                                    <option value="hebrew" <?php selected($banner['buttonFont'] ?? 'english', 'hebrew'); ?>>עברית (Ping)</option>
+                                    <option value="english" <?php selected($banner['buttonFont'] ?? 'english', 'english'); ?>>אנגלית (Amandine)</option>
+                                </select>
+                                <select name="bellano_banners[<?php echo $index; ?>][buttonWeight]" style="width: 100px;">
+                                    <option value="normal" <?php selected($banner['buttonWeight'] ?? 'normal', 'normal'); ?>>רגיל (400)</option>
+                                    <option value="bold" <?php selected($banner['buttonWeight'] ?? 'normal', 'bold'); ?>>בולד (700)</option>
+                                </select>
+                            </td>
                         </tr>
                         <tr>
                             <th><label>קישור כפתור</label></th>
@@ -312,8 +345,14 @@ add_action('rest_api_init', function() {
                     'videoLoop' => isset($banner['videoLoop']) ? (bool)$banner['videoLoop'] : true,
                     'videoMuted' => isset($banner['videoMuted']) ? (bool)$banner['videoMuted'] : true,
                     'title' => $banner['title'] ?? '',
+                    'titleFont' => $banner['titleFont'] ?? 'hebrew',
+                    'titleWeight' => $banner['titleWeight'] ?? 'bold',
                     'subtitle' => $banner['subtitle'] ?? '',
+                    'subtitleFont' => $banner['subtitleFont'] ?? 'hebrew',
+                    'subtitleWeight' => $banner['subtitleWeight'] ?? 'normal',
                     'buttonText' => $banner['buttonText'] ?? '',
+                    'buttonFont' => $banner['buttonFont'] ?? 'english',
+                    'buttonWeight' => $banner['buttonWeight'] ?? 'normal',
                     'buttonLink' => $banner['buttonLink'] ?? '',
                     'textColor' => $banner['textColor'] ?? 'white',
                 ];

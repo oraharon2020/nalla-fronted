@@ -15,8 +15,14 @@ interface HomepageBanner {
   videoLoop: boolean;
   videoMuted: boolean;
   title: string;
+  titleFont: 'hebrew' | 'english';
+  titleWeight: 'normal' | 'bold';
   subtitle: string;
+  subtitleFont: 'hebrew' | 'english';
+  subtitleWeight: 'normal' | 'bold';
   buttonText: string;
+  buttonFont: 'hebrew' | 'english';
+  buttonWeight: 'normal' | 'bold';
   buttonLink: string;
   textColor: 'white' | 'black';
 }
@@ -47,15 +53,27 @@ async function HeroSection() {
   const mobileVideoUrl = banner?.mobileVideo || videoUrl; // Fallback to main video
   const videoPoster = banner?.videoPoster || imageUrl;
   const title = banner?.title || '';
+  const titleFont = banner?.titleFont || 'hebrew';
+  const titleWeight = banner?.titleWeight || 'bold';
   const subtitle = banner?.subtitle || '';
+  const subtitleFont = banner?.subtitleFont || 'hebrew';
+  const subtitleWeight = banner?.subtitleWeight || 'normal';
   const buttonText = banner?.buttonText || '';
+  const buttonFont = banner?.buttonFont || 'english';
+  const buttonWeight = banner?.buttonWeight || 'normal';
   const buttonLink = banner?.buttonLink || '/categories';
   const textColor = banner?.textColor || 'white';
   
   // Check if we have any video (desktop or mobile)
   const hasDesktopVideo = mediaType === 'video' && videoUrl;
   const hasMobileVideo = mediaType === 'video' && mobileVideoUrl;
-  const hasAnyVideo = hasDesktopVideo || hasMobileVideo;
+  
+  // Font classes helper
+  const getFontClass = (font: string, weight: string) => {
+    const fontClass = font === 'english' ? 'font-english' : '';
+    const weightClass = weight === 'bold' ? 'font-bold' : 'font-normal';
+    return `${fontClass} ${weightClass}`.trim();
+  };
   
   const textColorClass = textColor === 'white' ? 'text-white' : 'text-black';
   const textColorMuted = textColor === 'white' ? 'text-white/90' : 'text-black/80';
@@ -118,19 +136,19 @@ async function HeroSection() {
         <div className="relative h-full flex items-center justify-center text-center">
           <div className="max-w-3xl px-6">
             {title && (
-              <h1 className={`text-4xl md:text-6xl lg:text-7xl font-bold ${textColorClass} mb-6 leading-tight`}>
+              <h1 className={`text-4xl md:text-6xl lg:text-7xl ${getFontClass(titleFont, titleWeight)} ${textColorClass} mb-6 leading-tight ${titleFont === 'english' ? 'tracking-wider' : ''}`}>
                 {title}
               </h1>
             )}
             {subtitle && (
-              <p className={`${textColorMuted} text-lg md:text-xl mb-8`}>
+              <p className={`${getFontClass(subtitleFont, subtitleWeight)} ${textColorMuted} text-lg md:text-xl mb-8 ${subtitleFont === 'english' ? 'tracking-wide' : ''}`}>
                 {subtitle}
               </p>
             )}
             {buttonText && buttonLink && (
               <Link
                 href={buttonLink}
-                className={`inline-block ${textColor === 'white' ? 'bg-white text-black hover:bg-black hover:text-white' : 'bg-black text-white hover:bg-white hover:text-black'} px-8 py-4 text-sm font-medium tracking-wider transition-all duration-300`}
+                className={`inline-block ${getFontClass(buttonFont, buttonWeight)} ${textColor === 'white' ? 'bg-white text-black hover:bg-black hover:text-white' : 'bg-black text-white hover:bg-white hover:text-black'} px-8 py-4 text-sm tracking-wider transition-all duration-300 uppercase`}
               >
                 {buttonText}
               </Link>
