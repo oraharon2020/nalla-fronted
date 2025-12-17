@@ -1,0 +1,86 @@
+import { ProductGrid } from '@/components/products';
+import { getProductsByCategorySlug, getCategoryBySlug, transformProduct } from '@/lib/woocommerce';
+
+interface CategoryPageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: CategoryPageProps) {
+  const { slug } = await params;
+  
+  try {
+    const category = await getCategoryBySlug(slug);
+    const name = category?.name || slug;
+    
+    return {
+      title: `${name} | בלאנו - רהיטי מעצבים`,
+      description: `מבחר רחב של ${name} איכותיים. משלוח חינם עד הבית!`,
+    };
+  } catch {
+    return {
+      title: `${slug} | בלאנו - רהיטי מעצבים`,
+    };
+  }
+}
+
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const { slug } = await params;
+  
+  let category = null;
+  let products: any[] = [];
+
+  try {
+    const [categoryData, wooProducts] = await Promise.all([
+      getCategoryBySlug(slug),
+      getProductsByCategorySlug(slug, { per_page: 24 }),
+    ]);
+    
+    category = categoryData;
+    products = wooProducts.map(p => transformProduct(p));
+  } catch (error) {
+    console.error('Error fetching category data:', error);
+  }
+
+  const categoryName = category?.name || slug;
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumb */}
+      <nav className="text-sm text-muted-foreground mb-6">
+        <a href="/" className="hover:text-primary">דף הבית</a>
+        <span className="mx-2">/</span>
+        <span>{categoryName}</span>
+      </nav>
+
+      {/* Category Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">{categoryName}</h1>
+        <p className="text-muted-foreground">
+          מבחר רחב של {categoryName} איכותיים בעיצוב מודרני
+        </p>
+      </div>
+
+      {/* Sort Options */}
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-sm text-muted-foreground">
+          {products.length} מוצרים
+        </p>
+        <select className="border rounded-md px-3 py-2 text-sm bg-background">
+          <option value="default">מיון בחירת מחדל</option>
+          <option value="price-low">מחיר: נמוך לגבוה</option>
+          <option value="price-high">מחיר: גבוה לנמוך</option>
+          <option value="newest">חדשים ביותר</option>
+        </select>
+      </div>
+
+      {/* Products Grid */}
+      {products.length > 0 ? (
+        <ProductGrid products={products} />
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">לא נמצאו מוצרים בקטגוריה זו</p>
+        </div>
+      )}
+    </div>
+  );
+}
