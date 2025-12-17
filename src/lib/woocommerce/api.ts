@@ -26,7 +26,10 @@ async function wooFetch<T>(endpoint: string, options: RequestInit = {}): Promise
       'Content-Type': 'application/json',
       ...options.headers,
     },
-    next: { revalidate: 300 }, // Cache for 5 minutes
+    next: { 
+      revalidate: 3600,  // Cache for 1 hour
+      tags: ['woocommerce'] 
+    },
   });
 
   if (!response.ok) {
