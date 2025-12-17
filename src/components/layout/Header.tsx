@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Search, ShoppingBag, Menu, Phone, User, Heart, X, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/lib/store/cart';
+import { useWishlistStore } from '@/lib/store/wishlist';
 import { CartSidebar } from './CartSidebar';
 import { SearchModal } from '@/components/search/SearchModal';
 
@@ -32,7 +33,9 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { getItemCount, toggleCart, isHydrated } = useCartStore();
+  const wishlistStore = useWishlistStore();
   const itemCount = isHydrated ? getItemCount() : 0;
+  const wishlistCount = wishlistStore.isHydrated ? wishlistStore.getItemCount() : 0;
 
   return (
     <>
@@ -96,9 +99,16 @@ export function Header() {
               </Button>
 
               {/* Wishlist */}
-              <Button variant="ghost" size="icon" className="hidden md:flex">
-                <Heart className="h-5 w-5" />
-              </Button>
+              <Link href="/wishlist">
+                <Button variant="ghost" size="icon" className="hidden md:flex relative">
+                  <Heart className="h-5 w-5" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
 
               {/* Account */}
               <Link href="/my-account">

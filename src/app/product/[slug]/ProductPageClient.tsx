@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCartStore } from '@/lib/store/cart';
+import { useWishlistStore } from '@/lib/store/wishlist';
 
 // Color mapping for visual display
 const colorMap: Record<string, string> = {
@@ -121,6 +122,20 @@ export function ProductPageClient({ product, variations = [] }: ProductPageClien
   const thumbnailsRef = useRef<HTMLDivElement>(null);
 
   const { addItem } = useCartStore();
+  const { toggleItem, isInWishlist, isHydrated: wishlistHydrated } = useWishlistStore();
+  const isWishlisted = wishlistHydrated && isInWishlist(product.id);
+
+  const wishlistItem = {
+    id: product.id,
+    databaseId: product.databaseId,
+    name: product.name,
+    slug: product.slug,
+    price: product.price,
+    regularPrice: product.regularPrice,
+    salePrice: product.salePrice,
+    onSale: product.onSale,
+    image: product.image,
+  };
 
   // Extract unique attributes - merge from product attributes AND variations
   const attributes = useMemo(() => {
@@ -478,8 +493,19 @@ export function ProductPageClient({ product, variations = [] }: ProductPageClien
               </Button>
 
               {/* Wishlist */}
-              <button className="w-10 h-10 md:w-9 md:h-9 flex items-center justify-center border border-gray-300 rounded hover:border-gray-400">
-                <Heart className="w-4 h-4 text-gray-500" />
+              <button 
+                className={`w-10 h-10 md:w-9 md:h-9 flex items-center justify-center border rounded transition-colors ${
+                  isWishlisted 
+                    ? 'border-red-500 bg-red-50' 
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+                onClick={() => toggleItem(wishlistItem)}
+              >
+                <Heart className={`w-4 h-4 transition-colors ${
+                  isWishlisted 
+                    ? 'fill-red-500 text-red-500' 
+                    : 'text-gray-500'
+                }`} />
               </button>
             </div>
 

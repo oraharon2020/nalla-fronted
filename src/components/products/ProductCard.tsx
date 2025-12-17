@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useWishlistStore } from '@/lib/store/wishlist';
 import type { Product } from '@/lib/types';
 
 // Color mapping for visual display
@@ -49,7 +49,20 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { toggleItem, isInWishlist, isHydrated } = useWishlistStore();
+  const isWishlisted = isHydrated && isInWishlist(product.id);
+  
+  const wishlistItem = {
+    id: product.id,
+    databaseId: product.databaseId,
+    name: product.name,
+    slug: product.slug,
+    price: product.price,
+    regularPrice: product.regularPrice,
+    salePrice: product.salePrice,
+    onSale: product.onSale,
+    image: product.image,
+  };
   
   const hasDiscount = product.onSale && product.regularPrice && product.salePrice;
   
@@ -107,7 +120,8 @@ export function ProductCard({ product }: ProductCardProps) {
           className="absolute bottom-3 left-3 bg-transparent hover:bg-transparent p-0"
           onClick={(e) => {
             e.preventDefault();
-            setIsWishlisted(!isWishlisted);
+            e.stopPropagation();
+            toggleItem(wishlistItem);
           }}
         >
           <Heart 
