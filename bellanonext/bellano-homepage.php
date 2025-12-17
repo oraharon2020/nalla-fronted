@@ -195,6 +195,16 @@ function bellano_homepage_settings_page() {
                             </td>
                         </tr>
                         <tr>
+                            <th><label>מיקום טקסט (אנכי)</label></th>
+                            <td>
+                                <select name="bellano_banners[<?php echo $index; ?>][textPosition]">
+                                    <option value="top" <?php selected($banner['textPosition'] ?? 'center', 'top'); ?>>למעלה</option>
+                                    <option value="center" <?php selected($banner['textPosition'] ?? 'center', 'center'); ?>>באמצע</option>
+                                    <option value="bottom" <?php selected($banner['textPosition'] ?? 'center', 'bottom'); ?>>למטה</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
                             <th><label>פעיל</label></th>
                             <td><input type="checkbox" name="bellano_banners[<?php echo $index; ?>][active]" value="1" <?php checked($banner['active'] ?? true, true); ?> /></td>
                         </tr>
@@ -355,6 +365,7 @@ add_action('rest_api_init', function() {
                     'buttonWeight' => $banner['buttonWeight'] ?? 'normal',
                     'buttonLink' => $banner['buttonLink'] ?? '',
                     'textColor' => $banner['textColor'] ?? 'white',
+                    'textPosition' => $banner['textPosition'] ?? 'center',
                 ];
             }, $active_banners));
             

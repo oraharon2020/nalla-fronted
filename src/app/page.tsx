@@ -25,6 +25,7 @@ interface HomepageBanner {
   buttonWeight: 'normal' | 'bold';
   buttonLink: string;
   textColor: 'white' | 'black';
+  textPosition: 'top' | 'center' | 'bottom';
 }
 
 // Fetch homepage data from WordPress
@@ -63,6 +64,7 @@ async function HeroSection() {
   const buttonWeight = banner?.buttonWeight || 'normal';
   const buttonLink = banner?.buttonLink || '/categories';
   const textColor = banner?.textColor || 'white';
+  const textPosition = banner?.textPosition || 'center';
   
   // Check if we have any video (desktop or mobile)
   const hasDesktopVideo = mediaType === 'video' && videoUrl;
@@ -78,6 +80,14 @@ async function HeroSection() {
   const textColorClass = textColor === 'white' ? 'text-white' : 'text-black';
   const textColorMuted = textColor === 'white' ? 'text-white/90' : 'text-black/80';
   const overlayClass = textColor === 'white' ? 'bg-black/30' : 'bg-white/30';
+  
+  // Text position classes
+  const positionClasses = {
+    top: 'items-start pt-24 md:pt-32',
+    center: 'items-center',
+    bottom: 'items-end pb-24 md:pb-32'
+  };
+  const textPositionClass = positionClasses[textPosition] || positionClasses.center;
 
   return (
     <section className="relative h-[85vh] md:h-[85vh] overflow-hidden">
@@ -133,7 +143,7 @@ async function HeroSection() {
       
       {/* Content - Only show if there's any text */}
       {(title || subtitle || buttonText) && (
-        <div className="relative h-full flex items-center justify-center text-center">
+        <div className={`relative h-full flex ${textPositionClass} justify-center text-center`}>
           <div className="max-w-3xl px-6">
             {title && (
               <h1 className={`text-4xl md:text-6xl lg:text-7xl ${getFontClass(titleFont, titleWeight)} ${textColorClass} mb-6 leading-tight ${titleFont === 'english' ? 'tracking-wider' : ''}`}>
