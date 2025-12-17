@@ -146,6 +146,7 @@ function bellano_homepage_settings_page() {
                                     <option value="english" <?php selected($banner['titleFont'] ?? 'hebrew', 'english'); ?>>אנגלית (Amandine)</option>
                                 </select>
                                 <select name="bellano_banners[<?php echo $index; ?>][titleWeight]" style="width: 100px;">
+                                    <option value="light" <?php selected($banner['titleWeight'] ?? 'bold', 'light'); ?>>קל (300)</option>
                                     <option value="normal" <?php selected($banner['titleWeight'] ?? 'bold', 'normal'); ?>>רגיל (400)</option>
                                     <option value="bold" <?php selected($banner['titleWeight'] ?? 'bold', 'bold'); ?>>בולד (700)</option>
                                 </select>
@@ -161,6 +162,7 @@ function bellano_homepage_settings_page() {
                                     <option value="english" <?php selected($banner['subtitleFont'] ?? 'hebrew', 'english'); ?>>אנגלית (Amandine)</option>
                                 </select>
                                 <select name="bellano_banners[<?php echo $index; ?>][subtitleWeight]" style="width: 100px;">
+                                    <option value="light" <?php selected($banner['subtitleWeight'] ?? 'normal', 'light'); ?>>קל (300)</option>
                                     <option value="normal" <?php selected($banner['subtitleWeight'] ?? 'normal', 'normal'); ?>>רגיל (400)</option>
                                     <option value="bold" <?php selected($banner['subtitleWeight'] ?? 'normal', 'bold'); ?>>בולד (700)</option>
                                 </select>
@@ -176,6 +178,7 @@ function bellano_homepage_settings_page() {
                                     <option value="english" <?php selected($banner['buttonFont'] ?? 'english', 'english'); ?>>אנגלית (Amandine)</option>
                                 </select>
                                 <select name="bellano_banners[<?php echo $index; ?>][buttonWeight]" style="width: 100px;">
+                                    <option value="light" <?php selected($banner['buttonWeight'] ?? 'normal', 'light'); ?>>קל (300)</option>
                                     <option value="normal" <?php selected($banner['buttonWeight'] ?? 'normal', 'normal'); ?>>רגיל (400)</option>
                                     <option value="bold" <?php selected($banner['buttonWeight'] ?? 'normal', 'bold'); ?>>בולד (700)</option>
                                 </select>

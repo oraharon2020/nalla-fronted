@@ -73,7 +73,12 @@ async function HeroSection() {
   // Font classes helper
   const getFontClass = (font: string, weight: string) => {
     const fontClass = font === 'english' ? 'font-english' : '';
-    const weightClass = weight === 'bold' ? 'font-bold' : 'font-normal';
+    const weightClasses: Record<string, string> = {
+      light: 'font-light',
+      normal: 'font-normal',
+      bold: 'font-bold'
+    };
+    const weightClass = weightClasses[weight] || 'font-normal';
     return `${fontClass} ${weightClass}`.trim();
   };
   
