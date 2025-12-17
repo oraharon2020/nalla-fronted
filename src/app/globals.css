@@ -44,6 +44,23 @@
   font-display: swap;
 }
 
+/* Font utility classes */
+.font-english {
+  font-family: 'Amandine', var(--font-inter), system-ui, sans-serif;
+}
+
+.font-english.font-light {
+  font-weight: 300 !important;
+}
+
+.font-english.font-normal {
+  font-weight: 400 !important;
+}
+
+.font-english.font-bold {
+  font-weight: 700 !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
