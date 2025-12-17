@@ -1,31 +1,13 @@
 import { ProductPageClient } from './ProductPageClient';
-import { getProductBySlug, getProductVariations, getProducts, transformProduct } from '@/lib/woocommerce/api';
+import { getProductBySlug, getProductVariations, transformProduct } from '@/lib/woocommerce/api';
 import { notFound } from 'next/navigation';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Generate static pages for popular products at build time
-// Falls back to on-demand rendering if API unavailable during build
-export async function generateStaticParams() {
-  // Skip during build if no API keys
-  if (!process.env.WOOCOMMERCE_CONSUMER_KEY) {
-    console.log('Skipping static generation - no API keys');
-    return [];
-  }
-  
-  try {
-    const products = await getProducts({ per_page: 50 });
-    return products.map((p) => ({ slug: p.slug }));
-  } catch (error) {
-    console.error('Failed to generate product params:', error);
-    return [];
-  }
-}
-
-// Allow dynamic rendering for pages not generated at build time
-export const dynamicParams = true;
+// Force dynamic rendering - no static generation
+export const dynamic = 'force-dynamic';
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
