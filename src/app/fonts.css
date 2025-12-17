@@ -1,0 +1,56 @@
+/* Custom Fonts - Ping (Hebrew) & Amadine (English) */
+
+/* Ping Font - Hebrew */
+@font-face {
+  font-family: 'Ping';
+  src: url('/fonts/Ping-Regular.woff2') format('woff2'),
+       url('/fonts/Ping-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ping';
+  src: url('/fonts/Ping-Bold.woff2') format('woff2'),
+       url('/fonts/Ping-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Amadine Font - English */
+@font-face {
+  font-family: 'Amadine';
+  src: url('/fonts/Amadine-Regular.woff2') format('woff2'),
+       url('/fonts/Amadine-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amadine';
+  src: url('/fonts/Amadine-Bold.woff2') format('woff2'),
+       url('/fonts/Amadine-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Font Variables */
+:root {
+  --font-ping: 'Ping', 'Rubik', sans-serif;
+  --font-amadine: 'Amadine', 'Inter', sans-serif;
+}
+
+/* Hebrew text uses Ping */
+body {
+  font-family: var(--font-ping);
+}
+
+/* English text uses Amadine */
+.font-english,
+[lang="en"] {
+  font-family: var(--font-amadine);
+}

@@ -1,111 +1,291 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Truck, ShieldCheck, CreditCard, Headphones } from 'lucide-react';
-import { CachedCategoryGrid, CachedProductGrid } from '@/components/home/CachedGrids';
-import { HeroBanner } from '@/components/home/HeroBanner';
+import Image from 'next/image';
+import { getProducts, getCategories, transformProduct, transformCategory } from '@/lib/woocommerce';
+import { Truck, ShieldCheck, CreditCard, RotateCcw } from 'lucide-react';
 
-const features = [
-  {
-    icon: Truck,
-    title: 'משלוח חינם',
-    description: 'משלוח חינם לכל הארץ',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'אחריות שנה',
-    description: 'אחריות מלאה על כל המוצרים',
-  },
-  {
-    icon: CreditCard,
-    title: '12 תשלומים',
-    description: 'ללא ריבית',
-  },
-  {
-    icon: Headphones,
-    title: 'שירות לקוחות',
-    description: 'זמינים עבורכם בכל שאלה',
-  },
-];
+// Hero Banner Component
+function HeroSection() {
+  return (
+    <section className="relative h-[70vh] md:h-[85vh] overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0 bg-[#f5f5f0]">
+        <Image
+          src="https://bellano.co.il/wp-content/uploads/2024/06/banner-main.jpg"
+          alt="בלאנו רהיטי מעצבים"
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/30" />
+      </div>
+      
+      {/* Content */}
+      <div className="relative h-full flex items-center justify-center text-center">
+        <div className="max-w-3xl px-6">
+          <p className="font-english text-white/90 text-sm md:text-base tracking-[0.3em] uppercase mb-4">
+            BELLANO FURNITURE
+          </p>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+            עיצוב שמדבר
+            <br />
+            <span className="font-english">Quality & Style</span>
+          </h1>
+          <p className="text-white/80 text-lg md:text-xl mb-8">
+            רהיטי מעצבים לבית שלכם
+          </p>
+          <Link
+            href="/categories"
+            className="inline-block bg-white text-black px-8 py-4 text-sm font-medium tracking-wider hover:bg-black hover:text-white transition-all duration-300"
+          >
+            DISCOVER
+          </Link>
+        </div>
+      </div>
 
-export default function HomePage() {
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center pt-2">
+          <div className="w-1 h-2 bg-white/50 rounded-full" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Categories Grid Component
+async function CategoriesSection() {
+  const wooCategories = await getCategories({ per_page: 6, hide_empty: true });
+  const categories = wooCategories
+    .filter((cat: { parent: number }) => cat.parent === 0)
+    .slice(0, 6)
+    .map(transformCategory);
+
+  return (
+    <section className="py-16 md:py-24">
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <p className="font-english text-gray-500 text-sm tracking-[0.3em] uppercase mb-2">
+            TOP COLLECTIONS
+          </p>
+          <h2 className="text-3xl md:text-4xl font-bold">הקולקציות שלנו</h2>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/category/${category.slug}`}
+              className="group relative aspect-[4/5] overflow-hidden bg-gray-100"
+            >
+              {/* Image */}
+              {category.image && (
+                <Image
+                  src={category.image.sourceUrl}
+                  alt={category.name}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                />
+              )}
+              
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              
+              {/* Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white">
+                <h3 className="text-xl md:text-2xl font-bold mb-2">{category.name}</h3>
+                <span className="font-english text-xs tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  DISCOVER
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Best Sellers Section
+async function BestSellersSection() {
+  const wooProducts = await getProducts({ per_page: 8, orderby: 'popularity' });
+  const products = wooProducts.map(transformProduct);
+
+  return (
+    <section className="py-16 md:py-24 bg-[#f8f8f6]">
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <p className="font-english text-gray-500 text-sm tracking-[0.3em] uppercase mb-2">
+            BEST SELLERS
+          </p>
+          <h2 className="text-3xl md:text-4xl font-bold">הנמכרים ביותר</h2>
+        </div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          {products.map((product) => (
+            <Link
+              key={product.id}
+              href={`/product/${product.slug}`}
+              className="group"
+            >
+              {/* Image */}
+              <div className="relative aspect-square overflow-hidden bg-gray-100 mb-4">
+                {product.image && (
+                  <Image
+                    src={product.image.sourceUrl}
+                    alt={product.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                  />
+                )}
+                {product.onSale && (
+                  <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1">
+                    SALE
+                  </span>
+                )}
+              </div>
+              
+              {/* Info */}
+              <div className="text-center">
+                <h3 className="font-medium text-sm md:text-base mb-1 group-hover:text-gray-600 transition-colors">
+                  {product.name}
+                </h3>
+                <div className="flex items-center justify-center gap-2">
+                  {product.onSale && product.regularPrice && (
+                    <span className="text-gray-400 line-through text-sm">
+                      {product.regularPrice}
+                    </span>
+                  )}
+                  <span className="font-bold">{product.price}</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* View All Button */}
+        <div className="text-center mt-12">
+          <Link
+            href="/categories"
+            className="inline-block border-2 border-black text-black px-8 py-3 text-sm font-medium tracking-wider hover:bg-black hover:text-white transition-all duration-300"
+          >
+            VIEW ALL PRODUCTS
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Features Strip
+function FeaturesStrip() {
+  const features = [
+    {
+      icon: CreditCard,
+      title: 'תנאי תשלום נוחים',
+      description: 'עד 12 תשלומים ללא ריבית',
+    },
+    {
+      icon: RotateCcw,
+      title: 'מדיניות ביטולים נוחה',
+      description: 'ביטול עסקה ללא דמי ביטול',
+    },
+    {
+      icon: Truck,
+      title: 'משלוח מהיר',
+      description: 'משלוח חינם עד הבית',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'איכות גבוהה',
+      description: 'אחריות מלאה על כל המוצרים',
+    },
+  ];
+
+  return (
+    <section className="py-12 border-y border-gray-200">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {features.map((feature) => (
+            <div key={feature.title} className="text-center">
+              <feature.icon className="h-8 w-8 mx-auto mb-3 text-gray-700" strokeWidth={1.5} />
+              <h3 className="font-bold text-sm mb-1">{feature.title}</h3>
+              <p className="text-gray-500 text-xs">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Newsletter Section
+function NewsletterSection() {
+  return (
+    <section className="py-16 md:py-24 bg-black text-white">
+      <div className="container mx-auto px-4 text-center">
+        <p className="font-english text-white/60 text-sm tracking-[0.3em] uppercase mb-4">
+          JOIN THE CLUB
+        </p>
+        <h2 className="text-2xl md:text-3xl font-bold mb-4">
+          הצטרפו למועדון הלקוחות
+        </h2>
+        <p className="text-white/70 mb-8 max-w-md mx-auto">
+          קבלו עדכונים על מוצרים חדשים, מבצעים והטבות בלעדיות לחברי המועדון
+        </p>
+        
+        <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <input
+            type="email"
+            placeholder="כתובת אימייל"
+            className="flex-1 px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:border-white/50 transition-colors"
+          />
+          <button
+            type="submit"
+            className="px-8 py-3 bg-white text-black font-medium hover:bg-gray-200 transition-colors"
+          >
+            הרשמה
+          </button>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+// Quote Section
+function QuoteSection() {
+  return (
+    <section className="py-16 md:py-24">
+      <div className="container mx-auto px-4 text-center">
+        <blockquote className="max-w-3xl mx-auto">
+          <p className="font-english text-2xl md:text-4xl font-light italic text-gray-700 leading-relaxed">
+            "It seems that the future belongs to those who design it."
+          </p>
+          <footer className="mt-6 text-gray-500">
+            <span className="font-english">— BELLANO</span>
+          </footer>
+        </blockquote>
+      </div>
+    </section>
+  );
+}
+
+// Main Page Component
+export default async function HomePage() {
   return (
     <div className="flex flex-col">
-      {/* Hero Banner - Edit in /src/config/banners.ts */}
-      <HeroBanner />
-
-      {/* Features */}
-      <section className="py-8 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {features.map((feature) => (
-              <div key={feature.title} className="flex flex-col items-center text-center">
-                <feature.icon className="h-8 w-8 text-primary mb-2" />
-                <h3 className="font-semibold">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories - Client side with browser cache */}
-      <section className="py-12 md:py-16">
-        <div className="container mx-auto px-4">
-          <CachedCategoryGrid />
-        </div>
-      </section>
-
-      {/* Best Sellers - Client side with browser cache */}
-      <section className="py-12 md:py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <CachedProductGrid />
-          <div className="text-center mt-8">
-            <Button variant="outline" size="lg" asChild>
-              <Link href="/categories">לכל המוצרים</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Style Comparison Section */}
-      <section className="py-12 md:py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
-            הסטייל שלכם זה
-            <br />
-            <span className="text-primary">עץ אגוז אמריקאי או אלון טבעי?</span>
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden group cursor-pointer">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-              <div className="absolute bottom-4 right-4 z-20 text-white font-bold text-xl">
-                אגוז אמריקאי
-              </div>
-              <div className="w-full h-full bg-[#5D4E37]" />
-            </div>
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden group cursor-pointer">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-              <div className="absolute bottom-4 right-4 z-20 text-white font-bold text-xl">
-                אלון טבעי
-              </div>
-              <div className="w-full h-full bg-[#C4A77D]" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges */}
-      <section className="py-12 md:py-16 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            למה לבחור בבלאנו?
-          </h2>
-          <p className="text-lg opacity-90 max-w-2xl mx-auto">
-            אנחנו מייצרים רהיטים איכותיים בישראל, עם תשומת לב לכל פרט.
-            כל המוצרים שלנו מגיעים עם אחריות מלאה ומשלוח חינם עד הבית.
-          </p>
-        </div>
-      </section>
+      <HeroSection />
+      <FeaturesStrip />
+      <CategoriesSection />
+      <BestSellersSection />
+      <QuoteSection />
+      <NewsletterSection />
     </div>
   );
 }
