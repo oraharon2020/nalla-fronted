@@ -182,7 +182,7 @@ async function HeroSection() {
   );
 }
 
-// Categories Grid Component - Elegant Asymmetric Layout
+// Categories Section - Beautiful Full-Width Cards with Hover Effects
 async function CategoriesSection() {
   const wooCategories = await getCategories({ per_page: 6, hide_empty: true });
   const categories = wooCategories
@@ -190,87 +190,109 @@ async function CategoriesSection() {
     .slice(0, 6)
     .map(transformCategory);
 
-  // Split categories for asymmetric layout
-  const mainCategories = categories.slice(0, 2);
-  const sideCategories = categories.slice(2, 6);
+  // Category descriptions for better engagement
+  const categoryDescriptions: Record<string, string> = {
+    'ספות': 'נוחות מושלמת לכל רגע בבית',
+    'כורסאות': 'עיצוב ייחודי שמשדרג כל חלל',
+    'שולחנות': 'מרכז הבית שלכם',
+    'כסאות': 'סטייל ונוחות בכל ארוחה',
+    'מיטות': 'שינה איכותית בעיצוב מרהיב',
+    'ארונות': 'פתרונות אחסון חכמים',
+    'default': 'גלו את הקולקציה המלאה'
+  };
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-20 md:py-28 bg-[#fafaf8]">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
-          <div>
-            <p className="font-english text-gray-400 text-xs tracking-[0.3em] uppercase mb-3">
-              EXPLORE COLLECTIONS
-            </p>
-            <h2 className="text-3xl md:text-5xl font-light">
-              גלו את <span className="font-bold">הקולקציות</span>
-            </h2>
-          </div>
-          <Link 
-            href="/categories" 
-            className="mt-4 md:mt-0 text-sm text-gray-600 hover:text-black transition-colors flex items-center gap-2 group"
-          >
-            <span>כל הקטגוריות</span>
-            <span className="group-hover:-translate-x-1 transition-transform">←</span>
-          </Link>
+        <div className="text-center mb-16">
+          <p className="font-english text-gray-400 text-xs tracking-[0.3em] uppercase mb-4">
+            FIND YOUR STYLE
+          </p>
+          <h2 className="text-3xl md:text-5xl font-light mb-4">
+            מה אתם <span className="font-bold">מחפשים?</span>
+          </h2>
+          <p className="text-gray-500 max-w-xl mx-auto">
+            בחרו קטגוריה וגלו מגוון רחב של רהיטים מעוצבים באיכות גבוהה
+          </p>
         </div>
 
-        {/* Asymmetric Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
-          {/* Main Large Categories */}
-          <div className="md:col-span-7 grid grid-cols-1 gap-4 md:gap-6">
-            {mainCategories.map((category, index) => (
+        {/* Horizontal Scroll Categories - Mobile & Desktop */}
+        <div className="relative -mx-4 md:mx-0">
+          <div className="flex gap-5 overflow-x-auto pb-6 px-4 md:px-0 scrollbar-hide snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 md:overflow-visible">
+            {categories.map((category, index) => (
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className={`group relative overflow-hidden bg-[#f5f5f0] ${index === 0 ? 'aspect-[16/10]' : 'aspect-[16/9]'}`}
+                className="group relative flex-shrink-0 w-[80vw] md:w-auto snap-center"
               >
-                {category.image && (
-                  <Image
-                    src={category.image.sourceUrl}
-                    alt={category.name}
-                    fill
-                    className="object-cover transition-all duration-700 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 60vw"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-                  <h3 className="text-white text-2xl md:text-3xl font-bold mb-2">{category.name}</h3>
-                  <span className="inline-flex items-center gap-2 text-white/80 text-sm font-english tracking-wider group-hover:text-white transition-colors">
-                    <span>SHOP NOW</span>
-                    <span className="group-hover:-translate-x-1 transition-transform">←</span>
-                  </span>
+                {/* Card Container */}
+                <div className="relative h-[400px] md:h-[450px] overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-500">
+                  {/* Background Image */}
+                  {category.image && (
+                    <Image
+                      src={category.image.sourceUrl}
+                      alt={category.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      sizes="(max-width: 768px) 80vw, 33vw"
+                    />
+                  )}
+                  
+                  {/* Gradient Overlay - Stronger on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500" />
+                  
+                  {/* Content */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+                    {/* Category Number */}
+                    <span className="absolute top-6 right-6 font-english text-white/30 text-6xl font-bold">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    
+                    {/* Text Content */}
+                    <div className="relative z-10">
+                      <h3 className="text-white text-2xl md:text-3xl font-bold mb-2 group-hover:translate-y-0 transition-transform duration-300">
+                        {category.name}
+                      </h3>
+                      <p className="text-white/70 text-sm mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 delay-100">
+                        {categoryDescriptions[category.name] || categoryDescriptions.default}
+                      </p>
+                      
+                      {/* CTA Button */}
+                      <div className="flex items-center gap-3 opacity-80 group-hover:opacity-100 transition-all duration-300">
+                        <span className="bg-white text-black px-5 py-2.5 text-sm font-medium rounded-full group-hover:bg-black group-hover:text-white transition-colors duration-300">
+                          לצפייה בקולקציה
+                        </span>
+                        <span className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-all duration-300 group-hover:-translate-x-1">
+                          ←
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
           
-          {/* Side Smaller Categories */}
-          <div className="md:col-span-5 grid grid-cols-2 gap-4 md:gap-6">
-            {sideCategories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/category/${category.slug}`}
-                className="group relative aspect-square overflow-hidden bg-[#f5f5f0]"
-              >
-                {category.image && (
-                  <Image
-                    src={category.image.sourceUrl}
-                    alt={category.name}
-                    fill
-                    className="object-cover transition-all duration-700 group-hover:scale-105"
-                    sizes="(max-width: 768px) 50vw, 20vw"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <h3 className="text-white text-lg font-bold">{category.name}</h3>
-                </div>
-              </Link>
+          {/* Scroll Hint - Mobile Only */}
+          <div className="flex justify-center gap-2 mt-4 md:hidden">
+            {categories.map((_, index) => (
+              <div key={index} className="w-2 h-2 rounded-full bg-gray-300" />
             ))}
           </div>
+        </div>
+
+        {/* View All Link */}
+        <div className="text-center mt-12">
+          <Link 
+            href="/categories" 
+            className="inline-flex items-center gap-3 text-gray-600 hover:text-black transition-colors group"
+          >
+            <span className="text-sm border-b border-gray-300 group-hover:border-black pb-1">
+              לכל הקטגוריות
+            </span>
+            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+          </Link>
         </div>
       </div>
     </section>
