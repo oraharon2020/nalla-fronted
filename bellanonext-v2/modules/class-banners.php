@@ -11,9 +11,19 @@ class Bellano_Banners {
     public function render_tab() {
         $banners = get_option('bellano_banners', []);
         if (!is_array($banners)) $banners = [];
+        
+        // Handle save
+        if (isset($_POST['save_banners']) && check_admin_referer('bellano_banners_save')) {
+            $new_banners = isset($_POST['bellano_banners']) ? $_POST['bellano_banners'] : [];
+            // Sanitize banners
+            $sanitized_banners = $this->sanitize_banners($new_banners);
+            update_option('bellano_banners', $sanitized_banners);
+            $banners = $sanitized_banners;
+            echo '<div class="notice notice-success"><p>✅ הבאנרים נשמרו בהצלחה!</p></div>';
+        }
         ?>
-        <form method="post" action="options.php" id="banners-form">
-            <?php settings_fields('bellano_settings'); ?>
+        <form method="post" id="banners-form">
+            <?php wp_nonce_field('bellano_banners_save'); ?>
             
             <div class="bellano-card">
                 <h2>🖼️ באנרים לדף הבית</h2>
@@ -34,11 +44,44 @@ class Bellano_Banners {
                 </button>
             </div>
             
-            <?php submit_button('💾 שמור באנרים', 'primary', 'submit', true, ['style' => 'font-size: 16px; padding: 8px 24px;']); ?>
+            <button type="submit" name="save_banners" class="button button-primary button-hero" style="font-size: 16px; padding: 8px 24px;">💾 שמור באנרים</button>
         </form>
         
         <?php $this->render_scripts(count($banners)); ?>
         <?php
+    }
+    
+    private function sanitize_banners($banners) {
+        if (!is_array($banners)) return [];
+        
+        $sanitized = [];
+        foreach ($banners as $banner) {
+            if (!is_array($banner)) continue;
+            
+            $sanitized[] = [
+                'active' => isset($banner['active']) ? 1 : 0,
+                'mediaType' => sanitize_text_field($banner['mediaType'] ?? 'image'),
+                'image' => esc_url_raw($banner['image'] ?? ''),
+                'mobileImage' => esc_url_raw($banner['mobileImage'] ?? ''),
+                'video' => esc_url_raw($banner['video'] ?? ''),
+                'mobileVideo' => esc_url_raw($banner['mobileVideo'] ?? ''),
+                'videoPoster' => esc_url_raw($banner['videoPoster'] ?? ''),
+                'title' => sanitize_text_field($banner['title'] ?? ''),
+                'titleFont' => sanitize_text_field($banner['titleFont'] ?? 'hebrew'),
+                'titleWeight' => sanitize_text_field($banner['titleWeight'] ?? 'bold'),
+                'subtitle' => sanitize_text_field($banner['subtitle'] ?? ''),
+                'subtitleFont' => sanitize_text_field($banner['subtitleFont'] ?? 'hebrew'),
+                'subtitleWeight' => sanitize_text_field($banner['subtitleWeight'] ?? 'normal'),
+                'buttonText' => sanitize_text_field($banner['buttonText'] ?? ''),
+                'buttonLink' => esc_url_raw($banner['buttonLink'] ?? ''),
+                'buttonFont' => sanitize_text_field($banner['buttonFont'] ?? 'hebrew'),
+                'buttonWeight' => sanitize_text_field($banner['buttonWeight'] ?? 'normal'),
+                'textPosition' => sanitize_text_field($banner['textPosition'] ?? 'center'),
+                'textColor' => sanitize_text_field($banner['textColor'] ?? 'white'),
+            ];
+        }
+        
+        return $sanitized;
     }
     
     private function render_banner_item($index, $banner = []) {

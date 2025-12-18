@@ -32,11 +32,20 @@ class Bellano_Cache {
                 echo '<div class="notice notice-error"><p>❌ שגיאה: ' . esc_html($result['message']) . '</p></div>';
             }
         }
+        
+        // Handle save Vercel settings
+        if (isset($_POST['save_vercel_settings']) && check_admin_referer('bellano_vercel_settings')) {
+            $revalidate_url = esc_url_raw($_POST['bellano_vercel_revalidate_url'] ?? '');
+            $revalidate_token = sanitize_text_field($_POST['bellano_vercel_revalidate_token'] ?? '');
+            update_option('bellano_vercel_revalidate_url', $revalidate_url);
+            update_option('bellano_vercel_revalidate_token', $revalidate_token);
+            echo '<div class="notice notice-success"><p>✅ ההגדרות נשמרו בהצלחה!</p></div>';
+        }
         ?>
         <div class="bellano-card">
             <h2>⚙️ הגדרות Vercel</h2>
-            <form method="post" action="options.php">
-                <?php settings_fields('bellano_settings'); ?>
+            <form method="post">
+                <?php wp_nonce_field('bellano_vercel_settings'); ?>
                 <table class="form-table">
                     <tr>
                         <th><label>כתובת ה-Revalidate</label></th>
@@ -53,7 +62,7 @@ class Bellano_Cache {
                         </td>
                     </tr>
                 </table>
-                <?php submit_button('💾 שמור הגדרות'); ?>
+                <button type="submit" name="save_vercel_settings" class="button button-primary">💾 שמור הגדרות</button>
             </form>
         </div>
         
