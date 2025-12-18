@@ -142,7 +142,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
   const [adminPrice, setAdminPrice] = useState<number | null>(null);
   const [adminFieldsData, setAdminFieldsData] = useState<any>(null);
 
-  const { addItem, updateItem, items } = useCartStore();
+  const { addItem } = useCartStore();
   const { toggleItem, isInWishlist, isHydrated: wishlistHydrated } = useWishlistStore();
   const isWishlisted = wishlistHydrated && isInWishlist(product.id);
 
@@ -291,12 +291,6 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
     // Use admin price if set, otherwise use regular price
     const finalPrice = adminPrice !== null ? `${adminPrice} ₪` : currentPrice;
     
-    // Check if this product+variation already exists in cart
-    const existingItem = items.find(item => 
-      item.id === product.id && 
-      item.variation?.id === selectedVariation?.id
-    );
-    
     const adminFieldsToSave = adminFieldsData ? {
       width: adminFieldsData.width,
       depth: adminFieldsData.depth,
@@ -312,30 +306,23 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
       finalPrice: finalPrice,
     } : undefined;
     
-    // If admin is updating an existing item, update instead of add
-    if (existingItem && adminFieldsData) {
-      updateItem(product.id, {
-        price: finalPrice,
-        adminFields: adminFieldsToSave,
-      }, selectedVariation?.id);
-    } else {
-      addItem({
-        id: product.id,
-        databaseId: product.databaseId,
-        name: product.name,
-        slug: product.slug,
-        price: finalPrice,
-        image: selectedVariation?.image 
-          ? { sourceUrl: selectedVariation.image.src, altText: selectedVariation.image.alt }
-          : product.image,
-        variation: selectedVariation ? {
-          id: selectedVariation.id,
-          name: variationName || 'ללא וריאציה',
-          attributes: Object.entries(selectedAttributes).map(([name, value]) => ({ name, value })),
-        } : undefined,
-        adminFields: adminFieldsToSave,
-      }, quantity);
-    }
+    // Always use addItem - it handles duplicates by increasing quantity
+    addItem({
+      id: product.id,
+      databaseId: product.databaseId,
+      name: product.name,
+      slug: product.slug,
+      price: finalPrice,
+      image: selectedVariation?.image 
+        ? { sourceUrl: selectedVariation.image.src, altText: selectedVariation.image.alt }
+        : product.image,
+      variation: selectedVariation ? {
+        id: selectedVariation.id,
+        name: variationName || 'ללא וריאציה',
+        attributes: Object.entries(selectedAttributes).map(([name, value]) => ({ name, value })),
+      } : undefined,
+      adminFields: adminFieldsToSave,
+    }, quantity);
   };
 
   const hasDiscount = (selectedVariation?.on_sale || product.onSale) && currentRegularPrice;

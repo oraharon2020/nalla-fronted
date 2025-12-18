@@ -108,6 +108,7 @@ export const useCartStore = create<CartStore>()(
               : i
           ),
         });
+        get().openCart();
       },
 
       updateQuantity: (id, quantity, variationId) => {
