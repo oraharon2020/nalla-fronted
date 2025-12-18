@@ -50,6 +50,36 @@ async function getProductFaqs(productId: number) {
   }
 }
 
+// Fetch product video from WordPress
+async function getProductVideo(productId: number) {
+  try {
+    const response = await fetch(
+      `https://bellano.co.il/wp-json/bellano/v1/product-video/${productId}`,
+      { next: { revalidate: 300 } }
+    );
+    
+    if (!response.ok) {
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    if (!data.hasVideo || !data.video) {
+      return null;
+    }
+    
+    return {
+      url: data.video.url,
+      thumbnail: data.video.thumbnail || null,
+      type: data.video.type as 'file' | 'youtube',
+      youtubeId: data.video.youtubeId || null,
+    };
+  } catch (error) {
+    console.error('Error fetching product video:', error);
+    return null;
+  }
+}
+
 // Force dynamic rendering - no static generation
 export const dynamic = 'force-dynamic';
 
@@ -105,10 +135,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
     
     const product = transformProduct(wooProduct, variations);
     
-    // Fetch FAQs for this product
-    const faqs = await getProductFaqs(wooProduct.id);
+    // Fetch FAQs and video for this product in parallel
+    const [faqs, video] = await Promise.all([
+      getProductFaqs(wooProduct.id),
+      getProductVideo(wooProduct.id),
+    ]);
 
-    return <ProductPageClient product={product} variations={variations} faqs={faqs} />;
+    return <ProductPageClient product={product} variations={variations} faqs={faqs} video={video} />;
   } catch (error) {
     console.error('Error fetching product:', error);
     notFound();

@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { AdminProductFields } from '@/components/product/AdminProductFields';
+import { ProductVideo } from '@/components/product/ProductVideo';
 
 // Color mapping for visual display
 const colorMap: Record<string, string> = {
@@ -100,6 +101,13 @@ interface FAQItem {
   answer: string;
 }
 
+interface ProductVideoData {
+  url: string;
+  thumbnail: string | null;
+  type: 'file' | 'youtube';
+  youtubeId: string | null;
+}
+
 interface ProductPageClientProps {
   product: {
     id: string;
@@ -120,9 +128,10 @@ interface ProductPageClientProps {
   };
   variations?: WooVariation[];
   faqs?: FAQItem[];
+  video?: ProductVideoData | null;
 }
 
-export function ProductPageClient({ product, variations = [], faqs = [] }: ProductPageClientProps) {
+export function ProductPageClient({ product, variations = [], faqs = [], video = null }: ProductPageClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -603,57 +612,70 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
 
         {/* Tabs */}
         <div className="mt-8 md:mt-12 border-t pt-6 md:pt-8">
-          <div className="flex gap-4 md:gap-6 border-b mb-4 md:mb-6">
-            <button 
-              onClick={() => setActiveTab('description')}
-              className={`pb-3 text-sm transition ${
-                activeTab === 'description' 
-                  ? 'text-black border-b-2 border-black font-medium' 
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              תיאור המוצר
-            </button>
-            <button 
-              onClick={() => setActiveTab('specs')}
-              className={`pb-3 text-sm transition ${
-                activeTab === 'specs' 
-                  ? 'text-black border-b-2 border-black font-medium' 
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              מפרט טכני
-            </button>
-          </div>
-          
-          <div className="max-w-3xl">
-            {activeTab === 'description' ? (
-              <HtmlContent 
-                html={product.description || ''}
-                className="text-sm text-gray-600 leading-relaxed"
-              />
-            ) : (
-              <div className="text-sm">
-                <table className="w-full">
-                  <tbody>
-                    {attributes.map(attr => (
-                      <tr key={attr.name} className="border-b border-gray-100">
-                        <td className="py-2.5 text-gray-500 w-1/3">{attr.name}</td>
-                        <td className="py-2.5">{selectedAttributes[attr.name] || attr.options[0]}</td>
-                      </tr>
-                    ))}
-                    <tr className="border-b border-gray-100">
-                      <td className="py-2.5 text-gray-500">ייצור</td>
-                      <td className="py-2.5">ישראל</td>
-                    </tr>
-                    <tr className="border-b border-gray-100">
-                      <td className="py-2.5 text-gray-500">אחריות</td>
-                      <td className="py-2.5">שנה</td>
-                    </tr>
-                  </tbody>
-                </table>
+          <div className={`flex flex-col-reverse ${video ? 'lg:flex-row lg:gap-8' : ''}`}>
+            {/* Video Section - Left side on desktop */}
+            {video && (
+              <div className="lg:w-1/3 mt-6 lg:mt-0">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">סרטון המוצר</h3>
+                <ProductVideo video={video} productName={product.name} />
               </div>
             )}
+
+            {/* Description/Specs Section */}
+            <div className={`${video ? 'lg:w-2/3' : 'w-full'}`}>
+              <div className="flex gap-4 md:gap-6 border-b mb-4 md:mb-6">
+                <button 
+                  onClick={() => setActiveTab('description')}
+                  className={`pb-3 text-sm transition ${
+                    activeTab === 'description' 
+                      ? 'text-black border-b-2 border-black font-medium' 
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  תיאור המוצר
+                </button>
+                <button 
+                  onClick={() => setActiveTab('specs')}
+                  className={`pb-3 text-sm transition ${
+                    activeTab === 'specs' 
+                      ? 'text-black border-b-2 border-black font-medium' 
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  מפרט טכני
+                </button>
+              </div>
+              
+              <div className="max-w-3xl">
+                {activeTab === 'description' ? (
+                  <HtmlContent 
+                    html={product.description || ''}
+                    className="text-sm text-gray-600 leading-relaxed"
+                  />
+                ) : (
+                  <div className="text-sm">
+                    <table className="w-full">
+                      <tbody>
+                        {attributes.map(attr => (
+                          <tr key={attr.name} className="border-b border-gray-100">
+                            <td className="py-2.5 text-gray-500 w-1/3">{attr.name}</td>
+                            <td className="py-2.5">{selectedAttributes[attr.name] || attr.options[0]}</td>
+                          </tr>
+                        ))}
+                        <tr className="border-b border-gray-100">
+                          <td className="py-2.5 text-gray-500">ייצור</td>
+                          <td className="py-2.5">ישראל</td>
+                        </tr>
+                        <tr className="border-b border-gray-100">
+                          <td className="py-2.5 text-gray-500">אחריות</td>
+                          <td className="py-2.5">שנה</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
