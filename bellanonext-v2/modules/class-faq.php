@@ -9,7 +9,14 @@ if (!defined('ABSPATH')) exit;
 class Bellano_FAQ {
     
     public function render_tab() {
-        $templates = get_option('bellano_faq_templates', $this->get_default_templates());
+        $templates = get_option('bellano_faq_templates', null);
+        
+        // If no templates or invalid, use defaults
+        if (empty($templates) || !is_array($templates)) {
+            $templates = $this->get_default_templates();
+            update_option('bellano_faq_templates', $templates);
+        }
+        
         $default_template = get_option('bellano_faq_default_template', 'standard');
         
         // Handle save
