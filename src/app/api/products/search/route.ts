@@ -5,6 +5,8 @@ export async function GET(request: NextRequest) {
   const query = searchParams.get('q') || '';
   const perPage = searchParams.get('per_page') || '12';
   
+  console.log('Search API called with query:', query);
+  
   if (!query) {
     return NextResponse.json({ products: [] });
   }
@@ -14,8 +16,18 @@ export async function GET(request: NextRequest) {
     const consumerKey = process.env.WC_CONSUMER_KEY;
     const consumerSecret = process.env.WC_CONSUMER_SECRET;
     
+    console.log('WooCommerce config:', { 
+      wpUrl, 
+      hasKey: !!consumerKey, 
+      hasSecret: !!consumerSecret 
+    });
+    
     if (!consumerKey || !consumerSecret) {
-      throw new Error('WooCommerce credentials not configured');
+      console.error('Missing WooCommerce credentials');
+      return NextResponse.json(
+        { error: 'WooCommerce credentials not configured', products: [] },
+        { status: 500 }
+      );
     }
 
     const url = new URL(`${wpUrl}/wp-json/wc/v3/products`);
@@ -25,20 +37,29 @@ export async function GET(request: NextRequest) {
     url.searchParams.append('consumer_key', consumerKey);
     url.searchParams.append('consumer_secret', consumerSecret);
 
+    console.log('Fetching from WooCommerce...');
+    
     const response = await fetch(url.toString(), {
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'no-store', // Don't cache search results
+      cache: 'no-store',
     });
 
+    console.log('WooCommerce response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`WooCommerce API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('WooCommerce API error:', response.status, errorText);
+      return NextResponse.json(
+        { error: `WooCommerce API error: ${response.status}`, products: [] },
+        { status: 500 }
+      );
     }
 
     const data = await response.json();
+    console.log('Got', data.length, 'products from WooCommerce');
     
-    // Simplify the response - WooCommerce returns images array
     const products = data.map((product: any) => ({
       id: product.id,
       name: product.name,
@@ -51,7 +72,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Product search error:', error);
     return NextResponse.json(
-      { error: 'Failed to search products', products: [] },
+      { error: error instanceof Error ? error.message : 'Failed to search products', products: [] },
       { status: 500 }
     );
   }
