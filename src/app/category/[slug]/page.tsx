@@ -1,6 +1,7 @@
 import { ProductGrid } from '@/components/products';
 import { getProductsByCategorySlug, getCategoryBySlug, getCategories, transformProduct } from '@/lib/woocommerce';
 import { BreadcrumbJsonLd } from '@/components/seo';
+import { ExpandableDescription } from '@/components/ui/ExpandableDescription';
 
 const SITE_URL = 'https://bellano.co.il';
 
@@ -107,18 +108,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
         {/* Category Header */}
         <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">{categoryName}</h1>
-        {category?.description ? (
-          <div 
-            className="text-muted-foreground prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: category.description }}
-          />
-        ) : (
-          <p className="text-muted-foreground">
-            מבחר רחב של {categoryName} איכותיים בעיצוב מודרני
-          </p>
-        )}
-      </div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{categoryName}</h1>
+          {category?.description ? (
+            <ExpandableDescription description={category.description} />
+          ) : (
+            <p className="text-muted-foreground text-sm">
+              מבחר רחב של {categoryName} איכותיים בעיצוב מודרני
+            </p>
+          )}
+        </div>
 
       {/* Sort Options */}
       <div className="flex justify-between items-center mb-6">
