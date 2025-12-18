@@ -227,22 +227,28 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
     ? `${selectedVariation.regular_price} ₪` 
     : product.regularPrice;
 
-  // Build gallery images including variation images
-  const galleryImages = product.galleryImages || [];
-  const variationImages = variations
-    .filter(v => v.image?.src)
-    .map(v => ({ sourceUrl: v.image.src, altText: v.image.alt }));
-  
-  const allImages = product.image 
-    ? [product.image, ...galleryImages, ...variationImages.filter(vi => 
-        !galleryImages.some(gi => gi.sourceUrl === vi.sourceUrl) && 
-        vi.sourceUrl !== product.image?.sourceUrl
-      )]
-    : [...galleryImages, ...variationImages];
+  // Build gallery images including variation images - memoize to prevent recreation
+  const allImages = useMemo(() => {
+    const galleryImages = product.galleryImages || [];
+    const variationImages = variations
+      .filter(v => v.image?.src)
+      .map(v => ({ sourceUrl: v.image.src, altText: v.image.alt }));
+    
+    const images = product.image 
+      ? [product.image, ...galleryImages, ...variationImages.filter(vi => 
+          !galleryImages.some(gi => gi.sourceUrl === vi.sourceUrl) && 
+          vi.sourceUrl !== product.image?.sourceUrl
+        )]
+      : [...galleryImages, ...variationImages];
+    
+    return images;
+  }, [product.image, product.galleryImages, variations]);
 
-  // Update main image when variation changes
+  // Update main image when variation changes - only if user hasn't manually selected
+  const [manualImageSelect, setManualImageSelect] = useState(false);
+  
   useEffect(() => {
-    if (selectedVariation?.image?.src) {
+    if (selectedVariation?.image?.src && !manualImageSelect) {
       const variationImageIndex = allImages.findIndex(
         img => img.sourceUrl === selectedVariation.image.src
       );
@@ -250,7 +256,18 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
         setSelectedImage(variationImageIndex);
       }
     }
-  }, [selectedVariation, allImages]);
+  }, [selectedVariation, allImages, manualImageSelect]);
+
+  // Reset manual select when attributes change
+  useEffect(() => {
+    setManualImageSelect(false);
+  }, [selectedAttributes]);
+
+  // Handle thumbnail click
+  const handleThumbnailClick = (index: number) => {
+    setSelectedImage(index);
+    setManualImageSelect(true);
+  };
 
   const handleAddToCart = () => {
     const variationName = Object.entries(selectedAttributes)
@@ -364,26 +381,11 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
                   }}
                 >
                   {allImages.map((img, index) => (
-                    <div
-                      key={index}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setSelectedImage(index);
-                      }}
-                      onMouseDown={(e) => {
-                        // Prevent drag/scroll from triggering
-                        e.stopPropagation();
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setSelectedImage(index);
-                        }
-                      }}
-                      className={`relative aspect-square w-16 md:w-20 flex-shrink-0 rounded-xl overflow-hidden transition-all cursor-pointer select-none ${
+                    <button
+                      key={`thumb-${index}-${img.sourceUrl}`}
+                      type="button"
+                      onClick={() => handleThumbnailClick(index)}
+                      className={`relative aspect-square w-16 md:w-20 flex-shrink-0 rounded-xl overflow-hidden transition-all cursor-pointer ${
                         selectedImage === index 
                           ? 'ring-2 ring-black ring-offset-1' 
                           : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-1'
@@ -392,14 +394,14 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
                       {img.sourceUrl && (
                         <Image
                           src={img.sourceUrl}
-                          alt={img.altText || ''}
+                          alt={img.altText || `תמונה ${index + 1}`}
                           fill
-                          className="object-contain pointer-events-none select-none"
+                          className="object-contain pointer-events-none"
                           sizes="80px"
                           draggable={false}
                         />
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
