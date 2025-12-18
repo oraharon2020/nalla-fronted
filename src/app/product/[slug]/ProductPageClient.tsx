@@ -531,6 +531,38 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
                 <span>עד 12 תשלומים</span>
               </div>
             </div>
+
+            {/* FAQ Section - Below info badges */}
+            {faqs && faqs.length > 0 && (
+              <div className="pt-4 border-t border-gray-100">
+                <div className="space-y-2">
+                  {faqs.map((faq, index) => (
+                    <div 
+                      key={index}
+                      className="border border-gray-200 rounded-lg overflow-hidden"
+                    >
+                      <button
+                        className="w-full flex items-center justify-between p-3 text-right hover:bg-gray-50 transition-colors"
+                        onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                      >
+                        <span className="font-medium text-sm">{faq.question}</span>
+                        <ChevronDown 
+                          className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${
+                            openFaq === index ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+                      
+                      {openFaq === index && (
+                        <div className="px-3 pb-3 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
+                          {faq.answer}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -589,43 +621,6 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
             )}
           </div>
         </div>
-
-        {/* FAQ Section */}
-        {faqs && faqs.length > 0 && (
-          <div className="mt-8 md:mt-12 border-t pt-6 md:pt-8">
-            <div className="flex items-center gap-2 mb-6">
-              <HelpCircle className="w-5 h-5 text-gray-400" />
-              <h2 className="text-lg font-medium">שאלות נפוצות</h2>
-            </div>
-            
-            <div className="space-y-3 max-w-3xl">
-              {faqs.map((faq, index) => (
-                <div 
-                  key={index}
-                  className="border border-gray-200 rounded-lg overflow-hidden"
-                >
-                  <button
-                    className="w-full flex items-center justify-between p-4 text-right hover:bg-gray-50 transition-colors"
-                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  >
-                    <span className="font-medium text-sm">{faq.question}</span>
-                    <ChevronDown 
-                      className={`w-4 h-4 text-gray-400 transition-transform ${
-                        openFaq === index ? 'rotate-180' : ''
-                      }`}
-                    />
-                  </button>
-                  
-                  {openFaq === index && (
-                    <div className="px-4 pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
-                      {faq.answer}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
