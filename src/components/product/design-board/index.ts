@@ -1,3 +1,3 @@
 export { ProductDesignBoard } from './ProductDesignBoard';
-export { ExcalidrawDesignBoard } from './ExcalidrawDesignBoard';
+export { FabricDesignBoard } from './FabricDesignBoard';
 export * from './types';
