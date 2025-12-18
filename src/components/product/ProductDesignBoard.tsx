@@ -382,21 +382,22 @@ export function ProductDesignBoard({
 
   // Mouse handlers for dragging
   const handleMouseDown = (e: React.MouseEvent, elementId: string) => {
-    if (toolMode === 'crop' && elements.find(el => el.id === elementId)?.type === 'image') {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (rect) {
-        const x = (e.clientX - rect.left) / zoom;
-        const y = (e.clientY - rect.top) / zoom;
-        setCropStart({ x, y });
-        setCropEnd({ x, y });
-        setIsCropping(true);
-        setSelectedElement(elementId);
-      }
-      return;
-    }
-    
     const element = elements.find(el => el.id === elementId);
     if (!element) return;
+    
+    if (toolMode === 'crop' && element.type === 'image') {
+      // Start cropping - calculate position relative to the element
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const x = (e.clientX - rect.left) / zoom;
+      const y = (e.clientY - rect.top) / zoom;
+      
+      // Store crop start relative to the element's position
+      setCropStart({ x: element.x + x, y: element.y + y });
+      setCropEnd({ x: element.x + x, y: element.y + y });
+      setIsCropping(true);
+      setSelectedElement(elementId);
+      return;
+    }
     
     setSelectedElement(elementId);
     setIsDragging(true);
@@ -411,17 +412,28 @@ export function ProductDesignBoard({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    
-    if (isCropping) {
-      const x = (e.clientX - rect.left) / zoom;
-      const y = (e.clientY - rect.top) / zoom;
-      setCropEnd({ x, y });
+    if (isCropping && selectedElement) {
+      const element = elements.find(el => el.id === selectedElement);
+      if (!element) return;
+      
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = (e.clientX - rect.left) / zoom;
+        const y = (e.clientY - rect.top) / zoom;
+        
+        // Clamp to element bounds
+        const clampedX = Math.max(element.x, Math.min(element.x + (element.width || 100), x));
+        const clampedY = Math.max(element.y, Math.min(element.y + (element.height || 100), y));
+        
+        setCropEnd({ x: clampedX, y: clampedY });
+      }
       return;
     }
     
     if (!isDragging || !selectedElement) return;
+    
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
     
     const newX = (e.clientX - rect.left) / zoom - dragOffset.x;
     const newY = (e.clientY - rect.top) / zoom - dragOffset.y;
@@ -444,25 +456,30 @@ export function ProductDesignBoard({
     setIsCropping(false);
   };
 
-  // Apply crop
+  // Apply crop - creates a new cropped image from selection
   const applyCrop = async () => {
     if (!selectedElement) return;
     
     const element = elements.find(el => el.id === selectedElement);
     if (!element || element.type !== 'image' || !element.src) return;
     
+    // Calculate crop bounds
     const minX = Math.min(cropStart.x, cropEnd.x);
     const minY = Math.min(cropStart.y, cropEnd.y);
     const maxX = Math.max(cropStart.x, cropEnd.x);
     const maxY = Math.max(cropStart.y, cropEnd.y);
     
-    const cropX = minX - element.x;
-    const cropY = minY - element.y;
-    const cropWidth = maxX - minX;
-    const cropHeight = maxY - minY;
+    // Calculate crop area relative to element
+    const cropX = Math.max(0, minX - element.x);
+    const cropY = Math.max(0, minY - element.y);
+    const cropWidth = Math.min(maxX - minX, (element.width || 100) - cropX);
+    const cropHeight = Math.min(maxY - minY, (element.height || 100) - cropY);
+    
+    console.log('Crop:', { cropX, cropY, cropWidth, cropHeight, element });
     
     if (cropWidth < 10 || cropHeight < 10) {
       setShowCropPreview(false);
+      alert('אזור החיתוך קטן מדי');
       return;
     }
     
@@ -470,47 +487,66 @@ export function ProductDesignBoard({
       const img = new window.Image();
       img.crossOrigin = 'anonymous';
       const imgSrc = element.originalSrc || element.src || '';
+      
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
         img.src = imgSrc;
       });
       
-      const scaleX = img.width / (element.width || 100);
-      const scaleY = img.height / (element.height || 100);
+      // Calculate scale between displayed size and actual image size
+      const displayWidth = element.width || 100;
+      const displayHeight = element.height || 100;
+      const scaleX = img.naturalWidth / displayWidth;
+      const scaleY = img.naturalHeight / displayHeight;
       
+      // Create canvas for cropped image
       const canvas = document.createElement('canvas');
-      canvas.width = cropWidth * scaleX;
-      canvas.height = cropHeight * scaleY;
+      const outputWidth = Math.round(cropWidth * scaleX);
+      const outputHeight = Math.round(cropHeight * scaleY);
+      canvas.width = outputWidth;
+      canvas.height = outputHeight;
+      
       const ctx = canvas.getContext('2d');
       
       if (ctx) {
+        // Draw the cropped portion
         ctx.drawImage(
           img,
-          cropX * scaleX, cropY * scaleY,
-          cropWidth * scaleX, cropHeight * scaleY,
+          Math.round(cropX * scaleX), 
+          Math.round(cropY * scaleY),
+          outputWidth, 
+          outputHeight,
           0, 0,
-          canvas.width, canvas.height
+          outputWidth, 
+          outputHeight
         );
         
         const croppedSrc = canvas.toDataURL('image/png');
         
-        const newElements = elements.map(el => {
-          if (el.id !== selectedElement) return el;
-          return {
-            ...el,
-            src: croppedSrc,
-            x: minX,
-            y: minY,
-            width: cropWidth,
-            height: cropHeight
-          };
-        });
+        // Create new element with cropped image
+        const newElement: DesignElement = {
+          id: `cropped-${Date.now()}`,
+          type: 'image',
+          x: minX,
+          y: minY,
+          width: cropWidth,
+          height: cropHeight,
+          src: croppedSrc,
+          originalSrc: croppedSrc,
+          rotation: 0,
+          zIndex: getMaxZIndex() + 1,
+          opacity: 100
+        };
+        
+        const newElements = [...elements, newElement];
         setElements(newElements);
         saveToHistory(newElements);
+        setSelectedElement(newElement.id);
       }
     } catch (error) {
       console.error('Crop error:', error);
+      alert('שגיאה בחיתוך התמונה');
     }
     
     setShowCropPreview(false);
