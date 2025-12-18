@@ -182,7 +182,7 @@ async function HeroSection() {
   );
 }
 
-// Categories Grid Component
+// Categories Grid Component - Elegant Asymmetric Layout
 async function CategoriesSection() {
   const wooCategories = await getCategories({ per_page: 6, hide_empty: true });
   const categories = wooCategories
@@ -190,51 +190,87 @@ async function CategoriesSection() {
     .slice(0, 6)
     .map(transformCategory);
 
+  // Split categories for asymmetric layout
+  const mainCategories = categories.slice(0, 2);
+  const sideCategories = categories.slice(2, 6);
+
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-20 md:py-28">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <p className="font-english text-gray-500 text-sm tracking-[0.3em] uppercase mb-2">
-            TOP COLLECTIONS
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold">הקולקציות שלנו</h2>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
+          <div>
+            <p className="font-english text-gray-400 text-xs tracking-[0.3em] uppercase mb-3">
+              EXPLORE COLLECTIONS
+            </p>
+            <h2 className="text-3xl md:text-5xl font-light">
+              גלו את <span className="font-bold">הקולקציות</span>
+            </h2>
+          </div>
+          <Link 
+            href="/categories" 
+            className="mt-4 md:mt-0 text-sm text-gray-600 hover:text-black transition-colors flex items-center gap-2 group"
+          >
+            <span>כל הקטגוריות</span>
+            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+          </Link>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/category/${category.slug}`}
-              className="group relative aspect-[4/5] overflow-hidden bg-gray-100"
-            >
-              {/* Image */}
-              {category.image && (
-                <Image
-                  src={category.image.sourceUrl}
-                  alt={category.name}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 768px) 50vw, 33vw"
-                />
-              )}
-              
-              {/* Overlay - darker gradient */}
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-300" />
-              
-              {/* Content - title at top, button at bottom */}
-              <div className="absolute inset-0 flex flex-col items-center justify-between py-8 text-white">
-                {/* Title at top */}
-                <h3 className="text-lg md:text-xl font-bold">{category.name}</h3>
-                
-                {/* Discover button at bottom */}
-                <span className="font-english text-xs tracking-[0.2em] uppercase border border-white/70 px-6 py-2 hover:bg-white hover:text-black transition-all duration-300">
-                  DISCOVER
-                </span>
-              </div>
-            </Link>
-          ))}
+        {/* Asymmetric Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
+          {/* Main Large Categories */}
+          <div className="md:col-span-7 grid grid-cols-1 gap-4 md:gap-6">
+            {mainCategories.map((category, index) => (
+              <Link
+                key={category.id}
+                href={`/category/${category.slug}`}
+                className={`group relative overflow-hidden bg-[#f5f5f0] ${index === 0 ? 'aspect-[16/10]' : 'aspect-[16/9]'}`}
+              >
+                {category.image && (
+                  <Image
+                    src={category.image.sourceUrl}
+                    alt={category.name}
+                    fill
+                    className="object-cover transition-all duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 60vw"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                  <h3 className="text-white text-2xl md:text-3xl font-bold mb-2">{category.name}</h3>
+                  <span className="inline-flex items-center gap-2 text-white/80 text-sm font-english tracking-wider group-hover:text-white transition-colors">
+                    <span>SHOP NOW</span>
+                    <span className="group-hover:-translate-x-1 transition-transform">←</span>
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+          
+          {/* Side Smaller Categories */}
+          <div className="md:col-span-5 grid grid-cols-2 gap-4 md:gap-6">
+            {sideCategories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/category/${category.slug}`}
+                className="group relative aspect-square overflow-hidden bg-[#f5f5f0]"
+              >
+                {category.image && (
+                  <Image
+                    src={category.image.sourceUrl}
+                    alt={category.name}
+                    fill
+                    className="object-cover transition-all duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 50vw, 20vw"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h3 className="text-white text-lg font-bold">{category.name}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -247,68 +283,169 @@ async function BestSellersSection() {
   const products = wooProducts.map((product) => transformProduct(product));
 
   return (
-    <section className="py-16 md:py-24 bg-[#f8f8f6]">
+    <section className="py-20 md:py-28 bg-white">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <p className="font-english text-gray-500 text-sm tracking-[0.3em] uppercase mb-2">
-            BEST SELLERS
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold">הנמכרים ביותר</h2>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
+          <div>
+            <p className="font-english text-gray-400 text-xs tracking-[0.3em] uppercase mb-3">
+              TRENDING NOW
+            </p>
+            <h2 className="text-3xl md:text-5xl font-light">
+              הכי <span className="font-bold">נמכרים</span>
+            </h2>
+          </div>
+          <Link 
+            href="/categories" 
+            className="mt-4 md:mt-0 text-sm text-gray-600 hover:text-black transition-colors flex items-center gap-2 group"
+          >
+            <span>לכל המוצרים</span>
+            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+          </Link>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {products.map((product) => (
-            <Link
-              key={product.id}
-              href={`/product/${product.slug}`}
-              className="group"
-            >
-              {/* Image */}
-              <div className="relative aspect-square overflow-hidden bg-gray-100 mb-4">
-                {product.image && (
-                  <Image
-                    src={product.image.sourceUrl}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                )}
-                {product.onSale && (
-                  <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1">
-                    SALE
-                  </span>
-                )}
-              </div>
-              
-              {/* Info */}
-              <div className="text-center">
-                <h3 className="font-medium text-sm md:text-base mb-1 group-hover:text-gray-600 transition-colors">
-                  {product.name}
-                </h3>
-                <div className="flex items-center justify-center gap-2">
-                  {product.onSale && product.regularPrice && (
-                    <span className="text-gray-400 line-through text-sm">
-                      {product.regularPrice}
+        {/* Products Horizontal Scroll on Mobile, Grid on Desktop */}
+        <div className="relative">
+          {/* Mobile Scroll Container */}
+          <div className="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto pb-4 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            {products.map((product) => (
+              <Link
+                key={product.id}
+                href={`/product/${product.slug}`}
+                className="group flex-shrink-0 w-[70vw] md:w-auto"
+              >
+                {/* Image Container */}
+                <div className="relative aspect-[3/4] overflow-hidden bg-[#f5f5f0] mb-4">
+                  {product.image && (
+                    <Image
+                      src={product.image.sourceUrl}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-all duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 70vw, 25vw"
+                    />
+                  )}
+                  {product.onSale && (
+                    <span className="absolute top-4 right-4 bg-black text-white text-[10px] font-english tracking-wider px-3 py-1.5">
+                      SALE
                     </span>
                   )}
-                  <span className="font-bold">{product.price}</span>
+                  {/* Quick View on Hover */}
+                  <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    <span className="block w-full bg-white/95 backdrop-blur-sm text-center py-3 text-sm font-medium hover:bg-black hover:text-white transition-colors">
+                      צפייה מהירה
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Info */}
+                <div className="space-y-1">
+                  <h3 className="font-medium text-base group-hover:text-gray-600 transition-colors line-clamp-1">
+                    {product.name}
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    {product.onSale && product.regularPrice && (
+                      <span className="text-gray-400 line-through text-sm">
+                        {product.regularPrice}
+                      </span>
+                    )}
+                    <span className="font-bold text-lg">{product.price}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Custom Furniture Section - NEW!
+function CustomFurnitureSection() {
+  return (
+    <section className="py-20 md:py-28 bg-[#f8f7f5]">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Image Side */}
+          <div className="relative">
+            <div className="aspect-[4/3] relative overflow-hidden">
+              <Image
+                src="https://bellano.co.il/wp-content/uploads/2024/06/custom-furniture.jpg"
+                alt="התאמה אישית"
+                fill
+                className="object-cover"
+              />
+            </div>
+            {/* Floating Badge */}
+            <div className="absolute -bottom-6 -left-6 md:left-auto md:-right-6 bg-black text-white p-6 md:p-8">
+              <p className="font-english text-4xl md:text-5xl font-bold">15+</p>
+              <p className="text-sm mt-1">שנות ניסיון</p>
+            </div>
+          </div>
+          
+          {/* Content Side */}
+          <div className="lg:pr-12">
+            <p className="font-english text-gray-400 text-xs tracking-[0.3em] uppercase mb-4">
+              CUSTOM MADE
+            </p>
+            <h2 className="text-3xl md:text-5xl font-light mb-6 leading-tight">
+              מומחים <span className="font-bold">בהתאמה אישית</span>
+            </h2>
+            <p className="text-gray-600 text-lg leading-relaxed mb-8">
+              כל לקוח הוא ייחודי, וכך גם הריהוט שלו. אנחנו מתמחים בהתאמה אישית של כל פריט - 
+              מידות, צבעים, בדים ופרטים קטנים שעושים את ההבדל. הצוות המקצועי שלנו ילווה אתכם 
+              משלב התכנון ועד להתקנה בבית.
+            </p>
+            
+            {/* Features List */}
+            <div className="grid grid-cols-2 gap-6 mb-10">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">📐</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm mb-1">מידות מותאמות</h4>
+                  <p className="text-gray-500 text-xs">לכל חלל ודרישה</p>
                 </div>
               </div>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">🎨</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm mb-1">מגוון צבעים</h4>
+                  <p className="text-gray-500 text-xs">מפלטת עשירה</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">🛋️</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm mb-1">בדים לבחירה</h4>
+                  <p className="text-gray-500 text-xs">איכות פרימיום</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">🚚</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm mb-1">התקנה מקצועית</h4>
+                  <p className="text-gray-500 text-xs">עד הבית</p>
+                </div>
+              </div>
+            </div>
+            
+            <Link 
+              href="/contact" 
+              className="inline-flex items-center gap-3 bg-black text-white px-8 py-4 font-medium hover:bg-gray-800 transition-colors"
+            >
+              <span>דברו איתנו</span>
+              <span>←</span>
             </Link>
-          ))}
-        </div>
-
-        {/* View All Button */}
-        <div className="text-center mt-12">
-          <Link
-            href="/categories"
-            className="inline-block border-2 border-black text-black px-8 py-3 text-sm font-medium tracking-wider hover:bg-black hover:text-white transition-all duration-300"
-          >
-            VIEW ALL PRODUCTS
-          </Link>
+          </div>
         </div>
       </div>
     </section>
@@ -357,52 +494,116 @@ function FeaturesStrip() {
   );
 }
 
-// Newsletter Section
+// Newsletter Section - Elegant Design
 function NewsletterSection() {
   return (
-    <section className="py-16 md:py-24 bg-black text-white">
-      <div className="container mx-auto px-4 text-center">
-        <p className="font-english text-white/60 text-sm tracking-[0.3em] uppercase mb-4">
-          JOIN THE CLUB
-        </p>
-        <h2 className="text-2xl md:text-3xl font-bold mb-4">
-          הצטרפו למועדון הלקוחות
-        </h2>
-        <p className="text-white/70 mb-8 max-w-md mx-auto">
-          קבלו עדכונים על מוצרים חדשים, מבצעים והטבות בלעדיות לחברי המועדון
-        </p>
-        
-        <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-          <input
-            type="email"
-            placeholder="כתובת אימייל"
-            className="flex-1 px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:border-white/50 transition-colors"
-          />
-          <button
-            type="submit"
-            className="px-8 py-3 bg-white text-black font-medium hover:bg-gray-200 transition-colors"
-          >
-            הרשמה
-          </button>
-        </form>
+    <section className="py-20 md:py-28 bg-[#1a1a1a] text-white relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{ 
+          backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }} />
+      </div>
+      
+      <div className="container mx-auto px-4 relative">
+        <div className="max-w-2xl mx-auto text-center">
+          <p className="font-english text-white/40 text-xs tracking-[0.3em] uppercase mb-4">
+            STAY UPDATED
+          </p>
+          <h2 className="text-3xl md:text-5xl font-light mb-4">
+            הישארו <span className="font-bold">מעודכנים</span>
+          </h2>
+          <p className="text-white/60 mb-10 text-lg">
+            הצטרפו לרשימת התפוצה שלנו וקבלו עדכונים על מוצרים חדשים, 
+            מבצעים בלעדיים והשראה לעיצוב הבית
+          </p>
+          
+          <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+            <input
+              type="email"
+              placeholder="הזינו את האימייל שלכם"
+              className="flex-1 px-6 py-4 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 focus:bg-white/15 transition-all"
+            />
+            <button
+              type="submit"
+              className="px-8 py-4 bg-white text-black font-medium hover:bg-gray-100 transition-colors whitespace-nowrap"
+            >
+              הרשמה
+            </button>
+          </form>
+          
+          <p className="text-white/30 text-xs mt-6">
+            לא נשלח ספאם. ניתן לבטל בכל עת.
+          </p>
+        </div>
       </div>
     </section>
   );
 }
 
-// Quote Section
-function QuoteSection() {
+// Instagram Section - NEW!
+function InstagramSection() {
+  const instagramImages = [
+    'https://bellano.co.il/wp-content/uploads/2024/06/insta-1.jpg',
+    'https://bellano.co.il/wp-content/uploads/2024/06/insta-2.jpg',
+    'https://bellano.co.il/wp-content/uploads/2024/06/insta-3.jpg',
+    'https://bellano.co.il/wp-content/uploads/2024/06/insta-4.jpg',
+    'https://bellano.co.il/wp-content/uploads/2024/06/insta-5.jpg',
+    'https://bellano.co.il/wp-content/uploads/2024/06/insta-6.jpg',
+  ];
+
   return (
-    <section className="py-16 md:py-24">
-      <div className="container mx-auto px-4 text-center">
-        <blockquote className="max-w-3xl mx-auto">
-          <p className="font-english text-2xl md:text-4xl font-light italic text-gray-700 leading-relaxed">
-            "It seems that the future belongs to those who design it."
-          </p>
-          <footer className="mt-6 text-gray-500">
-            <span className="font-english">— BELLANO</span>
-          </footer>
-        </blockquote>
+    <section className="py-16 md:py-20">
+      <div className="container mx-auto px-4 mb-10">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="font-english text-gray-400 text-xs tracking-[0.3em] uppercase mb-3">
+              @BELLANO.CO.IL
+            </p>
+            <h2 className="text-3xl md:text-4xl font-light">
+              עקבו <span className="font-bold">אחרינו</span>
+            </h2>
+          </div>
+          <a 
+            href="https://instagram.com/bellano.co.il" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 md:mt-0 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-black transition-colors group"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+            <span>עקבו אחרינו באינסטגרם</span>
+            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+          </a>
+        </div>
+      </div>
+      
+      {/* Full Width Image Grid */}
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
+        {instagramImages.map((img, index) => (
+          <a
+            key={index}
+            href="https://instagram.com/bellano.co.il"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative aspect-square overflow-hidden group bg-[#f5f5f0]"
+          >
+            <Image
+              src={img}
+              alt={`Instagram ${index + 1}`}
+              fill
+              className="object-cover transition-all duration-500 group-hover:scale-110"
+              sizes="(max-width: 768px) 33vw, 16vw"
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+              <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </div>
+          </a>
+        ))}
       </div>
     </section>
   );
@@ -415,8 +616,9 @@ export default async function HomePage() {
       <HeroSection />
       <FeaturesStrip />
       <CategoriesSection />
+      <CustomFurnitureSection />
       <BestSellersSection />
-      <QuoteSection />
+      <InstagramSection />
       <NewsletterSection />
     </div>
   );
