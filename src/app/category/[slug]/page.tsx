@@ -79,9 +79,16 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       {/* Category Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">{categoryName}</h1>
-        <p className="text-muted-foreground">
-          מבחר רחב של {categoryName} איכותיים בעיצוב מודרני
-        </p>
+        {category?.description ? (
+          <div 
+            className="text-muted-foreground prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: category.description }}
+          />
+        ) : (
+          <p className="text-muted-foreground">
+            מבחר רחב של {categoryName} איכותיים בעיצוב מודרני
+          </p>
+        )}
       </div>
 
       {/* Sort Options */}
