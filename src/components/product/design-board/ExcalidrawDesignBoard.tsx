@@ -10,17 +10,15 @@ const Excalidraw = dynamic(
     const mod = await import('@excalidraw/excalidraw');
     return mod.Excalidraw;
   },
-  { ssr: false, loading: () => <div className="flex items-center justify-center h-full"><Loader2 className="w-8 h-8 animate-spin text-purple-600" /></div> }
+  { 
+    ssr: false, 
+    loading: () => (
+      <div className="flex items-center justify-center h-full bg-white">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+      </div>
+    ) 
+  }
 );
-
-// Dynamic import for exportToBlob
-const getExportFunctions = async () => {
-  const mod = await import('@excalidraw/excalidraw');
-  return {
-    exportToBlob: mod.exportToBlob,
-    exportToSvg: mod.exportToSvg,
-  };
-};
 
 interface ProductSearchResult {
   id: number;
@@ -44,12 +42,12 @@ export function ExcalidrawDesignBoard({
   productName,
   onSave
 }: ExcalidrawDesignBoardProps) {
-  const excalidrawRef = useRef<any>(null);
+  const excalidrawAPIRef = useRef<any>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<ProductSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   // Search products
   const searchProducts = useCallback(async (query: string) => {
@@ -81,33 +79,39 @@ export function ExcalidrawDesignBoard({
   }, [searchQuery, searchProducts]);
 
   // Add image to canvas
-  const addImageToCanvas = async (src: string) => {
-    if (!excalidrawRef.current) return;
+  const addImageToCanvas = useCallback(async (src: string) => {
+    const api = excalidrawAPIRef.current;
+    if (!api) {
+      console.log('API not ready');
+      return;
+    }
 
     try {
-      // Get current API
-      const api = excalidrawRef.current;
+      // Load image via proxy or directly
+      let dataUrl: string;
       
-      // Load image to get dimensions and create data URL
-      const response = await fetch(src);
-      const blob = await response.blob();
-      const dataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
+      // Try to load the image
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = src;
       });
 
-      // Get dimensions
-      const img = new Image();
-      await new Promise<void>((resolve) => {
-        img.onload = () => resolve();
-        img.src = dataUrl;
-      });
+      // Convert to data URL using canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0);
+      dataUrl = canvas.toDataURL('image/png');
 
       // Scale if too large
-      let width = img.width;
-      let height = img.height;
-      const maxSize = 400;
+      let width = img.naturalWidth;
+      let height = img.naturalHeight;
+      const maxSize = 500;
       if (width > maxSize || height > maxSize) {
         const scale = maxSize / Math.max(width, height);
         width *= scale;
@@ -115,70 +119,81 @@ export function ExcalidrawDesignBoard({
       }
 
       // Create file ID
-      const fileId = `file-${Date.now()}` as any;
+      const fileId = `file_${Date.now()}`;
 
-      // Add file to Excalidraw
-      const files = {
-        [fileId]: {
-          id: fileId,
-          dataURL: dataUrl,
-          mimeType: blob.type || 'image/jpeg',
-          created: Date.now(),
-        }
-      };
+      // Add files first
+      api.addFiles([{
+        id: fileId,
+        dataURL: dataUrl,
+        mimeType: 'image/png',
+        created: Date.now(),
+        lastRetrieved: Date.now(),
+      }]);
 
       // Create image element
       const imageElement = {
-        id: `img-${Date.now()}`,
-        type: 'image' as const,
-        x: 100 + Math.random() * 100,
-        y: 100 + Math.random() * 100,
+        id: `img_${Date.now()}`,
+        type: 'image',
+        x: 100 + Math.random() * 50,
+        y: 100 + Math.random() * 50,
         width,
         height,
+        angle: 0,
+        strokeColor: 'transparent',
+        backgroundColor: 'transparent',
+        fillStyle: 'solid',
+        strokeWidth: 0,
+        roughness: 0,
+        opacity: 100,
         fileId,
-        status: 'saved' as const,
-        scale: [1, 1] as [number, number],
+        status: 'saved',
+        scale: [1, 1],
+        seed: Math.floor(Math.random() * 100000),
+        version: 1,
+        versionNonce: Math.floor(Math.random() * 100000),
+        isDeleted: false,
+        boundElements: null,
+        link: null,
+        locked: false,
       };
 
       // Get current elements and add new one
       const currentElements = api.getSceneElements() || [];
-      const currentFiles = api.getFiles() || {};
-
+      
       api.updateScene({
         elements: [...currentElements, imageElement],
       });
-      
-      api.addFiles(Object.values({ ...currentFiles, ...files }));
 
+      console.log('Image added successfully');
     } catch (error) {
       console.error('Error adding image:', error);
+      alert('שגיאה בטעינת התמונה. נסה שוב.');
     }
-  };
+  }, []);
 
-  // Load initial product image
+  // Load initial product image when ready
   useEffect(() => {
-    if (excalidrawRef.current && productImage && isOpen && !initialDataLoaded) {
-      // Small delay to ensure Excalidraw is ready
-      setTimeout(() => {
+    if (isReady && productImage && isOpen) {
+      const timer = setTimeout(() => {
         addImageToCanvas(productImage);
-        setInitialDataLoaded(true);
       }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [excalidrawRef.current, productImage, isOpen, initialDataLoaded]);
+  }, [isReady, productImage, isOpen, addImageToCanvas]);
 
   // Reset when closed
   useEffect(() => {
     if (!isOpen) {
-      setInitialDataLoaded(false);
+      setIsReady(false);
     }
   }, [isOpen]);
 
   // Export canvas
   const handleExport = async () => {
-    if (!excalidrawRef.current) return;
+    const api = excalidrawAPIRef.current;
+    if (!api) return;
 
     try {
-      const api = excalidrawRef.current;
       const elements = api.getSceneElements();
       const files = api.getFiles();
 
@@ -187,13 +202,12 @@ export function ExcalidrawDesignBoard({
         return;
       }
 
-      const { exportToBlob } = await getExportFunctions();
+      const { exportToBlob } = await import('@excalidraw/excalidraw');
       
       const blob = await exportToBlob({
         elements,
         files,
         getDimensions: () => ({ width: 1200, height: 800, scale: 2 }),
-        exportBackground: true,
         appState: {
           exportBackground: true,
           viewBackgroundColor: '#ffffff',
@@ -217,6 +231,7 @@ export function ExcalidrawDesignBoard({
       reader.readAsDataURL(blob);
     } catch (error) {
       console.error('Export error:', error);
+      alert('שגיאה בייצוא. נסה שוב.');
     }
   };
 
@@ -233,12 +248,9 @@ export function ExcalidrawDesignBoard({
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" dir="rtl">
       <div className="bg-white rounded-xl w-full h-full max-w-[95vw] max-h-[95vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-l from-purple-50 to-white">
+        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-l from-purple-50 to-white flex-shrink-0">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-bold text-gray-800">🎨 לוח עיצוב - {productName}</h2>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-              Excalidraw - עורך מקצועי
-            </span>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -262,27 +274,27 @@ export function ExcalidrawDesignBoard({
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden min-h-0">
           {/* Excalidraw Canvas */}
-          <div className="flex-1 relative" dir="ltr">
+          <div className="flex-1 relative" dir="ltr" style={{ minHeight: '500px' }}>
             <Excalidraw
-              excalidrawAPI={(api: any) => { excalidrawRef.current = api; }}
-              theme="light"
-              langCode="en"
-              UIOptions={{
-                canvasActions: {
-                  saveToActiveFile: false,
-                  loadScene: false,
-                  export: false,
-                  saveAsImage: false,
+              excalidrawAPI={(api: any) => {
+                excalidrawAPIRef.current = api;
+                setIsReady(true);
+              }}
+              initialData={{
+                appState: {
+                  viewBackgroundColor: '#ffffff',
+                  currentItemFontFamily: 1,
                 },
               }}
+              langCode="en"
             />
           </div>
 
           {/* Search Panel */}
           {showSearch && (
-            <div className="w-80 border-r bg-gray-50 flex flex-col" dir="rtl">
+            <div className="w-80 border-r bg-gray-50 flex flex-col flex-shrink-0" dir="rtl">
               <div className="p-4 border-b bg-white">
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -335,11 +347,6 @@ export function ExcalidrawDesignBoard({
               </div>
             </div>
           )}
-        </div>
-
-        {/* Footer tip */}
-        <div className="px-4 py-2 bg-gray-50 border-t text-xs text-gray-500 text-center">
-          💡 טיפ: השתמש בכלים בסרגל הכלים לציור, טקסט, צורות וחיצים. גרור תמונות לשינוי גודל וסיבוב.
         </div>
       </div>
     </div>
