@@ -1,6 +1,19 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+export interface AdminFieldsData {
+  width?: string;
+  depth?: string;
+  height?: string;
+  additionalFee?: string;
+  additionalFeeReason?: string;
+  discountType?: 'percent' | 'fixed';
+  discountValue?: string;
+  freeComments?: string;
+  originalPrice?: string;
+  finalPrice?: string;
+}
+
 export interface CartItem {
   id: string;
   databaseId: number;
@@ -17,6 +30,7 @@ export interface CartItem {
     name: string;
     attributes: { name: string; value: string }[];
   };
+  adminFields?: AdminFieldsData;
 }
 
 interface CartStore {

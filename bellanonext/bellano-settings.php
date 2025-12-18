@@ -136,6 +136,9 @@ class Bellano_Settings {
                 <a href="?page=bellano-settings&tab=faq" class="<?php echo $active_tab === 'faq' ? 'active' : ''; ?>">
                     ❓ שאלות נפוצות
                 </a>
+                <a href="?page=bellano-settings&tab=upgrades" class="<?php echo $active_tab === 'upgrades' ? 'active' : ''; ?>">
+                    ⬆️ שדרוגים
+                </a>
                 <a href="?page=bellano-settings&tab=cache" class="<?php echo $active_tab === 'cache' ? 'active' : ''; ?>">
                     🗑️ ניקוי קאש
                 </a>
@@ -145,6 +148,9 @@ class Bellano_Settings {
             switch ($active_tab) {
                 case 'faq':
                     $this->render_faq_tab();
+                    break;
+                case 'upgrades':
+                    $this->render_upgrades_tab();
                     break;
                 case 'cache':
                     $this->render_cache_tab();
@@ -576,6 +582,94 @@ class Bellano_Settings {
     }
     
     // ========================================
+    // UPGRADES TAB
+    // ========================================
+    
+    private function render_upgrades_tab() {
+        // Handle form submission
+        if (isset($_POST['save_upgrades']) && check_admin_referer('bellano_upgrades_action')) {
+            $upgrades = [];
+            if (!empty($_POST['upgrades']) && is_array($_POST['upgrades'])) {
+                foreach ($_POST['upgrades'] as $upgrade) {
+                    if (!empty($upgrade['name']) && isset($upgrade['price'])) {
+                        $upgrades[] = [
+                            'name' => sanitize_text_field($upgrade['name']),
+                            'price' => floatval($upgrade['price']),
+                        ];
+                    }
+                }
+            }
+            update_option('bellano_admin_upgrades', $upgrades);
+            echo '<div class="notice notice-success"><p>✅ השדרוגים נשמרו בהצלחה!</p></div>';
+        }
+        
+        $upgrades = get_option('bellano_admin_upgrades', []);
+        if (!is_array($upgrades)) $upgrades = [];
+        ?>
+        <form method="post">
+            <?php wp_nonce_field('bellano_upgrades_action'); ?>
+            
+            <div class="bellano-card">
+                <h2>⬆️ שדרוגים למכירות</h2>
+                <p>הגדר שדרוגים זמינים שנציגי מכירות יכולים להוסיף למוצרים. השדרוגים יופיעו בתיבת "שינוי נתונים - למנהלים" בעמוד המוצר.</p>
+                
+                <div id="upgrades-container">
+                    <?php foreach ($upgrades as $index => $upgrade): ?>
+                    <div class="upgrade-item" style="background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #ddd; display: flex; gap: 15px; align-items: center;">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">שם השדרוג</label>
+                            <input type="text" name="upgrades[<?php echo $index; ?>][name]" value="<?php echo esc_attr($upgrade['name']); ?>" class="regular-text" style="width: 100%;">
+                        </div>
+                        <div style="width: 150px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">מחיר (₪)</label>
+                            <input type="number" name="upgrades[<?php echo $index; ?>][price]" value="<?php echo esc_attr($upgrade['price']); ?>" step="0.01" min="0" style="width: 100%;">
+                        </div>
+                        <button type="button" class="button remove-upgrade" style="margin-top: 20px;">❌</button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <button type="button" id="add-upgrade" class="button button-secondary" style="margin-top: 15px;">
+                    ➕ הוסף שדרוג
+                </button>
+            </div>
+            
+            <p>
+                <input type="submit" name="save_upgrades" class="button button-primary" value="💾 שמור שדרוגים" style="font-size: 16px; padding: 8px 24px;">
+            </p>
+        </form>
+        
+        <script>
+        jQuery(document).ready(function($) {
+            var upgradeIndex = <?php echo count($upgrades); ?>;
+            
+            $('#add-upgrade').on('click', function() {
+                var html = `
+                    <div class="upgrade-item" style="background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #ddd; display: flex; gap: 15px; align-items: center;">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">שם השדרוג</label>
+                            <input type="text" name="upgrades[${upgradeIndex}][name]" class="regular-text" style="width: 100%;" placeholder="למשל: התקנה">
+                        </div>
+                        <div style="width: 150px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">מחיר (₪)</label>
+                            <input type="number" name="upgrades[${upgradeIndex}][price]" step="0.01" min="0" style="width: 100%;" placeholder="0">
+                        </div>
+                        <button type="button" class="button remove-upgrade" style="margin-top: 20px;">❌</button>
+                    </div>
+                `;
+                $('#upgrades-container').append(html);
+                upgradeIndex++;
+            });
+            
+            $(document).on('click', '.remove-upgrade', function() {
+                $(this).closest('.upgrade-item').remove();
+            });
+        });
+        </script>
+        <?php
+    }
+    
+    // ========================================
     // CACHE TAB
     // ========================================
     
@@ -949,6 +1043,56 @@ class Bellano_Settings {
             'callback' => [$this, 'get_meshulam_config'],
             'permission_callback' => '__return_true'
         ]);
+        
+        // Check if current user is admin (for sales rep features)
+        register_rest_route('bellano/v1', '/check-admin', [
+            'methods' => 'GET',
+            'callback' => [$this, 'check_user_is_admin'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        // Get admin upgrades list
+        register_rest_route('bellano/v1', '/admin-upgrades', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_admin_upgrades'],
+            'permission_callback' => function() {
+                return current_user_can('administrator');
+            }
+        ]);
+    }
+    
+    /**
+     * Check if the current user is an administrator
+     * Used for admin/sales rep fields on product pages
+     */
+    public function check_user_is_admin() {
+        $is_admin = current_user_can('administrator');
+        $user = wp_get_current_user();
+        
+        $response = [
+            'isAdmin' => $is_admin,
+            'userId' => $user->ID,
+            'userName' => $is_admin ? $user->display_name : '',
+        ];
+        
+        // If admin, also return available upgrades
+        if ($is_admin) {
+            $upgrades = get_option('bellano_admin_upgrades', []);
+            if (!is_array($upgrades)) {
+                $upgrades = [];
+            }
+            $response['upgrades'] = $upgrades;
+        }
+        
+        return new WP_REST_Response($response, 200);
+    }
+    
+    /**
+     * Get admin upgrades list (for logged-in admins)
+     */
+    public function get_admin_upgrades() {
+        $upgrades = get_option('bellano_admin_upgrades', []);
+        return new WP_REST_Response(['upgrades' => $upgrades], 200);
     }
     
     /**

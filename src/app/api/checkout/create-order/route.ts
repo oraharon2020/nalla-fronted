@@ -4,10 +4,24 @@ const WC_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://bellano.co.il';
 const WC_KEY = process.env.WC_CONSUMER_KEY || process.env.WOOCOMMERCE_CONSUMER_KEY;
 const WC_SECRET = process.env.WC_CONSUMER_SECRET || process.env.WOOCOMMERCE_CONSUMER_SECRET;
 
+interface AdminFields {
+  width?: string;
+  depth?: string;
+  height?: string;
+  additional_fee?: string;
+  additional_fee_reason?: string;
+  discount_type?: 'percent' | 'fixed';
+  discount_value?: string;
+  free_comments?: string;
+  original_price?: string;
+  final_price?: string;
+}
+
 interface OrderItem {
   product_id: number;
   variation_id?: number;
   quantity: number;
+  admin_fields?: AdminFields;
 }
 
 interface CustomerData {
@@ -43,6 +57,61 @@ export async function POST(request: NextRequest) {
     // Determine payment method settings
     const isPhoneOrder = payment_method === 'phone_order';
     
+    // Check if any items have admin fields (sales rep order)
+    const hasAdminFields = items.some(item => item.admin_fields);
+    
+    // Build line items with meta data for admin fields
+    const lineItems = items.map((item) => {
+      const lineItem: any = {
+        product_id: item.product_id,
+        variation_id: item.variation_id || undefined,
+        quantity: item.quantity,
+      };
+      
+      // If admin fields are present, add them as meta data and override price
+      if (item.admin_fields) {
+        lineItem.meta_data = [];
+        
+        if (item.admin_fields.width) {
+          lineItem.meta_data.push({ key: '_admin_width', value: item.admin_fields.width });
+        }
+        if (item.admin_fields.depth) {
+          lineItem.meta_data.push({ key: '_admin_depth', value: item.admin_fields.depth });
+        }
+        if (item.admin_fields.height) {
+          lineItem.meta_data.push({ key: '_admin_height', value: item.admin_fields.height });
+        }
+        if (item.admin_fields.additional_fee) {
+          lineItem.meta_data.push({ key: '_admin_additional_fee', value: item.admin_fields.additional_fee });
+        }
+        if (item.admin_fields.additional_fee_reason) {
+          lineItem.meta_data.push({ key: '_admin_additional_fee_reason', value: item.admin_fields.additional_fee_reason });
+        }
+        if (item.admin_fields.discount_type) {
+          lineItem.meta_data.push({ key: '_admin_discount_type', value: item.admin_fields.discount_type });
+        }
+        if (item.admin_fields.discount_value) {
+          lineItem.meta_data.push({ key: '_admin_discount_value', value: item.admin_fields.discount_value });
+        }
+        if (item.admin_fields.free_comments) {
+          lineItem.meta_data.push({ key: '_admin_comments', value: item.admin_fields.free_comments });
+        }
+        if (item.admin_fields.original_price) {
+          lineItem.meta_data.push({ key: '_admin_original_price', value: item.admin_fields.original_price });
+        }
+        if (item.admin_fields.final_price) {
+          // Use the final price from admin fields
+          const finalPrice = parseFloat(item.admin_fields.final_price.replace(/[^\d.]/g, ''));
+          lineItem.price = finalPrice;
+          lineItem.subtotal = (finalPrice * item.quantity).toString();
+          lineItem.total = (finalPrice * item.quantity).toString();
+          lineItem.meta_data.push({ key: '_admin_final_price', value: item.admin_fields.final_price });
+        }
+      }
+      
+      return lineItem;
+    });
+    
     // Create the order in WooCommerce
     const orderData = {
       payment_method: isPhoneOrder ? 'cod' : 'meshulam',
@@ -67,11 +136,7 @@ export async function POST(request: NextRequest) {
         postcode: customer.postcode || '',
         country: 'IL',
       },
-      line_items: items.map((item) => ({
-        product_id: item.product_id,
-        variation_id: item.variation_id || undefined,
-        quantity: item.quantity,
-      })),
+      line_items: lineItems,
       shipping_lines: [
         {
           method_id: shipping_method,
@@ -85,6 +150,7 @@ export async function POST(request: NextRequest) {
           key: '_created_via',
           value: 'bellano_nextjs_checkout',
         },
+        ...(hasAdminFields ? [{ key: '_sales_rep_order', value: 'yes' }] : []),
       ],
     };
 

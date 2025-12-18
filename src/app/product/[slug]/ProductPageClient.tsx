@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, Minus, Plus, Truck, ShieldCheck, CreditCard, ChevronDown, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
+import { AdminProductFields } from '@/components/product/AdminProductFields';
 
 // Color mapping for visual display
 const colorMap: Record<string, string> = {
@@ -127,6 +128,10 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
   const thumbnailsRef = useRef<HTMLDivElement>(null);
+  
+  // Admin fields state
+  const [adminPrice, setAdminPrice] = useState<number | null>(null);
+  const [adminFieldsData, setAdminFieldsData] = useState<any>(null);
 
   const { addItem } = useCartStore();
   const { toggleItem, isInWishlist, isHydrated: wishlistHydrated } = useWishlistStore();
@@ -274,12 +279,15 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
       .map(([key, value]) => `${key}: ${value}`)
       .join(' / ');
     
+    // Use admin price if set, otherwise use regular price
+    const finalPrice = adminPrice !== null ? `${adminPrice} ₪` : currentPrice;
+    
     addItem({
       id: product.id,
       databaseId: product.databaseId,
       name: product.name,
       slug: product.slug,
-      price: currentPrice,
+      price: finalPrice,
       image: selectedVariation?.image 
         ? { sourceUrl: selectedVariation.image.src, altText: selectedVariation.image.alt }
         : product.image,
@@ -287,6 +295,19 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
         id: selectedVariation.id,
         name: variationName || 'ללא וריאציה',
         attributes: Object.entries(selectedAttributes).map(([name, value]) => ({ name, value })),
+      } : undefined,
+      // Include admin fields data if present
+      adminFields: adminFieldsData ? {
+        width: adminFieldsData.width,
+        depth: adminFieldsData.depth,
+        height: adminFieldsData.height,
+        additionalFee: adminFieldsData.additionalFee,
+        additionalFeeReason: adminFieldsData.additionalFeeReason,
+        discountType: adminFieldsData.discountType,
+        discountValue: adminFieldsData.discountValue,
+        freeComments: adminFieldsData.freeComments,
+        originalPrice: currentPrice,
+        finalPrice: finalPrice,
       } : undefined,
     }, quantity);
   };
@@ -473,6 +494,16 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
                 );
               })}
             </div>
+
+            {/* Admin Fields - Only visible to admins/sales reps */}
+            <AdminProductFields
+              basePrice={parseFloat(product.price?.replace(/[^\d.]/g, '') || '0')}
+              variationPrice={selectedVariation ? parseFloat(selectedVariation.price || '0') : undefined}
+              onPriceChange={(newPrice, data) => {
+                setAdminPrice(newPrice);
+                setAdminFieldsData(data);
+              }}
+            />
 
             {/* Add to Cart */}
             <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
