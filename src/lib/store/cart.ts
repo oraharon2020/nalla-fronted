@@ -13,7 +13,7 @@ export interface CartItem {
     altText?: string;
   };
   variation?: {
-    id: string;
+    id: number;
     name: string;
     attributes: { name: string; value: string }[];
   };
@@ -23,18 +23,24 @@ interface CartStore {
   items: CartItem[];
   isOpen: boolean;
   isHydrated: boolean;
-  addItem: (item: Omit<CartItem, 'quantity'>) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  isCheckingOut: boolean;
+  addItem: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
+  removeItem: (id: string, variationId?: number) => void;
+  updateQuantity: (id: string, quantity: number, variationId?: number) => void;
   clearCart: () => void;
   toggleCart: () => void;
   openCart: () => void;
   closeCart: () => void;
   getTotal: () => number;
   getItemCount: () => number;
-  getCheckoutUrl: () => string;
+  checkout: () => Promise<void>;
+  getFallbackCheckoutUrl: () => string;
   setHydrated: () => void;
 }
+
+const getItemKey = (id: string, variationId?: number) => {
+  return variationId ? `${id}-${variationId}` : id;
+};
 
 export const useCartStore = create<CartStore>()(
   persist(
@@ -42,42 +48,51 @@ export const useCartStore = create<CartStore>()(
       items: [],
       isOpen: false,
       isHydrated: false,
+      isCheckingOut: false,
 
       setHydrated: () => set({ isHydrated: true }),
 
-      addItem: (item) => {
+      addItem: (item, quantity = 1) => {
         const items = get().items;
+        const itemKey = getItemKey(item.id, item.variation?.id);
         const existingItem = items.find((i) => 
-          i.id === item.id && 
-          i.variation?.id === item.variation?.id
+          getItemKey(i.id, i.variation?.id) === itemKey
         );
 
         if (existingItem) {
           set({
             items: items.map((i) =>
-              i.id === item.id && i.variation?.id === item.variation?.id
-                ? { ...i, quantity: i.quantity + 1 }
+              getItemKey(i.id, i.variation?.id) === itemKey
+                ? { ...i, quantity: i.quantity + quantity }
                 : i
             ),
           });
         } else {
-          set({ items: [...items, { ...item, quantity: 1 }] });
+          set({ items: [...items, { ...item, quantity }] });
         }
         get().openCart();
       },
 
-      removeItem: (id) => {
-        set({ items: get().items.filter((i) => i.id !== id) });
+      removeItem: (id, variationId) => {
+        const itemKey = getItemKey(id, variationId);
+        set({ 
+          items: get().items.filter((i) => 
+            getItemKey(i.id, i.variation?.id) !== itemKey
+          ) 
+        });
       },
 
-      updateQuantity: (id, quantity) => {
+      updateQuantity: (id, quantity, variationId) => {
         if (quantity < 1) {
-          get().removeItem(id);
+          get().removeItem(id, variationId);
           return;
         }
+        const itemKey = getItemKey(id, variationId);
         set({
           items: get().items.map((i) =>
-            i.id === id ? { ...i, quantity } : i
+            getItemKey(i.id, i.variation?.id) === itemKey 
+              ? { ...i, quantity } 
+              : i
           ),
         });
       },
@@ -99,41 +114,70 @@ export const useCartStore = create<CartStore>()(
         return get().items.reduce((count, item) => count + item.quantity, 0);
       },
 
-      getCheckoutUrl: () => {
+      checkout: async () => {
+        const items = get().items;
+        if (items.length === 0) return;
+
+        set({ isCheckingOut: true });
+
+        try {
+          // Prepare items for WooCommerce
+          const cartItems = items.map(item => ({
+            product_id: item.databaseId,
+            variation_id: item.variation?.id || 0,
+            quantity: item.quantity
+          }));
+
+          // Get checkout URL from WordPress
+          const response = await fetch('https://bellano.co.il/wp-json/bellano/v1/checkout-url', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cartItems),
+          });
+
+          const data = await response.json();
+
+          if (data.success && data.checkout_url) {
+            // Clear local cart
+            get().clearCart();
+            // Redirect to checkout
+            window.location.href = data.checkout_url;
+          } else {
+            // Fallback to simple URL method
+            const fallbackUrl = get().getFallbackCheckoutUrl();
+            window.location.href = fallbackUrl;
+          }
+        } catch (error) {
+          console.error('Checkout error:', error);
+          // Fallback to simple URL method
+          const fallbackUrl = get().getFallbackCheckoutUrl();
+          window.location.href = fallbackUrl;
+        } finally {
+          set({ isCheckingOut: false });
+        }
+      },
+
+      getFallbackCheckoutUrl: () => {
         const items = get().items;
         if (items.length === 0) return 'https://bellano.co.il/checkout';
         
-        // For single item - simple add-to-cart URL
+        // For single item
         if (items.length === 1) {
           const item = items[0];
-          const productId = item.variation?.id 
-            ? parseInt(item.variation.id.replace('variation-', ''))
-            : item.databaseId;
+          const productId = item.variation?.id || item.databaseId;
           return `https://bellano.co.il/?add-to-cart=${productId}&quantity=${item.quantity}`;
         }
         
-        // For multiple items - add first item, the rest will be handled by a special page
-        // This is a WooCommerce limitation
-        const firstItem = items[0];
-        const firstProductId = firstItem.variation?.id 
-          ? parseInt(firstItem.variation.id.replace('variation-', ''))
-          : firstItem.databaseId;
-        
-        // Encode remaining items
-        const remainingItems = items.slice(1).map(item => ({
-          id: item.variation?.id 
-            ? parseInt(item.variation.id.replace('variation-', ''))
-            : item.databaseId,
+        // For multiple items - encode all items
+        const encodedItems = items.map(item => ({
+          id: item.variation?.id || item.databaseId,
           qty: item.quantity
         }));
         
-        const baseUrl = `https://bellano.co.il/?add-to-cart=${firstProductId}&quantity=${firstItem.quantity}`;
-        
-        if (remainingItems.length > 0) {
-          return `${baseUrl}&bellano_more=${encodeURIComponent(JSON.stringify(remainingItems))}`;
-        }
-        
-        return baseUrl;
+        const cartData = btoa(JSON.stringify(encodedItems));
+        return `https://bellano.co.il/?bellano_cart=${cartData}`;
       },
     }),
     {
@@ -142,7 +186,7 @@ export const useCartStore = create<CartStore>()(
       onRehydrateStorage: () => (state) => {
         state?.setHydrated();
       },
-      partialize: (state) => ({ items: state.items }), // Don't persist isOpen or isHydrated
+      partialize: (state) => ({ items: state.items }),
     }
   )
 );

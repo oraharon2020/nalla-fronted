@@ -921,6 +921,20 @@ class Bellano_Settings {
             'callback' => [$this, 'get_faq_templates'],
             'permission_callback' => '__return_true'
         ]);
+        
+        // Cart - Create checkout with items
+        register_rest_route('bellano/v1', '/create-checkout', [
+            'methods' => 'POST',
+            'callback' => [$this, 'create_checkout'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        // Cart - Get checkout URL for items
+        register_rest_route('bellano/v1', '/checkout-url', [
+            'methods' => 'POST',
+            'callback' => [$this, 'get_checkout_url'],
+            'permission_callback' => '__return_true'
+        ]);
     }
     
     public function get_homepage_data() {
@@ -1007,7 +1021,166 @@ class Bellano_Settings {
             'default' => $default_template
         ];
     }
+    
+    /**
+     * Create checkout with cart items
+     * Receives items from Next.js and returns a checkout URL
+     */
+    public function create_checkout($request) {
+        $items = $request->get_json_params();
+        
+        if (empty($items) || !is_array($items)) {
+            return new WP_Error('no_items', 'No items provided', ['status' => 400]);
+        }
+        
+        // Clear any existing cart
+        if (function_exists('WC') && WC()->cart) {
+            WC()->cart->empty_cart();
+        }
+        
+        $added_items = [];
+        $errors = [];
+        
+        foreach ($items as $item) {
+            $product_id = isset($item['product_id']) ? intval($item['product_id']) : 0;
+            $variation_id = isset($item['variation_id']) ? intval($item['variation_id']) : 0;
+            $quantity = isset($item['quantity']) ? intval($item['quantity']) : 1;
+            
+            if ($product_id <= 0) {
+                $errors[] = 'Invalid product ID';
+                continue;
+            }
+            
+            // Check if product exists
+            $product = wc_get_product($variation_id > 0 ? $variation_id : $product_id);
+            if (!$product) {
+                $errors[] = "Product {$product_id} not found";
+                continue;
+            }
+            
+            // Add to cart
+            if (function_exists('WC') && WC()->cart) {
+                $cart_item_key = WC()->cart->add_to_cart(
+                    $product_id,
+                    $quantity,
+                    $variation_id,
+                    [], // variation attributes
+                    [] // cart item data
+                );
+                
+                if ($cart_item_key) {
+                    $added_items[] = [
+                        'product_id' => $product_id,
+                        'variation_id' => $variation_id,
+                        'quantity' => $quantity,
+                        'cart_key' => $cart_item_key
+                    ];
+                } else {
+                    $errors[] = "Failed to add product {$product_id} to cart";
+                }
+            }
+        }
+        
+        // Get checkout URL
+        $checkout_url = wc_get_checkout_url();
+        
+        return [
+            'success' => count($added_items) > 0,
+            'checkout_url' => $checkout_url,
+            'cart_url' => wc_get_cart_url(),
+            'added_items' => $added_items,
+            'errors' => $errors,
+            'cart_total' => WC()->cart ? WC()->cart->get_cart_contents_total() : 0,
+            'cart_count' => WC()->cart ? WC()->cart->get_cart_contents_count() : 0
+        ];
+    }
+    
+    /**
+     * Generate checkout URL with all items (no session needed)
+     * Uses WooCommerce's add-to-cart URL structure
+     */
+    public function get_checkout_url($request) {
+        $items = $request->get_json_params();
+        
+        if (empty($items) || !is_array($items)) {
+            return new WP_Error('no_items', 'No items provided', ['status' => 400]);
+        }
+        
+        // For single item - simple URL
+        if (count($items) === 1) {
+            $item = $items[0];
+            $product_id = isset($item['variation_id']) && $item['variation_id'] > 0 
+                ? intval($item['variation_id']) 
+                : intval($item['product_id']);
+            $quantity = isset($item['quantity']) ? intval($item['quantity']) : 1;
+            
+            $checkout_url = add_query_arg([
+                'add-to-cart' => $product_id,
+                'quantity' => $quantity
+            ], wc_get_checkout_url());
+            
+            return [
+                'success' => true,
+                'checkout_url' => $checkout_url,
+                'method' => 'single'
+            ];
+        }
+        
+        // For multiple items - create a special URL that our handler will process
+        $encoded_items = [];
+        foreach ($items as $item) {
+            $encoded_items[] = [
+                'id' => isset($item['variation_id']) && $item['variation_id'] > 0 
+                    ? intval($item['variation_id']) 
+                    : intval($item['product_id']),
+                'qty' => isset($item['quantity']) ? intval($item['quantity']) : 1
+            ];
+        }
+        
+        $checkout_url = add_query_arg([
+            'bellano_cart' => base64_encode(json_encode($encoded_items))
+        ], home_url('/'));
+        
+        return [
+            'success' => true,
+            'checkout_url' => $checkout_url,
+            'method' => 'multi',
+            'items_count' => count($items)
+        ];
+    }
 }
+
+// Handle multi-item cart URL
+add_action('template_redirect', function() {
+    if (isset($_GET['bellano_cart'])) {
+        $cart_data = json_decode(base64_decode($_GET['bellano_cart']), true);
+        
+        if (!empty($cart_data) && is_array($cart_data) && function_exists('WC') && WC()->cart) {
+            // Clear existing cart
+            WC()->cart->empty_cart();
+            
+            // Add all items
+            foreach ($cart_data as $item) {
+                $product_id = intval($item['id']);
+                $quantity = isset($item['qty']) ? intval($item['qty']) : 1;
+                
+                // Check if it's a variation
+                $product = wc_get_product($product_id);
+                if ($product) {
+                    if ($product->is_type('variation')) {
+                        WC()->cart->add_to_cart($product->get_parent_id(), $quantity, $product_id);
+                    } else {
+                        WC()->cart->add_to_cart($product_id, $quantity);
+                    }
+                }
+            }
+            
+            // Redirect to checkout
+            wp_redirect(wc_get_checkout_url());
+            exit;
+        }
+    }
+});
 
 // Initialize
 Bellano_Settings::get_instance();

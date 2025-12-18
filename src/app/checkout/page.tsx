@@ -7,8 +7,7 @@ import { ArrowRight, Loader2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 
 export default function CheckoutPage() {
-  const { items, getTotal, clearCart, isHydrated } = useCartStore();
-  const [isLoading, setIsLoading] = useState(false);
+  const { items, getTotal, checkout, isHydrated, isCheckingOut } = useCartStore();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('he-IL', {
@@ -20,52 +19,7 @@ export default function CheckoutPage() {
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
-    
-    setIsLoading(true);
-    
-    // Build the WooCommerce cart URL
-    // For multiple products, we'll open a new window that adds them sequentially
-    const wooUrl = 'https://bellano.co.il';
-    
-    // Create a form that will add all items to WooCommerce cart
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `${wooUrl}/cart/`;
-    form.target = '_self';
-    
-    // Add each item
-    items.forEach((item, index) => {
-      const productId = item.variation?.id 
-        ? parseInt(item.variation.id.replace('variation-', ''))
-        : item.databaseId;
-      
-      // Product ID
-      const idInput = document.createElement('input');
-      idInput.type = 'hidden';
-      idInput.name = `products[${index}][id]`;
-      idInput.value = String(productId);
-      form.appendChild(idInput);
-      
-      // Quantity
-      const qtyInput = document.createElement('input');
-      qtyInput.type = 'hidden';
-      qtyInput.name = `products[${index}][quantity]`;
-      qtyInput.value = String(item.quantity);
-      form.appendChild(qtyInput);
-    });
-    
-    // Simple approach: just redirect to WooCommerce with first product
-    // then user can continue from there
-    const firstItem = items[0];
-    const firstProductId = firstItem.variation?.id 
-      ? parseInt(firstItem.variation.id.replace('variation-', ''))
-      : firstItem.databaseId;
-    
-    // Clear local cart
-    clearCart();
-    
-    // Redirect to WooCommerce
-    window.location.href = `${wooUrl}/?add-to-cart=${firstProductId}&quantity=${firstItem.quantity}`;
+    await checkout();
   };
 
   if (!isHydrated) {
@@ -171,10 +125,10 @@ export default function CheckoutPage() {
 
               <button
                 onClick={handleCheckout}
-                disabled={isLoading}
+                disabled={isCheckingOut}
                 className="w-full py-4 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {isLoading ? (
+                {isCheckingOut ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
                     מעבד...

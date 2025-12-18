@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Minus, Plus, Trash2, ShoppingBag, X } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, X, Loader2 } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 
 export function CartSidebar() {
-  const { items, isOpen, closeCart, updateQuantity, removeItem, getTotal, isHydrated } = useCartStore();
+  const { items, isOpen, closeCart, updateQuantity, removeItem, getTotal, isHydrated, checkout, isCheckingOut } = useCartStore();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('he-IL', {
@@ -14,6 +14,10 @@ export function CartSidebar() {
       currency: 'ILS',
       minimumFractionDigits: 0,
     }).format(price);
+  };
+
+  const handleCheckout = async () => {
+    await checkout();
   };
 
   if (!isHydrated || !isOpen) return null;
@@ -82,7 +86,7 @@ export function CartSidebar() {
                     <div className="flex justify-between items-start gap-2">
                       <h4 className="font-medium text-sm leading-tight line-clamp-2">{item.name}</h4>
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.id, item.variation?.id)}
                         className="p-1.5 hover:bg-gray-200 rounded transition-colors flex-shrink-0 active:scale-95"
                       >
                         <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
@@ -99,14 +103,14 @@ export function CartSidebar() {
                       {/* Quantity Controls */}
                       <div className="flex items-center border border-gray-300 rounded-md">
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.id, item.quantity - 1, item.variation?.id)}
                           className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors active:bg-gray-200"
                         >
                           <Minus className="h-4 w-4" />
                         </button>
                         <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1, item.variation?.id)}
                           className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors active:bg-gray-200"
                         >
                           <Plus className="h-4 w-4" />
@@ -134,13 +138,20 @@ export function CartSidebar() {
               </div>
               
               {/* Checkout Button */}
-              <Link 
-                href="/checkout"
-                onClick={closeCart}
-                className="block w-full py-3.5 bg-black text-white text-center font-medium rounded-md hover:bg-gray-800 transition-colors active:scale-[0.98]"
+              <button 
+                onClick={handleCheckout}
+                disabled={isCheckingOut}
+                className="block w-full py-3.5 bg-black text-white text-center font-medium rounded-md hover:bg-gray-800 transition-colors active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                מעבר לתשלום
-              </Link>
+                {isCheckingOut ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    מעבר לתשלום...
+                  </span>
+                ) : (
+                  'מעבר לתשלום'
+                )}
+              </button>
               
               {/* Continue Shopping */}
               <button 

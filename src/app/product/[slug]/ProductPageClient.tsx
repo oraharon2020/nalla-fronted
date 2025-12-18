@@ -258,20 +258,20 @@ export function ProductPageClient({ product, variations = [], faqs = [] }: Produ
       .join(' / ');
     
     addItem({
-      id: selectedVariation ? String(selectedVariation.id) : product.id,
-      databaseId: selectedVariation?.id || product.databaseId,
+      id: product.id,
+      databaseId: product.databaseId,
       name: product.name,
       slug: product.slug,
       price: currentPrice,
       image: selectedVariation?.image 
         ? { sourceUrl: selectedVariation.image.src, altText: selectedVariation.image.alt }
         : product.image,
-      variation: {
-        id: selectedVariation ? String(selectedVariation.id) : `${product.id}-custom`,
+      variation: selectedVariation ? {
+        id: selectedVariation.id,
         name: variationName || 'ללא וריאציה',
         attributes: Object.entries(selectedAttributes).map(([name, value]) => ({ name, value })),
-      },
-    });
+      } : undefined,
+    }, quantity);
   };
 
   const hasDiscount = (selectedVariation?.on_sale || product.onSale) && currentRegularPrice;
