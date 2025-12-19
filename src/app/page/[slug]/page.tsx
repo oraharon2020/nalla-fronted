@@ -6,6 +6,9 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Revalidate every 5 minutes
+export const revalidate = 300;
+
 // Map Hebrew URLs to WordPress slugs
 const slugMap: Record<string, string> = {
   'faq': 'faq',
