@@ -393,16 +393,24 @@ export function AdminProductFields({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button
+            <span
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 handleLogout();
               }}
-              className="text-xs text-gray-500 hover:text-red-500 flex items-center gap-1"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation();
+                  handleLogout();
+                }
+              }}
+              className="text-xs text-gray-500 hover:text-red-500 flex items-center gap-1 cursor-pointer"
             >
               <LogOut className="w-3 h-3" />
               יציאה
-            </button>
+            </span>
             {isExpanded ? (
               <ChevronUp className="w-5 h-5 text-gray-600" />
             ) : (
