@@ -24,6 +24,7 @@ require_once BELLANO_PLUGIN_DIR . 'modules/class-product-video.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-rest-api.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-checkout.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-featured-categories.php';
+require_once BELLANO_PLUGIN_DIR . 'modules/class-contact-form.php';
 
 /**
  * Main plugin class
@@ -42,6 +43,7 @@ class Bellano_Settings {
     public $product_video;
     public $rest_api;
     public $checkout;
+    public $contact_form;
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -61,6 +63,7 @@ class Bellano_Settings {
         $this->product_video = new Bellano_Product_Video();
         $this->rest_api = new Bellano_REST_API($this);
         $this->checkout = new Bellano_Checkout();
+        $this->contact_form = new Bellano_Contact_Form();
         
         // Register hooks
         add_action('admin_menu', [$this->admin_pages, 'add_admin_menu']);

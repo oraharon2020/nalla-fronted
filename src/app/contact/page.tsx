@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Phone, Mail, MessageCircle, Clock, Send } from 'lucide-react';
+import { Phone, Mail, MessageCircle, Clock, Send, AlertCircle } from 'lucide-react';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -14,14 +14,34 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setSubmitted(true);
-    setIsSubmitting(false);
+    setError(null);
+    
+    try {
+      const response = await fetch('https://bellano.co.il/wp-json/bellano/v1/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        setError(data.message || 'שגיאה בשליחת ההודעה');
+      }
+    } catch {
+      setError('שגיאה בשליחת ההודעה. אנא נסו שנית.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -171,6 +191,14 @@ export default function ContactPage() {
                     placeholder="כתבו את ההודעה שלכם..."
                   />
                 </div>
+
+                {/* Error Message */}
+                {error && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
 
                 <button 
                   type="submit"
