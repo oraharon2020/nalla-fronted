@@ -55,9 +55,9 @@ export const siteConfig = {
     wordpressUrl: 'https://bellano.co.il/wp-content/uploads/2024/06/Bellano-שחור-על-רקע-שקוף.png',
   },
   favicon: {
-    ico32: 'https://bellano.co.il/wp-content/uploads/2024/04/cropped-bellano-logo-square-32x32.webp',
-    ico192: 'https://bellano.co.il/wp-content/uploads/2024/04/cropped-bellano-logo-square-192x192.webp',
-    appleTouchIcon: 'https://bellano.co.il/wp-content/uploads/2024/04/cropped-bellano-logo-square-180x180.webp',
+    ico32: 'https://i0.wp.com/bellano.co.il/wp-content/uploads/2024/06/cropped-Bellano-%D7%A9%D7%97%D7%95%D7%A8-%D7%A2%D7%9C-%D7%A8%D7%A7%D7%A2-%D7%A9%D7%A7%D7%95%D7%A3-1.png?fit=32%2C32&ssl=1',
+    ico192: 'https://i0.wp.com/bellano.co.il/wp-content/uploads/2024/06/cropped-Bellano-%D7%A9%D7%97%D7%95%D7%A8-%D7%A2%D7%9C-%D7%A8%D7%A7%D7%A2-%D7%A9%D7%A7%D7%95%D7%A3-1.png?fit=192%2C192&ssl=1',
+    appleTouchIcon: 'https://i0.wp.com/bellano.co.il/wp-content/uploads/2024/06/cropped-Bellano-%D7%A9%D7%97%D7%95%D7%A8-%D7%A2%D7%9C-%D7%A8%D7%A7%D7%A2-%D7%A9%D7%A7%D7%95%D7%A3-1.png?fit=180%2C180&ssl=1',
   },
   ogImage: '/images/bellano%20logo.avif',
   
