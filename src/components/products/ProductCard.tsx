@@ -255,20 +255,16 @@ export function ProductCard({ product }: ProductCardProps) {
           </Badge>
         )}
 
-        {/* Stock Status Badge */}
-        {product.stockStatus && (
-          <span 
-            className={`absolute top-3 left-3 text-xs font-medium px-2 py-1 rounded-full ${
-              product.stockStatus === 'instock' 
-                ? 'bg-green-100 text-green-700' 
-                : product.stockStatus === 'onbackorder'
-                ? 'bg-amber-100 text-amber-700'
-                : 'bg-gray-100 text-gray-500'
-            }`}
-          >
-            {product.stockStatus === 'instock' ? 'במלאי' : product.stockStatus === 'onbackorder' ? 'בהזמנה מיוחדת' : 'אזל'}
-          </span>
-        )}
+        {/* Availability Badge */}
+        <span 
+          className={`absolute top-3 left-3 text-xs font-medium px-2 py-1 rounded-full ${
+            product.availabilityType === 'custom_order' 
+              ? 'bg-amber-100 text-amber-700' 
+              : 'bg-green-100 text-green-700'
+          }`}
+        >
+          {product.availabilityType === 'custom_order' ? 'בהזמנה אישית' : 'במלאי'}
+        </span>
 
         {/* Wishlist Button */}
         <Button

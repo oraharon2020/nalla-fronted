@@ -57,6 +57,7 @@ export interface WooProduct {
   sale_price: string;
   on_sale: boolean;
   stock_status: string;
+  bellano_availability?: 'in_stock' | 'custom_order'; // Custom field from Bellano plugin
   categories: { id: number; name: string; slug: string }[];
   images: { id: number; src: string; alt: string }[];
   attributes: { id: number; name: string; options: string[]; variation: boolean }[];
@@ -418,7 +419,7 @@ export function transformProduct(wooProduct: WooProduct, variations?: WooVariati
     salePrice: wooProduct.sale_price ? `${wooProduct.sale_price} ₪` : undefined,
     onSale: wooProduct.on_sale,
     sku: wooProduct.sku,
-    stockStatus: wooProduct.stock_status as 'instock' | 'outofstock' | 'onbackorder',
+    availabilityType: wooProduct.bellano_availability || 'in_stock',
     image: wooProduct.images?.[0] ? {
       sourceUrl: wooProduct.images[0].src,
       altText: wooProduct.images[0].alt || wooProduct.name,
