@@ -183,8 +183,9 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Color Variations with Images - clickable to change product image */}
         {hasVariationImages ? (
-          <div className="flex items-center justify-center gap-1.5 pt-2 flex-wrap">
-            {variationsWithImages.slice(0, 6).map((variation) => {
+          <div className="flex items-center justify-center gap-2 pt-3 flex-wrap">
+            {/* Show 4 on mobile, 6 on desktop */}
+            {variationsWithImages.slice(0, 6).map((variation, index) => {
               const isSelected = selectedVariation?.id === variation.id;
               // Use swatchImage for the circle, or fallback to variation image
               const swatchImageUrl = variation.swatchImage || variation.image?.sourceUrl;
@@ -194,13 +195,14 @@ export function ProductCard({ product }: ProductCardProps) {
                 <button
                   key={variation.id}
                   onClick={(e) => handleVariationClick(variation, e)}
-                  className={`relative rounded-full overflow-hidden transition-all cursor-pointer ${
-                    isSelected 
-                      ? 'ring-2 ring-primary ring-offset-1 scale-110' 
-                      : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-1'
-                  }`}
+                  className={`relative rounded-full overflow-hidden transition-all duration-200 cursor-pointer 
+                    border border-gray-200 shadow-sm
+                    ${isSelected 
+                      ? 'ring-2 ring-primary ring-offset-2 scale-110 border-primary' 
+                      : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-1 hover:scale-105'
+                    } ${index >= 4 ? 'hidden md:block' : ''}`}
                   title={variation.colorName || ''}
-                  style={{ width: 28, height: 28 }}
+                  style={{ width: 32, height: 32 }}
                 >
                   {hasSwatchImage ? (
                     <Image
@@ -208,36 +210,42 @@ export function ProductCard({ product }: ProductCardProps) {
                       alt={variation.colorName || ''}
                       fill
                       className="object-cover"
-                      sizes="28px"
+                      sizes="32px"
                     />
                   ) : (
                     <div 
-                      className="w-full h-full border border-gray-200"
+                      className="w-full h-full"
                       style={getColorStyle(variation.colorName || '')}
                     />
                   )}
                 </button>
               );
             })}
+            {/* Show +X count - different for mobile vs desktop */}
+            {variationsWithImages.length > 4 && (
+              <span className="text-xs text-muted-foreground font-medium ml-1 md:hidden">
+                +{variationsWithImages.length - 4}
+              </span>
+            )}
             {variationsWithImages.length > 6 && (
-              <span className="text-xs text-muted-foreground ml-1">
+              <span className="text-xs text-muted-foreground font-medium ml-1 hidden md:inline">
                 +{variationsWithImages.length - 6}
               </span>
             )}
           </div>
         ) : colorOptions.length > 0 ? (
           // Fallback to color attributes (no image switching)
-          <div className="flex items-center justify-center gap-2 pt-2">
+          <div className="flex items-center justify-center gap-2 pt-3">
             {colorOptions.slice(0, 5).map((color, index) => (
               <div
                 key={index}
-                className="w-6 h-6 rounded-full border border-gray-200"
+                className="w-7 h-7 rounded-full border border-gray-200 shadow-sm"
                 style={getColorStyle(color)}
                 title={color}
               />
             ))}
             {colorOptions.length > 5 && (
-              <span className="text-xs text-muted-foreground">+{colorOptions.length - 5}</span>
+              <span className="text-xs text-muted-foreground font-medium">+{colorOptions.length - 5}</span>
             )}
           </div>
         ) : null}
