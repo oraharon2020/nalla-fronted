@@ -230,7 +230,8 @@ export function ProductCard({ product }: ProductCardProps) {
               alt={displayImageAlt}
               fill
               className={`object-cover transition-all duration-300 group-hover:scale-105 ${isLoadingImage ? 'opacity-50' : ''}`}
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 300px"
+              quality={75}
               priority={false}
             />
           ) : (

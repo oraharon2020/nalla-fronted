@@ -263,7 +263,8 @@ async function CategoriesSection() {
                     alt={category.name}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    sizes="(max-width: 768px) 50vw, 25vw"
+                    sizes="(max-width: 768px) 50vw, 250px"
+                    quality={75}
                   />
                 )}
                 
@@ -354,7 +355,8 @@ async function BestSellersSection() {
                       alt={product.name}
                       fill
                       className="object-cover transition-all duration-500 group-hover:scale-105"
-                      sizes="(max-width: 768px) 70vw, 25vw"
+                      sizes="(max-width: 768px) 70vw, 300px"
+                      quality={75}
                     />
                   )}
                   {product.onSale && (
@@ -626,7 +628,8 @@ function InstagramSection() {
               alt={`Instagram ${index + 1}`}
               fill
               className="object-cover transition-all duration-500 group-hover:scale-110"
-              sizes="(max-width: 768px) 33vw, 16vw"
+              sizes="(max-width: 768px) 33vw, 200px"
+              quality={75}
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
               <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24">
