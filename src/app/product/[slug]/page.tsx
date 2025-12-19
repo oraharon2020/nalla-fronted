@@ -143,24 +143,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
       notFound();
     }
     
-    // Fetch variations if it's a variable product
-    let variations: any[] = [];
-    if (wooProduct.type === 'variable' && wooProduct.variations?.length > 0) {
-      try {
-        variations = await getProductVariations(wooProduct.id);
-      } catch (error) {
-        console.error('Error fetching variations:', error);
-      }
-    }
+    // Fetch everything in parallel for speed
+    const isVariable = wooProduct.type === 'variable' && wooProduct.variations?.length > 0;
     
-    const product = transformProduct(wooProduct, variations);
-    
-    // Fetch FAQs and video for this product in parallel
-    const [faqs, video, swatches] = await Promise.all([
+    const [variations, faqs, video, swatches] = await Promise.all([
+      isVariable ? getProductVariations(wooProduct.id).catch(() => []) : Promise.resolve([]),
       getProductFaqs(wooProduct.id),
       getProductVideo(wooProduct.id),
       getColorSwatches(),
     ]);
+    
+    const product = transformProduct(wooProduct, variations, swatches);
 
     // Get category name for breadcrumb
     const categoryName = wooProduct.categories?.[0]?.name || 'מוצרים';

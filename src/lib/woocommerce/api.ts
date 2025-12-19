@@ -152,10 +152,26 @@ export async function getProductById(id: number): Promise<WooProduct> {
 }
 
 /**
- * Get product variations
+ * Get product variations (with cache)
  */
 export async function getProductVariations(productId: number): Promise<WooVariation[]> {
-  return wooFetch<WooVariation[]>(`products/${productId}/variations?per_page=100`);
+  const url = new URL(`${WOOCOMMERCE_URL}/wp-json/wc/v3/products/${productId}/variations`);
+  url.searchParams.append('per_page', '100');
+  
+  if (CONSUMER_KEY && CONSUMER_SECRET) {
+    url.searchParams.append('consumer_key', CONSUMER_KEY);
+    url.searchParams.append('consumer_secret', CONSUMER_SECRET);
+  }
+
+  const response = await fetch(url.toString(), {
+    next: { revalidate: CACHE_DURATION.VARIATIONS },
+  });
+
+  if (!response.ok) {
+    throw new Error(`WooCommerce API error: ${response.status}`);
+  }
+
+  return response.json();
 }
 
 /**
