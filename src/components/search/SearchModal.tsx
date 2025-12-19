@@ -98,7 +98,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         <div className="border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center h-16 gap-3">
-              <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+              <Search className="w-5 h-5 text-gray-400 flex-shrink-0" aria-hidden="true" />
               <input
                 ref={inputRef}
                 type="text"
@@ -107,6 +107,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 placeholder="חיפוש מוצרים..."
                 className="flex-1 h-full text-lg outline-none bg-transparent"
                 autoComplete="off"
+                aria-label="חיפוש מוצרים"
               />
               {query && (
                 <button
@@ -116,7 +117,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     setHasSearched(false);
                     inputRef.current?.focus();
                   }}
-                  className="p-1 hover:bg-gray-100 rounded-full"
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                  aria-label="נקה חיפוש"
                 >
                   <X className="w-4 h-4 text-gray-400" />
                 </button>
@@ -124,6 +126,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="סגור חיפוש"
               >
                 <X className="w-5 h-5" />
               </button>

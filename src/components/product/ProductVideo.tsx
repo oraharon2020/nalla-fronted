@@ -66,6 +66,7 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
             <button
               onClick={handleFullscreen}
               className="absolute inset-0 flex items-center justify-center"
+              aria-label={`נגן סרטון של ${productName}`}
             >
               <div className="w-16 h-16 md:w-20 md:h-20 bg-white/95 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <Play className="w-6 h-6 md:w-8 md:h-8 text-black mr-[-2px]" fill="currentColor" />
@@ -108,7 +109,8 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
           {/* Close button */}
           <button
             onClick={handleClose}
-            className="absolute top-4 left-4 z-50 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+            className="absolute top-4 left-4 z-50 w-11 h-11 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+            aria-label="סגור סרטון"
           >
             <X className="w-6 h-6" />
           </button>

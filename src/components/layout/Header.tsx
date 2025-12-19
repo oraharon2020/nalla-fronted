@@ -52,6 +52,7 @@ export function Header() {
             <button
               className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
               onClick={() => setMobileMenuOpen(true)}
+              aria-label="פתח תפריט"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -94,16 +95,17 @@ export function Header() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setSearchOpen(true)}
+                aria-label="חיפוש"
               >
                 <Search className="h-5 w-5" />
               </Button>
 
               {/* Wishlist */}
-              <Link href="/wishlist">
-                <Button variant="ghost" size="icon" className="hidden md:flex relative">
+              <Link href="/wishlist" aria-label={`מועדפים${wishlistCount > 0 ? ` (${wishlistCount})` : ''}`}>
+                <Button variant="ghost" size="icon" className="hidden md:flex relative" aria-label="מועדפים">
                   <Heart className="h-5 w-5" />
                   {wishlistCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" aria-hidden="true">
                       {wishlistCount}
                     </span>
                   )}
@@ -116,10 +118,11 @@ export function Header() {
                 size="icon"
                 className="relative"
                 onClick={toggleCart}
+                aria-label={`עגלת קניות${itemCount > 0 ? ` (${itemCount} פריטים)` : ''}`}
               >
                 <ShoppingBag className="h-5 w-5" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center" aria-hidden="true">
                     {itemCount}
                   </span>
                 )}
@@ -163,6 +166,7 @@ export function Header() {
               <button 
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="סגור תפריט"
               >
                 <X className="w-5 h-5" />
               </button>

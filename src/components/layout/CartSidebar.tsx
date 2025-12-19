@@ -95,6 +95,7 @@ export function CartSidebar() {
           <button 
             onClick={closeCart}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            aria-label="סגור עגלת קניות"
           >
             <X className="w-5 h-5" />
           </button>
@@ -146,6 +147,7 @@ export function CartSidebar() {
                       <button
                         onClick={() => removeItem(item.id, item.variation?.id)}
                         className="p-1.5 hover:bg-gray-200 rounded transition-colors flex-shrink-0 active:scale-95"
+                        aria-label={`הסר ${item.name} מהעגלה`}
                       >
                         <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
                       </button>
@@ -200,17 +202,19 @@ export function CartSidebar() {
                     
                     <div className="flex items-center justify-between mt-auto pt-2">
                       {/* Quantity Controls */}
-                      <div className="flex items-center border border-gray-300 rounded-md">
+                      <div className="flex items-center border border-gray-300 rounded-md" role="group" aria-label="כמות">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1, item.variation?.id)}
-                          className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors active:bg-gray-200"
+                          className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 transition-colors active:bg-gray-200"
+                          aria-label="הפחת כמות"
                         >
                           <Minus className="h-4 w-4" />
                         </button>
-                        <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                        <span className="w-8 text-center text-sm font-medium" aria-live="polite">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1, item.variation?.id)}
-                          className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors active:bg-gray-200"
+                          className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 transition-colors active:bg-gray-200"
+                          aria-label="הוסף כמות"
                         >
                           <Plus className="h-4 w-4" />
                         </button>

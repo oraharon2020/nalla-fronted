@@ -123,12 +123,19 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <p className="text-sm text-muted-foreground">
           {products.length} מוצרים
         </p>
-        <select className="border rounded-md px-3 py-2 text-sm bg-background">
-          <option value="default">מיון בחירת מחדל</option>
-          <option value="price-low">מחיר: נמוך לגבוה</option>
-          <option value="price-high">מחיר: גבוה לנמוך</option>
-          <option value="newest">חדשים ביותר</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <label htmlFor="sort-select" className="text-sm text-muted-foreground sr-only">מיון לפי</label>
+          <select 
+            id="sort-select"
+            className="border rounded-md px-3 py-2 text-sm bg-background"
+            aria-label="מיין מוצרים"
+          >
+            <option value="default">מיון בחירת מחדל</option>
+            <option value="price-low">מחיר: נמוך לגבוה</option>
+            <option value="price-high">מחיר: גבוה לנמוך</option>
+            <option value="newest">חדשים ביותר</option>
+          </select>
+        </div>
       </div>
 
         {/* Products Grid */}

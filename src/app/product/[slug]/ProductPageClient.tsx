@@ -608,17 +608,19 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
             {/* Add to Cart */}
             <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
               {/* Quantity */}
-              <div className="flex items-center border border-gray-300 rounded">
+              <div className="flex items-center border border-gray-300 rounded" role="group" aria-label="כמות">
                 <button
-                  className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-gray-500 hover:text-black"
+                  className="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-black"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  aria-label="הפחת כמות"
                 >
                   <Minus className="w-3 h-3 md:w-3.5 md:h-3.5" />
                 </button>
-                <span className="w-8 md:w-10 text-center text-sm">{quantity}</span>
+                <span className="w-8 md:w-10 text-center text-sm" aria-live="polite">{quantity}</span>
                 <button
-                  className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-gray-500 hover:text-black"
+                  className="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-black"
                   onClick={() => setQuantity(quantity + 1)}
+                  aria-label="הוסף כמות"
                 >
                   <Plus className="w-3 h-3 md:w-3.5 md:h-3.5" />
                 </button>
@@ -634,12 +636,14 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
 
               {/* Wishlist */}
               <button 
-                className={`w-10 h-10 md:w-9 md:h-9 flex items-center justify-center border rounded transition-colors ${
+                className={`w-11 h-11 flex items-center justify-center border rounded transition-colors ${
                   isWishlisted 
                     ? 'border-red-500 bg-red-50' 
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
                 onClick={() => toggleItem(wishlistItem)}
+                aria-label={isWishlisted ? 'הסר מהמועדפים' : 'הוסף למועדפים'}
+                aria-pressed={isWishlisted}
               >
                 <Heart className={`w-4 h-4 transition-colors ${
                   isWishlisted 

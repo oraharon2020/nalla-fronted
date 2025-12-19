@@ -77,12 +77,13 @@ export default function WishlistPage() {
                       size="icon"
                       className="absolute top-3 left-3 bg-white/80 hover:bg-white shadow-sm"
                       onClick={() => removeItem(item.id)}
+                      aria-label={`הסר ${item.name} מהמועדפים`}
                     >
                       <Trash2 className="h-4 w-4 text-gray-600" />
                     </Button>
 
                     {/* Filled Heart */}
-                    <div className="absolute bottom-3 left-3">
+                    <div className="absolute bottom-3 left-3" aria-hidden="true">
                       <Heart className="h-6 w-6 fill-red-500 text-red-500" />
                     </div>
                   </div>

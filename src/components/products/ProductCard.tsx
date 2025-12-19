@@ -250,7 +250,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Discount Badge */}
         {hasDiscount && discountPercentage > 0 && (
-          <Badge className="absolute top-3 right-3 bg-red-500 hover:bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+          <Badge className="absolute top-3 right-3 bg-red-500 hover:bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium" aria-label={`הנחה של ${discountPercentage} אחוז`}>
             {discountPercentage}%-
           </Badge>
         )}
@@ -265,6 +265,8 @@ export function ProductCard({ product }: ProductCardProps) {
             e.stopPropagation();
             toggleItem(wishlistItem);
           }}
+          aria-label={isWishlisted ? `הסר ${product.name} מהמועדפים` : `הוסף ${product.name} למועדפים`}
+          aria-pressed={isWishlisted}
         >
           <Heart 
             className={`h-6 w-6 transition-colors ${
@@ -314,8 +316,9 @@ export function ProductCard({ product }: ProductCardProps) {
                       ? 'ring-2 ring-black ring-offset-1 border-black' 
                       : 'border-gray-200 hover:border-gray-400'
                   } ${index >= 4 ? 'hidden md:block' : ''} ${isLoadingImage ? 'opacity-50' : ''}`}
-                  title={variation.colorName || ''}
-                  style={{ width: 28, height: 28 }}
+                  aria-label={`בחר צבע ${variation.colorName || ''}`}
+                  aria-pressed={isSelected}
+                  style={{ width: 44, height: 44 }}
                 >
                   {hasSwatchImage ? (
                     <Image
@@ -323,7 +326,7 @@ export function ProductCard({ product }: ProductCardProps) {
                       alt={variation.colorName || ''}
                       fill
                       className="object-cover"
-                      sizes="28px"
+                      sizes="44px"
                     />
                   ) : (
                     <div 
