@@ -108,9 +108,9 @@ export default function RootLayout({
         <LocalBusinessJsonLd />
       </head>
       <body className={`${rubik.variable} ${inter.variable} font-sans antialiased`}>
-        {/* Google Tag Manager - loaded after page is interactive */}
+        {/* Google Ads & GA4 - gtag.js */}
         <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics.googleTagManager}`}
+          src={`https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics.googleAds}`}
           strategy="afterInteractive"
         />
         <Script id="gtag-init" strategy="afterInteractive">
@@ -118,8 +118,6 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('set', 'linker', {'domains': ['${siteConfig.url.replace('https://', '')}']});
-            gtag('config', '${siteConfig.analytics.googleTagManager}');
             gtag('config', '${siteConfig.analytics.googleAds}');
           `}
         </Script>

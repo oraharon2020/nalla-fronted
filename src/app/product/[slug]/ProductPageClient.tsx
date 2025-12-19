@@ -365,8 +365,9 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
       });
     }
     
-    // Track Add to Cart - Google Analytics 4
+    // Track Add to Cart - Google Analytics 4 + Google Ads
     if (typeof window !== 'undefined' && (window as any).gtag) {
+      // GA4 event
       (window as any).gtag('event', 'add_to_cart', {
         currency: 'ILS',
         value: priceValue * quantity,
@@ -378,7 +379,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
         }],
       });
       
-      // Track Add to Cart - Google Ads Conversion
+      // Google Ads Conversion
       (window as any).gtag('event', 'conversion', {
         send_to: `${siteConfig.analytics.googleAds}/${siteConfig.analytics.googleAdsAddToCartLabel}`,
         value: priceValue * quantity,
