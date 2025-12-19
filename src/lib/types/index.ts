@@ -20,6 +20,7 @@ export interface ProductVariation {
   databaseId?: number;
   name?: string;
   colorName?: string;
+  colorSlug?: string;
   price?: string;
   regularPrice?: string;
   salePrice?: string;
@@ -27,6 +28,7 @@ export interface ProductVariation {
     nodes: ProductAttribute[];
   };
   image?: ProductImage;
+  swatchImage?: string; // Thumbnail image for color swatch display
 }
 
 export interface Product {

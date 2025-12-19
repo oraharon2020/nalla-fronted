@@ -186,7 +186,9 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center justify-center gap-1.5 pt-2 flex-wrap">
             {variationsWithImages.slice(0, 6).map((variation) => {
               const isSelected = selectedVariation?.id === variation.id;
-              const hasImage = !!variation.image?.sourceUrl;
+              // Use swatchImage for the circle, or fallback to variation image
+              const swatchImageUrl = variation.swatchImage || variation.image?.sourceUrl;
+              const hasSwatchImage = !!swatchImageUrl;
               
               return (
                 <button
@@ -198,11 +200,11 @@ export function ProductCard({ product }: ProductCardProps) {
                       : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-1'
                   }`}
                   title={variation.colorName || ''}
-                  style={{ width: hasImage ? 28 : 24, height: hasImage ? 28 : 24 }}
+                  style={{ width: 28, height: 28 }}
                 >
-                  {hasImage ? (
+                  {hasSwatchImage ? (
                     <Image
-                      src={variation.image!.sourceUrl}
+                      src={swatchImageUrl}
                       alt={variation.colorName || ''}
                       fill
                       className="object-cover"

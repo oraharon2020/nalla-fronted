@@ -271,10 +271,10 @@ async function CategoriesSection() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
                 
                 {/* Content */}
-                <div className="absolute inset-0 flex flex-col justify-end p-4 md:p-5">
+                <div className="absolute inset-0 flex flex-col justify-end p-3 pb-4 md:p-5">
                   {/* Text Content */}
                   <div className="relative z-10">
-                    <h3 className="text-white text-lg md:text-xl font-bold mb-1">
+                    <h3 className="text-white text-lg md:text-xl font-bold mb-0 md:mb-1">
                       {category.name}
                     </h3>
                     <p className="text-white/60 text-xs md:text-sm hidden md:block">

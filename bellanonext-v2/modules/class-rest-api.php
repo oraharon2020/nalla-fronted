@@ -114,6 +114,13 @@ class Bellano_REST_API {
             'callback' => [$this, 'upload_file'],
             'permission_callback' => '__return_true'
         ]);
+        
+        // Color swatches - get attribute term images
+        register_rest_route('bellano/v1', '/color-swatches', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_color_swatches'],
+            'permission_callback' => '__return_true'
+        ]);
     }
     
     public function get_homepage_data() {
@@ -227,6 +234,84 @@ class Bellano_REST_API {
             'success' => true,
             'url' => $file_url,
             'filename' => basename($target_path)
+        ], 200);
+    }
+    
+    /**
+     * Get color swatches (attribute term images)
+     * Returns all color terms with their swatch images
+     */
+    public function get_color_swatches() {
+        $swatches = [];
+        
+        // Get the color attribute (pa_color-product with ID 2)
+        $attribute_taxonomies = wc_get_attribute_taxonomies();
+        
+        foreach ($attribute_taxonomies as $attribute) {
+            // Only get image type attributes (color swatches)
+            if ($attribute->attribute_type !== 'image') {
+                continue;
+            }
+            
+            $taxonomy = 'pa_' . $attribute->attribute_name;
+            $terms = get_terms([
+                'taxonomy' => $taxonomy,
+                'hide_empty' => false
+            ]);
+            
+            if (is_wp_error($terms)) {
+                continue;
+            }
+            
+            foreach ($terms as $term) {
+                // Get the swatch image - try different meta keys used by various plugins
+                $image_id = get_term_meta($term->term_id, 'product_attribute_image', true);
+                if (!$image_id) {
+                    $image_id = get_term_meta($term->term_id, 'image', true);
+                }
+                if (!$image_id) {
+                    $image_id = get_term_meta($term->term_id, 'pa_color_image', true);
+                }
+                if (!$image_id) {
+                    // Try variation swatches plugin meta
+                    $image_id = get_term_meta($term->term_id, 'product_attribute_color', true);
+                }
+                
+                // Get color value (hex) if set
+                $color = get_term_meta($term->term_id, 'product_attribute_color', true);
+                if (!$color) {
+                    $color = get_term_meta($term->term_id, 'color', true);
+                }
+                
+                $swatch_data = [
+                    'id' => $term->term_id,
+                    'name' => $term->name,
+                    'slug' => $term->slug,
+                    'attribute' => $attribute->attribute_label,
+                    'attribute_slug' => $taxonomy
+                ];
+                
+                if ($image_id && is_numeric($image_id)) {
+                    $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
+                    if ($image_url) {
+                        $swatch_data['image'] = $image_url;
+                    }
+                } elseif ($image_id && filter_var($image_id, FILTER_VALIDATE_URL)) {
+                    // Some plugins store URL directly
+                    $swatch_data['image'] = $image_id;
+                }
+                
+                if ($color) {
+                    $swatch_data['color'] = $color;
+                }
+                
+                $swatches[$term->slug] = $swatch_data;
+            }
+        }
+        
+        return new WP_REST_Response([
+            'success' => true,
+            'swatches' => $swatches
         ], 200);
     }
 }

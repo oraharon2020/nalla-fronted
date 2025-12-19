@@ -206,38 +206,128 @@ export async function getProductsByCategorySlug(
 }
 
 // Transform functions to match our app types
-export function transformProduct(wooProduct: WooProduct, variations?: WooVariation[]) {
+
+// Color swatch cache
+interface ColorSwatch {
+  id: number;
+  name: string;
+  slug: string;
+  attribute: string;
+  attribute_slug: string;
+  image?: string;
+  color?: string;
+}
+
+let colorSwatchesCache: Record<string, ColorSwatch> | null = null;
+let swatchesCacheTime: number = 0;
+const SWATCHES_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Fetch color swatches from WordPress
+async function getColorSwatches(): Promise<Record<string, ColorSwatch>> {
+  // Return cached data if available and not expired
+  if (colorSwatchesCache && Date.now() - swatchesCacheTime < SWATCHES_CACHE_DURATION) {
+    return colorSwatchesCache;
+  }
+
+  try {
+    const response = await fetch('https://bellano.co.il/wp-json/bellano/v1/color-swatches', {
+      next: { revalidate: 300 }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.swatches) {
+        colorSwatchesCache = data.swatches;
+        swatchesCacheTime = Date.now();
+        return data.swatches;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching color swatches:', error);
+  }
+
+  return colorSwatchesCache || {};
+}
+
+// Find swatch by name (fuzzy match)
+function findSwatchByName(swatches: Record<string, ColorSwatch>, name: string): ColorSwatch | undefined {
+  // First try exact slug match
+  const slug = name.toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\u0590-\u05ff-]/g, '');
+  
+  if (swatches[slug]) return swatches[slug];
+  
+  // Then try to find by name
+  return Object.values(swatches).find(s => 
+    s.name === name || 
+    s.name.includes(name) || 
+    name.includes(s.name)
+  );
+}
+
+export function transformProduct(wooProduct: WooProduct, variations?: WooVariation[], swatches?: Record<string, ColorSwatch>) {
   // Extract color variations from product attributes or variations
   const colorAttr = wooProduct.attributes?.find(attr => 
-    attr.name === 'צבע' || attr.name === 'color' || attr.name === 'pa_color'
+    attr.name === 'צבע' || attr.name === 'color' || attr.name === 'pa_color' || attr.name === 'pa_color-product'
   );
   
   // Build variations array from actual variations data (ensure it's an array)
   const variationsArray = Array.isArray(variations) ? variations : [];
   const productVariations = variationsArray.map(v => {
     const colorAttribute = v.attributes?.find(a => 
-      a.name === 'צבע' || a.name === 'color' || a.name === 'pa_color'
+      a.name === 'צבע' || a.name === 'color' || a.name === 'pa_color' || a.name === 'pa_color-product'
     );
+    
+    const colorName = colorAttribute?.option || '';
+    
+    // If variation has image, use it. Otherwise try to get from swatches
+    let swatchImage: { sourceUrl: string; altText: string } | undefined = undefined;
+    
+    if (v.image?.src) {
+      swatchImage = {
+        sourceUrl: v.image.src,
+        altText: v.image.alt || colorName || wooProduct.name,
+      };
+    } else if (swatches && colorName) {
+      // Try to find swatch image by color name
+      const swatch = findSwatchByName(swatches, colorName);
+      if (swatch?.image) {
+        swatchImage = {
+          sourceUrl: swatch.image,
+          altText: swatch.name || colorName,
+        };
+      }
+    }
+    
     return {
       id: String(v.id),
-      colorName: colorAttribute?.option || '',
-      image: v.image ? {
-        sourceUrl: v.image.src,
-        altText: v.image.alt || wooProduct.name,
-      } : undefined,
+      colorName,
+      colorSlug: colorAttribute?.option?.toLowerCase().replace(/\s+/g, '-') || '',
+      image: swatchImage,
+      // Also store the swatch thumbnail separately for the color circles
+      swatchImage: swatches ? findSwatchByName(swatches, colorName)?.image : undefined,
     };
   }).filter(v => v.colorName);
 
   // If no variations but has color attribute, create from attribute options
   const fallbackVariations = !productVariations.length && colorAttr 
-    ? colorAttr.options.map((color, index) => ({
-        id: `${wooProduct.id}-color-${index}`,
-        colorName: color,
-        image: wooProduct.images?.[index] ? {
-          sourceUrl: wooProduct.images[index].src,
-          altText: wooProduct.images[index].alt || color,
-        } : undefined,
-      }))
+    ? colorAttr.options.map((color, index) => {
+        const swatch = swatches ? findSwatchByName(swatches, color) : undefined;
+        return {
+          id: `${wooProduct.id}-color-${index}`,
+          colorName: color,
+          colorSlug: color.toLowerCase().replace(/\s+/g, '-'),
+          image: swatch?.image ? {
+            sourceUrl: swatch.image,
+            altText: swatch.name || color,
+          } : (wooProduct.images?.[index] ? {
+            sourceUrl: wooProduct.images[index].src,
+            altText: wooProduct.images[index].alt || color,
+          } : undefined),
+          swatchImage: swatch?.image,
+        };
+      })
     : [];
 
   return {
@@ -287,7 +377,11 @@ export async function getProductsWithVariations(params?: {
   orderby?: 'date' | 'price' | 'popularity' | 'rating';
   order?: 'asc' | 'desc';
 }): Promise<ReturnType<typeof transformProduct>[]> {
-  const products = await getProducts(params);
+  // Fetch products and color swatches in parallel
+  const [products, swatches] = await Promise.all([
+    getProducts(params),
+    getColorSwatches()
+  ]);
   
   // Fetch variations for variable products in parallel
   const productsWithVariations = await Promise.all(
@@ -295,12 +389,12 @@ export async function getProductsWithVariations(params?: {
       if (product.type === 'variable' && product.variations.length > 0) {
         try {
           const variations = await getProductVariations(product.id);
-          return transformProduct(product, variations);
+          return transformProduct(product, variations, swatches);
         } catch {
-          return transformProduct(product);
+          return transformProduct(product, undefined, swatches);
         }
       }
-      return transformProduct(product);
+      return transformProduct(product, undefined, swatches);
     })
   );
   
