@@ -351,6 +351,32 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
     
     // Use admin price if set, otherwise use regular price
     const finalPrice = adminPrice !== null ? `${adminPrice} ₪` : currentPrice;
+    const priceValue = parseFloat(finalPrice.replace(/[^\d.]/g, '')) || 0;
+    
+    // Track Add to Cart - Facebook Pixel
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'AddToCart', {
+        content_name: product.name,
+        content_ids: [product.databaseId.toString()],
+        content_type: 'product',
+        value: priceValue * quantity,
+        currency: 'ILS',
+      });
+    }
+    
+    // Track Add to Cart - Google Analytics 4
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'add_to_cart', {
+        currency: 'ILS',
+        value: priceValue * quantity,
+        items: [{
+          item_id: product.databaseId.toString(),
+          item_name: product.name,
+          price: priceValue,
+          quantity: quantity,
+        }],
+      });
+    }
     
     const adminFieldsToSave = adminFieldsData ? {
       width: adminFieldsData.width,
