@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, Minus, Plus, Truck, ShieldCheck, CreditCard, ChevronDown, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
+import { Heart, Minus, Plus, Truck, ShieldCheck, CreditCard, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -79,6 +79,64 @@ function HtmlContent({ html, className }: { html: string; className?: string }) 
       className={className}
       dangerouslySetInnerHTML={{ __html: html }}
     />
+  );
+}
+
+// Expandable short description for mobile
+function ExpandableShortDescription({ html, className }: { html: string; className?: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  const plainText = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  const needsTruncation = plainText.length > 100;
+  
+  if (!mounted) {
+    return <p className={`text-sm text-gray-600 ${className}`}>{plainText.slice(0, 100)}...</p>;
+  }
+  
+  if (!needsTruncation) {
+    return (
+      <div 
+        className={`text-sm text-gray-600 leading-relaxed ${className}`}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    );
+  }
+  
+  return (
+    <div className={className}>
+      <div className="relative">
+        <div 
+          className={`text-sm text-gray-600 leading-relaxed overflow-hidden transition-all duration-300 ${
+            isExpanded ? 'max-h-[500px]' : 'max-h-[3em]'
+          }`}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+        {!isExpanded && (
+          <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+        )}
+      </div>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 mt-1 transition-colors"
+      >
+        {isExpanded ? (
+          <>
+            <span>הצג פחות</span>
+            <ChevronUp className="w-3 h-3" />
+          </>
+        ) : (
+          <>
+            <span>קרא עוד</span>
+            <ChevronDown className="w-3 h-3" />
+          </>
+        )}
+      </button>
+    </div>
   );
 }
 
@@ -462,10 +520,20 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
             </div>
 
             {/* Short Description */}
-            <HtmlContent 
-              html={product.shortDescription || ''}
-              className="text-sm text-gray-600 leading-relaxed mb-4 md:mb-6 hidden md:block"
-            />
+            {product.shortDescription && (
+              <>
+                {/* Desktop - full description */}
+                <HtmlContent 
+                  html={product.shortDescription}
+                  className="text-sm text-gray-600 leading-relaxed mb-4 md:mb-6 hidden md:block"
+                />
+                {/* Mobile - expandable description */}
+                <ExpandableShortDescription 
+                  html={product.shortDescription}
+                  className="md:hidden mb-4"
+                />
+              </>
+            )}
 
             {/* Variations */}
             <div className="space-y-4 md:space-y-5 mb-4 md:mb-6">
