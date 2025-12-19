@@ -60,8 +60,9 @@ function SuccessContent() {
 
       // Google Ads - Conversion (for both - phone orders are still valuable leads)
       if (typeof window !== 'undefined' && (window as any).gtag) {
+        const conversionLabel = siteConfig.analytics.googleAdsConversionLabel;
         (window as any).gtag('event', 'conversion', {
-          send_to: `${siteConfig.analytics.googleAds}/${isPhoneOrder ? 'lead' : 'purchase'}`,
+          send_to: `${siteConfig.analytics.googleAds}/${conversionLabel}`,
           value: totalValue,
           currency: 'ILS',
           transaction_id: orderData.id,
