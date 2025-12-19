@@ -1,4 +1,6 @@
-const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL || 'https://bellano.co.il/graphql';
+import { siteConfig } from '@/config/site';
+
+const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL || `${siteConfig.wordpressUrl}/graphql`;
 
 interface GraphQLResponse<T = any> {
   data?: T;

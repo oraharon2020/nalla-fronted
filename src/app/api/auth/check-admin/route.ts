@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { siteConfig } from '@/config/site';
 
-const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://bellano.co.il';
+const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
 
 export async function GET(request: NextRequest) {
   try {

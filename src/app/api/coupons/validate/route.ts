@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { siteConfig } from '@/config/site';
 
-const WC_URL = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL || 'https://bellano.co.il';
+const WC_URL = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL || siteConfig.wordpressUrl;
 const WC_KEY = process.env.WOOCOMMERCE_CONSUMER_KEY;
 const WC_SECRET = process.env.WOOCOMMERCE_CONSUMER_SECRET;
 

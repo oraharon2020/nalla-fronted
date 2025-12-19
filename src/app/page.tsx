@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { getProductsWithSwatches, getCategories, transformCategory } from '@/lib/woocommerce';
 import { Truck, ShieldCheck, CreditCard, RotateCcw } from 'lucide-react';
 import { NewsletterForm } from '@/components/home/NewsletterForm';
+import { siteConfig, getApiEndpoint } from '@/config/site';
 
 // Types for homepage banners
 interface HomepageBanner {
@@ -32,7 +33,7 @@ interface HomepageBanner {
 // Fetch homepage data from WordPress
 async function getHomepageData(): Promise<{ banners: HomepageBanner[] } | null> {
   try {
-    const res = await fetch('https://bellano.co.il/wp-json/bellano/v1/homepage', {
+    const res = await fetch(getApiEndpoint('homepage'), {
       next: { revalidate: 300 } // Cache for 5 minutes
     });
     if (!res.ok) return null;
@@ -49,7 +50,7 @@ async function HeroSection() {
   
   // Default values if no banner from WordPress
   const mediaType = banner?.mediaType || 'image';
-  const imageUrl = banner?.image || 'https://bellano.co.il/wp-content/uploads/2024/06/banner-main.jpg';
+  const imageUrl = banner?.image || siteConfig.defaultBannerImage;
   const mobileImageUrl = banner?.mobileImage || imageUrl;
   const videoUrl = banner?.video || '';
   const mobileVideoUrl = banner?.mobileVideo || videoUrl; // Fallback to main video
@@ -197,7 +198,7 @@ async function CategoriesSection() {
   let categories: CategoryItem[] = [];
   
   try {
-    const res = await fetch('https://bellano.co.il/wp-json/bellano/v1/featured-categories', {
+    const res = await fetch(getApiEndpoint('featured-categories'), {
       next: { revalidate: 300 }
     });
     if (res.ok) {
@@ -593,7 +594,7 @@ function InstagramSection() {
     '/images/instagram/6.jpg',
   ];
   
-  const instagramHandle = 'bellano.decor';
+  const instagramHandle = siteConfig.social.instagramHandle;
 
   return (
     <section className="py-16 md:py-20">

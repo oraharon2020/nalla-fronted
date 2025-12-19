@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getApiEndpoint } from '@/config/site';
 
 export interface ColorSwatch {
   id: number;
@@ -26,7 +27,7 @@ export async function GET() {
       });
     }
 
-    const response = await fetch('https://bellano.co.il/wp-json/bellano/v1/color-swatches', {
+    const response = await fetch(getApiEndpoint('color-swatches'), {
       next: { revalidate: 300 } // Cache for 5 minutes
     });
 

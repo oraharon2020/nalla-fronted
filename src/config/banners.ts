@@ -1,5 +1,6 @@
 // Banner Configuration
 // Easy to update - just change the values here!
+import { siteConfig } from './site';
 
 export interface Banner {
   id: string;
@@ -15,23 +16,15 @@ export interface Banner {
 export const banners: Banner[] = [
   {
     id: 'banner-1',
-    image: 'https://bellano.co.il/wp-content/uploads/2024/06/banner-main.jpg',
-    mobileImage: 'https://bellano.co.il/wp-content/uploads/2024/06/banner-main-mobile.jpg',
-    title: 'רהיטי מעצבים',
+    image: siteConfig.defaultBannerImage,
+    mobileImage: `${siteConfig.wordpressUrl}/wp-content/uploads/2024/06/banner-main-mobile.jpg`,
+    title: siteConfig.tagline,
     subtitle: 'עיצוב איטלקי | איכות ללא פשרות',
     buttonText: 'לקולקציה',
     buttonLink: '/categories',
     backgroundColor: '#f5f5f5',
   },
-  // Add more banners here for a slider:
-  // {
-  //   id: 'banner-2',
-  //   image: 'https://bellano.co.il/wp-content/uploads/2024/06/banner-sale.jpg',
-  //   title: 'מבצע סוף עונה',
-  //   subtitle: 'עד 50% הנחה על פריטים נבחרים',
-  //   buttonText: 'למבצעים',
-  //   buttonLink: '/category/sale',
-  // },
+  // Add more banners here for a slider
 ];
 
 // Settings

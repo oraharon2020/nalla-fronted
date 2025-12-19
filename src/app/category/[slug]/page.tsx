@@ -2,8 +2,9 @@ import { ProductGrid } from '@/components/products';
 import { getProductsByCategorySlugWithSwatches, getCategoryBySlug, getCategories } from '@/lib/woocommerce';
 import { BreadcrumbJsonLd } from '@/components/seo';
 import { ExpandableDescription } from '@/components/ui/ExpandableDescription';
+import { siteConfig } from '@/config/site';
 
-const SITE_URL = 'https://bellano.co.il';
+const SITE_URL = siteConfig.url;
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;

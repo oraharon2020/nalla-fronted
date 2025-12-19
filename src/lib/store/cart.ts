@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { siteConfig, getApiEndpoint } from '@/config/site';
 
 export interface AdminFieldsData {
   width?: string;
@@ -158,7 +159,7 @@ export const useCartStore = create<CartStore>()(
           }));
 
           // Get checkout URL from WordPress
-          const response = await fetch('https://bellano.co.il/wp-json/bellano/v1/checkout-url', {
+          const response = await fetch(getApiEndpoint('checkout-url'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -190,13 +191,13 @@ export const useCartStore = create<CartStore>()(
 
       getFallbackCheckoutUrl: () => {
         const items = get().items;
-        if (items.length === 0) return 'https://bellano.co.il/checkout';
+        if (items.length === 0) return `${siteConfig.wordpressUrl}/checkout`;
         
         // For single item
         if (items.length === 1) {
           const item = items[0];
           const productId = item.variation?.id || item.databaseId;
-          return `https://bellano.co.il/?add-to-cart=${productId}&quantity=${item.quantity}`;
+          return `${siteConfig.wordpressUrl}/?add-to-cart=${productId}&quantity=${item.quantity}`;
         }
         
         // For multiple items - encode all items
@@ -206,11 +207,11 @@ export const useCartStore = create<CartStore>()(
         }));
         
         const cartData = btoa(JSON.stringify(encodedItems));
-        return `https://bellano.co.il/?bellano_cart=${cartData}`;
+        return `${siteConfig.wordpressUrl}/?${siteConfig.prefix}_cart=${cartData}`;
       },
     }),
     {
-      name: 'bellano-cart',
+      name: `${siteConfig.prefix}-cart`,
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated();

@@ -1,10 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getCategories } from '@/lib/woocommerce/api';
+import { siteConfig } from '@/config/site';
 
 export const metadata = {
-  title: 'כל הקטגוריות | בלאנו - רהיטי מעצבים',
-  description: 'צפו בכל הקטגוריות של רהיטי בלאנו - מזנונים, שולחנות, קומודות, כורסאות ועוד',
+  title: `כל הקטגוריות | ${siteConfig.fullName}`,
+  description: `צפו בכל הקטגוריות של רהיטי ${siteConfig.name} - מזנונים, שולחנות, קומודות, כורסאות ועוד`,
 };
 
 export default async function CategoriesPage() {

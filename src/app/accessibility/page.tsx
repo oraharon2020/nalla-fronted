@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
+import { siteConfig } from '@/config/site';
 
 export const metadata: Metadata = {
-  title: 'הצהרת נגישות | בלאנו',
-  description: 'הצהרת נגישות של אתר בלאנו - רהיטי מעצבים',
+  title: `הצהרת נגישות | ${siteConfig.name}`,
+  description: `הצהרת נגישות של אתר ${siteConfig.fullName}`,
 };
 
 export default function AccessibilityPage() {
@@ -15,7 +16,7 @@ export default function AccessibilityPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-4">כללי</h2>
             <p className="text-gray-600 leading-relaxed">
-              אתר בלאנו - רהיטי מעצבים מחויב לספק חוויית גלישה נגישה לכל המשתמשים, 
+              אתר {siteConfig.fullName} מחויב לספק חוויית גלישה נגישה לכל המשתמשים, 
               כולל אנשים עם מוגבלויות. אנו משקיעים מאמצים רבים על מנת להבטיח 
               שהאתר יהיה נגיש ושימושי עבור כולם.
             </p>
@@ -75,7 +76,7 @@ export default function AccessibilityPage() {
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-gray-700"><strong>טלפון:</strong> 03-5566696</p>
               <p className="text-gray-700"><strong>וואטסאפ:</strong> 03-5566696</p>
-              <p className="text-gray-700"><strong>אימייל:</strong> info@bellano.co.il</p>
+              <p className="text-gray-700"><strong>אימייל:</strong> {siteConfig.email}</p>
             </div>
           </section>
 

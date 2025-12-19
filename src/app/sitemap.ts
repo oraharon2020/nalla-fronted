@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
 import { getProducts, getCategories } from '@/lib/woocommerce';
+import { siteConfig } from '@/config/site';
 
-const SITE_URL = 'https://bellano.co.il';
+const SITE_URL = siteConfig.url;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages

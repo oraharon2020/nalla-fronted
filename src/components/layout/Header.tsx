@@ -9,6 +9,7 @@ import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { CartSidebar } from './CartSidebar';
 import { SearchModal } from '@/components/search/SearchModal';
+import { siteConfig } from '@/config/site';
 
 const categories = [
   { name: 'שולחנות סלון', slug: 'living-room-tables' },
@@ -60,8 +61,8 @@ export function Header() {
             {/* Logo - centered on mobile */}
             <Link href="/" className="flex-shrink-0 absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
               <Image
-                src="https://bellano.co.il/wp-content/uploads/2024/06/Bellano-שחור-על-רקע-שקוף.png"
-                alt="בלאנו - רהיטי מעצבים"
+                src={siteConfig.logo.wordpressUrl}
+                alt={siteConfig.fullName}
                 width={120}
                 height={40}
                 className="h-10 md:h-12 w-auto"
@@ -130,11 +131,11 @@ export function Header() {
 
               {/* Phone */}
               <a
-                href="tel:03-5566696"
+                href={`tel:${siteConfig.phoneClean}`}
                 className="hidden md:flex items-center gap-2 text-sm font-medium"
               >
                 <Phone className="h-4 w-4" />
-                03-5566696
+                {siteConfig.phone}
               </a>
             </div>
           </div>
@@ -156,8 +157,8 @@ export function Header() {
             <div className="flex items-center justify-between p-4 border-b">
               <Link href="/" onClick={() => setMobileMenuOpen(false)}>
                 <Image
-                  src="https://bellano.co.il/wp-content/uploads/2024/06/Bellano-שחור-על-רקע-שקוף.png"
-                  alt="בלאנו - רהיטי מעצבים"
+                  src={siteConfig.logo.wordpressUrl}
+                  alt={siteConfig.fullName}
                   width={100}
                   height={33}
                   className="h-8 w-auto"

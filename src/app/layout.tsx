@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { Header, Footer, FloatingButtons } from "@/components/layout";
 import { OrganizationJsonLd, WebsiteJsonLd, LocalBusinessJsonLd } from "@/components/seo";
+import { siteConfig } from "@/config/site";
 
 const rubik = Rubik({
   variable: "--font-rubik",
@@ -17,61 +18,46 @@ const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const SITE_URL = 'https://bellano.co.il';
-
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "בלאנו - רהיטי מעצבים | משלוח חינם עד הבית",
-    template: "%s | בלאנו - רהיטי מעצבים",
+    default: `${siteConfig.fullName} | משלוח חינם עד הבית`,
+    template: `%s | ${siteConfig.fullName}`,
   },
-  description:
-    "בלאנו - רהיטי מעצבים. מבחר רחב של רהיטים איכותיים: מזנונים, שולחנות סלון, קומודות, כורסאות, מיטות ועוד. משלוח חינם עד הבית!",
-  keywords: [
-    "רהיטים",
-    "מזנונים",
-    "שולחנות סלון",
-    "קומודות",
-    "כורסאות",
-    "מיטות",
-    "רהיטי מעצבים",
-    "בלאנו",
-    "ריהוט לבית",
-    "ריהוט מעוצב",
-    "רהיטים אונליין",
-  ],
-  authors: [{ name: "בלאנו" }],
-  creator: "בלאנו",
-  publisher: "בלאנו",
+  description: `${siteConfig.fullName}. ${siteConfig.description}`,
+  keywords: [...siteConfig.keywords],
+  authors: [{ name: siteConfig.name }],
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   alternates: {
-    canonical: SITE_URL,
+    canonical: siteConfig.url,
   },
   openGraph: {
-    title: "בלאנו - רהיטי מעצבים",
-    description: "מבחר רחב של רהיטים איכותיים. משלוח חינם עד הבית!",
-    url: SITE_URL,
-    siteName: "בלאנו",
-    locale: "he_IL",
+    title: siteConfig.fullName,
+    description: siteConfig.shortDescription,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    locale: siteConfig.locale,
     type: "website",
     images: [
       {
-        url: `${SITE_URL}/images/bellano%20logo.avif`,
+        url: `${siteConfig.url}${siteConfig.ogImage}`,
         width: 800,
         height: 800,
-        alt: "בלאנו - רהיטי מעצבים",
+        alt: siteConfig.fullName,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "בלאנו - רהיטי מעצבים",
-    description: "מבחר רחב של רהיטים איכותיים. משלוח חינם עד הבית!",
-    images: [`${SITE_URL}/images/bellano%20logo.avif`],
+    title: siteConfig.fullName,
+    description: siteConfig.shortDescription,
+    images: [`${siteConfig.url}${siteConfig.ogImage}`],
   },
   robots: {
     index: true,
@@ -85,7 +71,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "MFPhXQELpvk-2gH-jHTP0R4LTOxhJxrH-DVa8l6Hqis",
+    google: siteConfig.analytics.googleVerification,
   },
 };
 
@@ -95,19 +81,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang={siteConfig.language} dir={siteConfig.direction}>
       <head>
-        {/* Favicon from WordPress */}
-        <link rel="icon" href="https://bellano.co.il/wp-content/uploads/2024/04/cropped-bellano-logo-square-32x32.webp" sizes="32x32" />
-        <link rel="icon" href="https://bellano.co.il/wp-content/uploads/2024/04/cropped-bellano-logo-square-192x192.webp" sizes="192x192" />
-        <link rel="apple-touch-icon" href="https://bellano.co.il/wp-content/uploads/2024/04/cropped-bellano-logo-square-180x180.webp" />
+        {/* Favicon */}
+        <link rel="icon" href={siteConfig.favicon.ico32} sizes="32x32" />
+        <link rel="icon" href={siteConfig.favicon.ico192} sizes="192x192" />
+        <link rel="apple-touch-icon" href={siteConfig.favicon.appleTouchIcon} />
         
         {/* Facebook Domain Verification */}
-        <meta name="facebook-domain-verification" content="v0s7x4i0ko65qjr2nczfx0yoshknu0" />
+        <meta name="facebook-domain-verification" content={siteConfig.analytics.facebookDomainVerification} />
         
         {/* Preconnect to external resources */}
-        <link rel="preconnect" href="https://bellano.co.il" />
-        <link rel="dns-prefetch" href="https://bellano.co.il" />
+        <link rel="preconnect" href={siteConfig.wordpressUrl} />
+        <link rel="dns-prefetch" href={siteConfig.wordpressUrl} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
@@ -120,7 +106,7 @@ export default function RootLayout({
       <body className={`${rubik.variable} ${inter.variable} font-sans antialiased`}>
         {/* Google Tag Manager - loaded after page is interactive */}
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=GT-WBL97X64"
+          src={`https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics.googleTagManager}`}
           strategy="afterInteractive"
         />
         <Script id="gtag-init" strategy="afterInteractive">
@@ -128,9 +114,9 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('set', 'linker', {'domains': ['bellano.co.il']});
-            gtag('config', 'GT-WBL97X64');
-            gtag('config', 'AW-16598610854');
+            gtag('set', 'linker', {'domains': ['${siteConfig.url.replace('https://', '')}']});
+            gtag('config', '${siteConfig.analytics.googleTagManager}');
+            gtag('config', '${siteConfig.analytics.googleAds}');
           `}
         </Script>
         
@@ -145,7 +131,7 @@ export default function RootLayout({
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '421335350861171');
+            fbq('init', '${siteConfig.analytics.facebookPixel}');
             fbq('track', 'PageView');
           `}
         </Script>
@@ -154,7 +140,7 @@ export default function RootLayout({
             height="1" 
             width="1" 
             style={{ display: 'none' }}
-            src="https://www.facebook.com/tr?id=421335350861171&ev=PageView&noscript=1"
+            src={`https://www.facebook.com/tr?id=${siteConfig.analytics.facebookPixel}&ev=PageView&noscript=1`}
             alt=""
           />
         </noscript>

@@ -1,5 +1,7 @@
 // WooCommerce REST API Configuration
-const WOOCOMMERCE_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://bellano.co.il';
+import { siteConfig } from '@/config/site';
+
+const WOOCOMMERCE_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
 const CONSUMER_KEY = process.env.WOOCOMMERCE_CONSUMER_KEY || '';
 const CONSUMER_SECRET = process.env.WOOCOMMERCE_CONSUMER_SECRET || '';
 
@@ -287,7 +289,7 @@ export async function getColorSwatches(): Promise<Record<string, ColorSwatch>> {
   }
 
   try {
-    const response = await fetch('https://bellano.co.il/wp-json/bellano/v1/color-swatches', {
+    const response = await fetch(`${WOOCOMMERCE_URL}/wp-json/${siteConfig.prefix}/v1/color-swatches`, {
       next: { revalidate: 300 }
     });
 

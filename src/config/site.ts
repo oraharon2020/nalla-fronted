@@ -1,0 +1,145 @@
+/**
+ * Site Configuration
+ * ==================
+ * כל הפרטים הספציפיים לאתר מרוכזים כאן.
+ * לשכפול לאתר חדש - שנה רק את הקובץ הזה!
+ */
+
+export const siteConfig = {
+  // Basic Info
+  name: 'בלאנו',
+  tagline: 'רהיטי מעצבים',
+  fullName: 'בלאנו - רהיטי מעצבים',
+  description: 'מבחר רחב של רהיטים איכותיים: מזנונים, שולחנות סלון, קומודות, כורסאות, מיטות ועוד. משלוח חינם עד הבית!',
+  shortDescription: 'מבחר רחב של רהיטים איכותיים. משלוח חינם עד הבית!',
+  
+  // URLs
+  url: 'https://bellano.co.il',
+  wordpressUrl: 'https://bellano.co.il',
+  vercelUrl: 'https://bellano.vercel.app',
+  
+  // Contact
+  email: 'info@bellano.co.il',
+  phone: '054-9942466',
+  phoneClean: '0549942466', // Without dashes for tel: links
+  whatsapp: '972549942466', // International format for WhatsApp
+  
+  // Social Media
+  social: {
+    instagram: 'https://www.instagram.com/bellano.decor/',
+    instagramHandle: 'bellano.decor',
+    facebook: 'https://www.facebook.com/bellano.decor',
+    facebookHandle: 'bellano.decor',
+  },
+  
+  // SEO Keywords
+  keywords: [
+    'רהיטים',
+    'מזנונים',
+    'שולחנות סלון',
+    'קומודות',
+    'כורסאות',
+    'מיטות',
+    'רהיטי מעצבים',
+    'בלאנו',
+    'ריהוט לבית',
+    'ריהוט מעוצב',
+    'רהיטים אונליין',
+  ],
+  
+  // Images/Logos
+  logo: {
+    dark: '/images/bellano logo.avif', // Black logo on transparent
+    light: '/images/bellano-logo-white.png', // White logo for dark backgrounds
+    square: '/images/bellano-logo-square.webp',
+    wordpressUrl: 'https://bellano.co.il/wp-content/uploads/2024/06/Bellano-שחור-על-רקע-שקוף.png',
+  },
+  favicon: {
+    ico32: 'https://bellano.co.il/wp-content/uploads/2024/04/cropped-bellano-logo-square-32x32.webp',
+    ico192: 'https://bellano.co.il/wp-content/uploads/2024/04/cropped-bellano-logo-square-192x192.webp',
+    appleTouchIcon: 'https://bellano.co.il/wp-content/uploads/2024/04/cropped-bellano-logo-square-180x180.webp',
+  },
+  ogImage: '/images/bellano%20logo.avif',
+  
+  // Analytics & Tracking
+  analytics: {
+    googleTagManager: 'GT-WBL97X64',
+    googleAds: 'AW-16598610854',
+    googleVerification: 'MFPhXQELpvk-2gH-jHTP0R4LTOxhJxrH-DVa8l6Hqis',
+    facebookPixel: '421335350861171',
+    facebookDomainVerification: 'v0s7x4i0ko65qjr2nczfx0yoshknu0',
+  },
+  
+  // Business Info (for JSON-LD)
+  business: {
+    type: 'FurnitureStore',
+    priceRange: '₪₪₪',
+    address: {
+      street: '',
+      city: 'ישראל',
+      region: '',
+      postalCode: '',
+      country: 'IL',
+    },
+    geo: {
+      latitude: 32.0853,
+      longitude: 34.7818,
+    },
+    openingHours: [
+      'Su-Th 09:00-18:00',
+      'Fr 09:00-14:00',
+    ],
+  },
+  
+  // WooCommerce API (these should match .env.local)
+  woocommerce: {
+    consumerKey: process.env.WOOCOMMERCE_CONSUMER_KEY || '',
+    consumerSecret: process.env.WOOCOMMERCE_CONSUMER_SECRET || '',
+  },
+  
+  // Prefix for localStorage, cookies, etc.
+  prefix: 'bellano',
+  
+  // Default banner image
+  defaultBannerImage: 'https://bellano.co.il/wp-content/uploads/2024/06/banner-main.jpg',
+  
+  // Currency
+  currency: {
+    code: 'ILS',
+    symbol: '₪',
+    locale: 'he-IL',
+  },
+  
+  // Locale
+  locale: 'he_IL',
+  language: 'he',
+  direction: 'rtl',
+} as const;
+
+// Helper function to get full URL
+export const getFullUrl = (path: string = '') => {
+  return `${siteConfig.url}${path}`;
+};
+
+// Helper function to get WordPress URL
+export const getWpUrl = (path: string = '') => {
+  return `${siteConfig.wordpressUrl}${path}`;
+};
+
+// Helper function to get API endpoint
+export const getApiEndpoint = (endpoint: string) => {
+  return `${siteConfig.wordpressUrl}/wp-json/${siteConfig.prefix}/v1/${endpoint}`;
+};
+
+// Helper function to format phone for tel: link
+export const getTelLink = () => {
+  return `tel:${siteConfig.phoneClean}`;
+};
+
+// Helper function to get WhatsApp link
+export const getWhatsAppLink = (message?: string) => {
+  const base = `https://wa.me/${siteConfig.whatsapp}`;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+};
+
+export type SiteConfig = typeof siteConfig;

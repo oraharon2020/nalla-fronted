@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { banners as fallbackBanners, bannerSettings as fallbackSettings, Banner } from '@/config/banners';
+import { getApiEndpoint } from '@/config/site';
 
 interface HomepageData {
   banners: Banner[];
@@ -25,7 +26,7 @@ export function HeroBanner() {
     const fetchBanners = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://bellano.co.il'}/wp-json/bellano/v1/homepage`,
+          getApiEndpoint('homepage'),
           { next: { revalidate: 60 } } // Cache for 1 minute
         );
         

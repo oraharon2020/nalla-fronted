@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Phone, Mail, MessageCircle, Clock, Send, AlertCircle } from 'lucide-react';
+import { siteConfig, getApiEndpoint } from '@/config/site';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ export default function ContactPage() {
     setError(null);
     
     try {
-      const response = await fetch('https://bellano.co.il/wp-json/bellano/v1/contact', {
+      const response = await fetch(getApiEndpoint('contact'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,18 +67,18 @@ export default function ContactPage() {
           {/* Contact Cards */}
           <div className="grid sm:grid-cols-3 gap-4 mb-12">
             <a 
-              href="tel:03-5566696"
+              href={`tel:${siteConfig.phoneClean}`}
               className="flex flex-col items-center p-6 border border-gray-200 rounded-lg hover:border-black transition-colors group"
             >
               <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 group-hover:bg-black group-hover:text-white transition-colors">
                 <Phone className="w-5 h-5" />
               </div>
               <span className="text-sm text-gray-500 mb-1">טלפון</span>
-              <span className="font-medium">03-5566696</span>
+              <span className="font-medium">{siteConfig.phone}</span>
             </a>
 
             <a 
-              href="https://wa.me/97235566696"
+              href={`https://wa.me/${siteConfig.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center p-6 border border-gray-200 rounded-lg hover:border-green-500 transition-colors group"
@@ -86,18 +87,18 @@ export default function ContactPage() {
                 <MessageCircle className="w-5 h-5" />
               </div>
               <span className="text-sm text-gray-500 mb-1">וואטסאפ</span>
-              <span className="font-medium">03-5566696</span>
+              <span className="font-medium">{siteConfig.phone}</span>
             </a>
 
             <a 
-              href="mailto:info@bellano.co.il"
+              href={`mailto:${siteConfig.email}`}
               className="flex flex-col items-center p-6 border border-gray-200 rounded-lg hover:border-black transition-colors group"
             >
               <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 group-hover:bg-black group-hover:text-white transition-colors">
                 <Mail className="w-5 h-5" />
               </div>
               <span className="text-sm text-gray-500 mb-1">אימייל</span>
-              <span className="font-medium">info@bellano.co.il</span>
+              <span className="font-medium">{siteConfig.email}</span>
             </a>
           </div>
 

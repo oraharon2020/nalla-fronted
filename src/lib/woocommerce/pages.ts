@@ -1,5 +1,7 @@
 // Fetch WordPress pages content
-const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://bellano.co.il';
+import { siteConfig } from '@/config/site';
+
+const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
 
 interface WPPage {
   id: number;

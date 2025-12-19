@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { siteConfig } from '@/config/site';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://bellano.co.il';
+    const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
     const consumerKey = process.env.WC_CONSUMER_KEY || process.env.WOOCOMMERCE_CONSUMER_KEY;
     const consumerSecret = process.env.WC_CONSUMER_SECRET || process.env.WOOCOMMERCE_CONSUMER_SECRET;
     

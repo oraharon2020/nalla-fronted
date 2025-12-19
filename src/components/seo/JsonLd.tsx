@@ -1,4 +1,5 @@
 // JSON-LD Structured Data Components for SEO
+import { siteConfig } from '@/config/site';
 
 interface OrganizationJsonLdProps {
   name?: string;
@@ -9,11 +10,11 @@ interface OrganizationJsonLdProps {
 }
 
 export function OrganizationJsonLd({
-  name = 'בלאנו - רהיטי מעצבים',
-  url = 'https://bellano.co.il',
-  logo = 'https://bellano.co.il/logo.png',
-  phone = '03-5566696',
-  email = 'info@bellano.co.il',
+  name = siteConfig.fullName,
+  url = siteConfig.url,
+  logo = `${siteConfig.url}/logo.png`,
+  phone = siteConfig.phone,
+  email = siteConfig.email,
 }: OrganizationJsonLdProps) {
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -29,8 +30,8 @@ export function OrganizationJsonLd({
       availableLanguage: 'Hebrew',
     },
     sameAs: [
-      'https://www.facebook.com/bellano.co.il',
-      'https://www.instagram.com/bellano.co.il',
+      siteConfig.social.facebook,
+      siteConfig.social.instagram,
     ],
   };
 
@@ -48,8 +49,8 @@ interface WebsiteJsonLdProps {
 }
 
 export function WebsiteJsonLd({
-  name = 'בלאנו - רהיטי מעצבים',
-  url = 'https://bellano.co.il',
+  name = siteConfig.fullName,
+  url = siteConfig.url,
 }: WebsiteJsonLdProps) {
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -97,7 +98,7 @@ export function ProductJsonLd({
   currency = 'ILS',
   availability = 'InStock',
   sku,
-  brand = 'בלאנו',
+  brand = siteConfig.name,
   rating,
   reviewCount,
 }: ProductJsonLdProps) {
@@ -120,7 +121,7 @@ export function ProductJsonLd({
       url,
       seller: {
         '@type': 'Organization',
-        name: 'בלאנו',
+        name: siteConfig.name,
       },
     },
   };
@@ -182,19 +183,19 @@ interface LocalBusinessJsonLdProps {
 }
 
 export function LocalBusinessJsonLd({
-  name = 'בלאנו - רהיטי מעצבים',
-  url = 'https://bellano.co.il',
-  phone = '03-5566696',
+  name = siteConfig.fullName,
+  url = siteConfig.url,
+  phone = siteConfig.phone,
   address = {
-    street: 'הברזל 30',
-    city: 'תל אביב',
-    postalCode: '6971046',
-    country: 'IL',
+    street: siteConfig.business.address.street,
+    city: siteConfig.business.address.city,
+    postalCode: siteConfig.business.address.postalCode,
+    country: siteConfig.business.address.country,
   },
 }: LocalBusinessJsonLdProps) {
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'FurnitureStore',
+    '@type': siteConfig.business.type,
     name,
     url,
     telephone: phone,
@@ -207,8 +208,8 @@ export function LocalBusinessJsonLd({
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: 32.0853,
-      longitude: 34.7818,
+      latitude: siteConfig.business.geo.latitude,
+      longitude: siteConfig.business.geo.longitude,
     },
     openingHoursSpecification: [
       {
@@ -218,7 +219,7 @@ export function LocalBusinessJsonLd({
         closes: '17:00',
       },
     ],
-    priceRange: '₪₪₪',
+    priceRange: siteConfig.business.priceRange,
   };
 
   return (

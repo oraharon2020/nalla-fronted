@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Phone, Mail, Clock, Instagram, Facebook } from 'lucide-react';
+import { siteConfig } from '@/config/site';
 
 const categories = [
   { name: 'מזנונים לסלון', slug: 'living-room-sideboards' },
@@ -30,18 +31,18 @@ export function Footer() {
             <h4 className="font-bold text-sm md:text-base mb-3 md:mb-4">יצירת קשר</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="tel:03-5566696" className="hover:text-black text-gray-600">
-                  📞 03-5566696
+                <a href={`tel:${siteConfig.phoneClean}`} className="hover:text-black text-gray-600">
+                  📞 {siteConfig.phone}
                 </a>
               </li>
               <li>
-                <a href="https://wa.me/97235566696" className="hover:text-black text-gray-600">
+                <a href={`https://wa.me/${siteConfig.whatsapp}`} className="hover:text-black text-gray-600">
                   💬 וואטסאפ
                 </a>
               </li>
               <li>
-                <a href="mailto:info@bellano.co.il" className="hover:text-black text-gray-600">
-                  ✉️ info@bellano.co.il
+                <a href={`mailto:${siteConfig.email}`} className="hover:text-black text-gray-600">
+                  ✉️ {siteConfig.email}
                 </a>
               </li>
               <li className="text-gray-600 text-xs md:text-sm">
@@ -86,7 +87,7 @@ export function Footer() {
             <h4 className="font-bold text-sm md:text-base mb-3 md:mb-4">עקבו אחרינו</h4>
             <div className="flex gap-3 mb-4 justify-center md:justify-start">
               <a
-                href="https://www.instagram.com/bellano.decor/"
+                href={siteConfig.social.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white p-2 rounded-full hover:bg-black hover:text-white transition-colors"
@@ -94,7 +95,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://www.facebook.com/bellano.decor"
+                href={siteConfig.social.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white p-2 rounded-full hover:bg-black hover:text-white transition-colors"
@@ -104,8 +105,8 @@ export function Footer() {
             </div>
             <div className="mt-4 flex justify-center md:justify-start">
               <Image
-                src="https://bellano.co.il/wp-content/uploads/2024/06/Bellano-שחור-על-רקע-שקוף.png"
-                alt="בלאנו - רהיטי מעצבים"
+                src={siteConfig.logo.wordpressUrl}
+                alt={siteConfig.fullName}
                 width={100}
                 height={33}
                 className="h-8 w-auto opacity-80"
@@ -118,7 +119,7 @@ export function Footer() {
       {/* Copyright */}
       <div className="border-t border-gray-200">
         <div className="container mx-auto px-4 py-4 text-center text-xs text-gray-500">
-          כל הזכויות שמורות לבלאנו © {new Date().getFullYear()}
+          כל הזכויות שמורות ל{siteConfig.name} © {new Date().getFullYear()}
         </div>
       </div>
     </footer>

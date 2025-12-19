@@ -2,8 +2,9 @@ import { ProductPageClient } from './ProductPageClient';
 import { getProductBySlug, getProductVariations, transformProduct, getColorSwatches } from '@/lib/woocommerce/api';
 import { notFound } from 'next/navigation';
 import { ProductJsonLd, BreadcrumbJsonLd, FAQJsonLd } from '@/components/seo';
+import { siteConfig, getApiEndpoint } from '@/config/site';
 
-const SITE_URL = 'https://bellano.co.il';
+const SITE_URL = siteConfig.url;
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -37,7 +38,7 @@ const defaultFaqs = [
 async function getProductFaqs(productId: number) {
   try {
     const response = await fetch(
-      `https://bellano.co.il/wp-json/bellano/v1/product-faq/${productId}`,
+      getApiEndpoint(`product-faq/${productId}`),
       { next: { revalidate: 300 } }
     );
     
@@ -57,7 +58,7 @@ async function getProductFaqs(productId: number) {
 async function getProductVideo(productId: number) {
   try {
     const response = await fetch(
-      `https://bellano.co.il/wp-json/bellano/v1/product-video/${productId}`,
+      getApiEndpoint(`product-video/${productId}`),
       { next: { revalidate: 300 } }
     );
     

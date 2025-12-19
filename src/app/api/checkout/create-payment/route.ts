@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { siteConfig } from '@/config/site';
 
 // Meshulam API configuration
 const MESHULAM_API_KEY = 'ae67b1668109'; // Production API key from Meshulam plugin
@@ -11,8 +12,8 @@ const PAGE_CODES = {
   google_pay: 'e10278843d0e', // Will be fetched from WordPress
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bellano.vercel.app';
-const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://bellano.co.il';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || siteConfig.vercelUrl;
+const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
 
 interface CustomerData {
   firstName: string;

@@ -1,6 +1,8 @@
 'use server';
 
-const WOO_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://bellano.co.il';
+import { siteConfig } from '@/config/site';
+
+const WOO_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
 
 interface CartItem {
   productId: number;
