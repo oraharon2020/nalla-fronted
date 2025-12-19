@@ -1,5 +1,5 @@
 import { ProductPageClient } from './ProductPageClient';
-import { getProductBySlug, getProductVariations, transformProduct } from '@/lib/woocommerce/api';
+import { getProductBySlug, getProductVariations, transformProduct, getColorSwatches } from '@/lib/woocommerce/api';
 import { notFound } from 'next/navigation';
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo';
 
@@ -156,9 +156,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     const product = transformProduct(wooProduct, variations);
     
     // Fetch FAQs and video for this product in parallel
-    const [faqs, video] = await Promise.all([
+    const [faqs, video, swatches] = await Promise.all([
       getProductFaqs(wooProduct.id),
       getProductVideo(wooProduct.id),
+      getColorSwatches(),
     ]);
 
     // Get category name for breadcrumb
@@ -185,7 +186,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           ]}
         />
         
-        <ProductPageClient product={product} variations={variations} faqs={faqs} video={video} />
+        <ProductPageClient product={product} variations={variations} faqs={faqs} video={video} swatches={swatches} />
       </>
     );
   } catch (error) {

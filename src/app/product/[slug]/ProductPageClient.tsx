@@ -11,6 +11,7 @@ import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { AdminProductFields } from '@/components/product/AdminProductFields';
 import { ProductVideo } from '@/components/product/ProductVideo';
+import { ColorSwatch, findSwatchByName } from '@/lib/woocommerce/api';
 
 // Color mapping for visual display
 const colorMap: Record<string, string> = {
@@ -129,9 +130,10 @@ interface ProductPageClientProps {
   variations?: WooVariation[];
   faqs?: FAQItem[];
   video?: ProductVideoData | null;
+  swatches?: Record<string, ColorSwatch>;
 }
 
-export function ProductPageClient({ product, variations = [], faqs = [], video = null }: ProductPageClientProps) {
+export function ProductPageClient({ product, variations = [], faqs = [], video = null, swatches = {} }: ProductPageClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -478,19 +480,34 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                     
                     {isColor ? (
                       <div className="flex flex-wrap gap-2">
-                        {attr.options.map((option) => (
-                          <button
-                            key={option}
-                            onClick={() => setSelectedAttributes(prev => ({ ...prev, [attr.name]: option }))}
-                            className={`w-8 h-8 rounded-full transition ${
-                              selectedAttributes[attr.name] === option
-                                ? 'ring-2 ring-offset-1 ring-black'
-                                : 'ring-1 ring-gray-300 hover:ring-gray-400'
-                            }`}
-                            style={getColorStyle(option)}
-                            title={option}
-                          />
-                        ))}
+                        {attr.options.map((option) => {
+                          const swatch = findSwatchByName(swatches, option);
+                          const hasSwatchImage = swatch?.image;
+                          
+                          return (
+                            <button
+                              key={option}
+                              onClick={() => setSelectedAttributes(prev => ({ ...prev, [attr.name]: option }))}
+                              className={`w-8 h-8 rounded-full transition overflow-hidden border border-gray-200 shadow-sm ${
+                                selectedAttributes[attr.name] === option
+                                  ? 'ring-2 ring-offset-1 ring-black'
+                                  : 'ring-1 ring-gray-300 hover:ring-gray-400'
+                              }`}
+                              style={hasSwatchImage ? undefined : getColorStyle(option)}
+                              title={option}
+                            >
+                              {hasSwatchImage && (
+                                <Image
+                                  src={swatch.image!}
+                                  alt={option}
+                                  width={32}
+                                  height={32}
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     ) : (
                       <select

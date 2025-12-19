@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
@@ -61,27 +61,31 @@ export function ProductCard({ product }: ProductCardProps) {
   const { toggleItem, isInWishlist, isHydrated } = useWishlistStore();
   const isWishlisted = isHydrated && isInWishlist(product.id);
   
-  // Get variations with images (for clickable swatches)
-  const variationsWithImages = useMemo(() => {
+  // Get unique colors from variations (deduplicate by colorName)
+  const uniqueColors = useMemo(() => {
     const variations = product.variations || [];
-    // Filter variations that have either an image or a color name
-    return variations.filter(v => v.image?.sourceUrl || v.colorName);
+    const seenColors = new Set<string>();
+    const unique: ProductVariation[] = [];
+    
+    for (const v of variations) {
+      const colorName = v.colorName?.trim();
+      if (colorName && !seenColors.has(colorName)) {
+        seenColors.add(colorName);
+        unique.push(v);
+      }
+    }
+    
+    return unique;
   }, [product.variations]);
-
-  // Selected variation state
-  const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
-
-  // Current image to display - either selected variation image or product default
-  const currentImage = selectedVariation?.image || product.image;
   
-  // Fallback to color options from attributes if no variations with images
+  // Fallback to color options from attributes if no variations
   const colorAttribute = product.attributes?.nodes?.find(
     attr => attr.name === 'צבע' || attr.name === 'color' || attr.name.toLowerCase().includes('color')
   );
   const colorOptions = colorAttribute?.options || [];
   
-  // Use variations if available, otherwise use color attributes
-  const hasVariationImages = variationsWithImages.length > 0;
+  // Use unique colors from variations if available
+  const hasColors = uniqueColors.length > 0;
 
   const wishlistItem = {
     id: product.id,
@@ -107,23 +111,15 @@ export function ProductCard({ product }: ProductCardProps) {
       )
     : 0;
 
-  // Handle variation click - changes the displayed image
-  const handleVariationClick = (variation: ProductVariation, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Toggle off if clicking the same variation
-    setSelectedVariation(selectedVariation?.id === variation.id ? null : variation);
-  };
-
   return (
     <div className="group">
       {/* Image Container */}
       <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden mb-3">
         <Link href={`/product/${product.slug}`}>
-          {currentImage?.sourceUrl ? (
+          {product.image?.sourceUrl ? (
             <Image
-              src={currentImage.sourceUrl}
-              alt={currentImage.altText || product.name}
+              src={product.image.sourceUrl}
+              alt={product.image.altText || product.name}
               fill
               className="object-cover transition-all duration-300 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -181,28 +177,21 @@ export function ProductCard({ product }: ProductCardProps) {
           </span>
         </div>
 
-        {/* Color Variations with Images - clickable to change product image */}
-        {hasVariationImages ? (
+        {/* Available Colors - display only, no click action */}
+        {hasColors ? (
           <div className="flex items-center justify-center gap-2 pt-3 flex-wrap">
             {/* Show 4 on mobile, 6 on desktop */}
-            {variationsWithImages.slice(0, 6).map((variation, index) => {
-              const isSelected = selectedVariation?.id === variation.id;
-              // Use swatchImage for the circle, or fallback to variation image
+            {uniqueColors.slice(0, 6).map((variation, index) => {
+              // Use swatchImage for the circle
               const swatchImageUrl = variation.swatchImage || variation.image?.sourceUrl;
               const hasSwatchImage = !!swatchImageUrl;
               
               return (
-                <button
+                <div
                   key={variation.id}
-                  onClick={(e) => handleVariationClick(variation, e)}
-                  className={`relative rounded-full overflow-hidden transition-all duration-200 cursor-pointer 
-                    border border-gray-200 shadow-sm
-                    ${isSelected 
-                      ? 'ring-2 ring-primary ring-offset-2 scale-110 border-primary' 
-                      : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-1 hover:scale-105'
-                    } ${index >= 4 ? 'hidden md:block' : ''}`}
+                  className={`relative rounded-full overflow-hidden border border-gray-200 shadow-sm ${index >= 4 ? 'hidden md:block' : ''}`}
                   title={variation.colorName || ''}
-                  style={{ width: 32, height: 32 }}
+                  style={{ width: 28, height: 28 }}
                 >
                   {hasSwatchImage ? (
                     <Image
@@ -210,7 +199,7 @@ export function ProductCard({ product }: ProductCardProps) {
                       alt={variation.colorName || ''}
                       fill
                       className="object-cover"
-                      sizes="32px"
+                      sizes="28px"
                     />
                   ) : (
                     <div 
@@ -218,23 +207,23 @@ export function ProductCard({ product }: ProductCardProps) {
                       style={getColorStyle(variation.colorName || '')}
                     />
                   )}
-                </button>
+                </div>
               );
             })}
             {/* Show +X count - different for mobile vs desktop */}
-            {variationsWithImages.length > 4 && (
+            {uniqueColors.length > 4 && (
               <span className="text-xs text-muted-foreground font-medium ml-1 md:hidden">
-                +{variationsWithImages.length - 4}
+                +{uniqueColors.length - 4}
               </span>
             )}
-            {variationsWithImages.length > 6 && (
+            {uniqueColors.length > 6 && (
               <span className="text-xs text-muted-foreground font-medium ml-1 hidden md:inline">
-                +{variationsWithImages.length - 6}
+                +{uniqueColors.length - 6}
               </span>
             )}
           </div>
         ) : colorOptions.length > 0 ? (
-          // Fallback to color attributes (no image switching)
+          // Fallback to color attributes
           <div className="flex items-center justify-center gap-2 pt-3">
             {colorOptions.slice(0, 5).map((color, index) => (
               <div

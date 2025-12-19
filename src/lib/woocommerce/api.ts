@@ -248,7 +248,7 @@ export async function getProductsByCategorySlugWithSwatches(
 // Transform functions to match our app types
 
 // Color swatch cache
-interface ColorSwatch {
+export interface ColorSwatch {
   id: number;
   name: string;
   slug: string;
@@ -263,7 +263,7 @@ let swatchesCacheTime: number = 0;
 const SWATCHES_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Fetch color swatches from WordPress
-async function getColorSwatches(): Promise<Record<string, ColorSwatch>> {
+export async function getColorSwatches(): Promise<Record<string, ColorSwatch>> {
   // Return cached data if available and not expired
   if (colorSwatchesCache && Date.now() - swatchesCacheTime < SWATCHES_CACHE_DURATION) {
     return colorSwatchesCache;
@@ -295,7 +295,7 @@ function normalizeForComparison(str: string): string {
 }
 
 // Find swatch by name (improved matching)
-function findSwatchByName(swatches: Record<string, ColorSwatch>, name: string): ColorSwatch | undefined {
+export function findSwatchByName(swatches: Record<string, ColorSwatch>, name: string): ColorSwatch | undefined {
   if (!name || !swatches) return undefined;
   
   const normalizedName = normalizeForComparison(name);
