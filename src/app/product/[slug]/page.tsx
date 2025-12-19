@@ -179,7 +179,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           ]}
         />
         {/* FAQ Schema for product questions */}
-        <FAQJsonLd faqs={faqs} />
+        <FAQJsonLd questions={faqs} />
         
         <ProductPageClient product={product} variations={variations} faqs={faqs} video={video} swatches={swatches} />
       </>

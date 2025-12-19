@@ -311,14 +311,13 @@ export function ProductCard({ product }: ProductCardProps) {
                   onClick={() => handleColorClick(variation.colorName || '')}
                   onMouseEnter={() => handleColorHover(variation.colorName || '')}
                   disabled={isLoadingImage}
-                  className={`relative rounded-full overflow-hidden border shadow-sm cursor-pointer transition-all ${
+                  className={`relative rounded-full overflow-hidden border shadow-sm cursor-pointer transition-all w-7 h-7 ${
                     isSelected 
                       ? 'ring-2 ring-black ring-offset-1 border-black' 
                       : 'border-gray-200 hover:border-gray-400'
                   } ${index >= 4 ? 'hidden md:block' : ''} ${isLoadingImage ? 'opacity-50' : ''}`}
                   aria-label={`בחר צבע ${variation.colorName || ''}`}
                   aria-pressed={isSelected}
-                  style={{ width: 44, height: 44 }}
                 >
                   {hasSwatchImage ? (
                     <Image
@@ -326,7 +325,7 @@ export function ProductCard({ product }: ProductCardProps) {
                       alt={variation.colorName || ''}
                       fill
                       className="object-cover"
-                      sizes="44px"
+                      sizes="28px"
                     />
                   ) : (
                     <div 
