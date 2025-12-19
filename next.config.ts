@@ -1,6 +1,115 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Redirects from old WordPress URLs to new Next.js URLs
+  async redirects() {
+    return [
+      // Category pages: /product-category/X → /category/X
+      {
+        source: '/product-category/:slug*',
+        destination: '/category/:slug*',
+        permanent: true,
+      },
+      // Shop page
+      {
+        source: '/shop',
+        destination: '/categories',
+        permanent: true,
+      },
+      // Cart pages
+      {
+        source: '/cart',
+        destination: '/checkout',
+        permanent: true,
+      },
+      {
+        source: '/cart-2',
+        destination: '/checkout',
+        permanent: true,
+      },
+      // Checkout
+      {
+        source: '/checkout-2',
+        destination: '/checkout',
+        permanent: true,
+      },
+      // Account pages (redirect to homepage for now)
+      {
+        source: '/my-account',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/dashboard',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/my-orders',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/order-tracking',
+        destination: '/',
+        permanent: false,
+      },
+      // About page
+      {
+        source: '/about-us',
+        destination: '/about',
+        permanent: true,
+      },
+      // Policies
+      {
+        source: '/refund_returns-2',
+        destination: '/faq',
+        permanent: true,
+      },
+      {
+        source: '/privacy-policy-2',
+        destination: '/page/privacy-policy',
+        permanent: true,
+      },
+      // Hebrew pages
+      {
+        source: '/%D7%A8%D7%94%D7%99%D7%98-%D7%91%D7%94%D7%AA%D7%90%D7%9E%D7%94-%D7%90%D7%99%D7%A9%D7%99%D7%AA',
+        destination: '/faq',
+        permanent: true,
+      },
+      // Site map
+      {
+        source: '/site-map',
+        destination: '/sitemap.xml',
+        permanent: true,
+      },
+      // Blog (if not exists, redirect to home)
+      {
+        source: '/blog',
+        destination: '/',
+        permanent: false,
+      },
+      // Partner page
+      {
+        source: '/partner',
+        destination: '/',
+        permanent: false,
+      },
+      // New home page redirect
+      {
+        source: '/new-home-page',
+        destination: '/',
+        permanent: true,
+      },
+      // Trailing slashes
+      {
+        source: '/:path+/',
+        destination: '/:path+',
+        permanent: true,
+      },
+    ];
+  },
+
   // Image optimization
   images: {
     remotePatterns: [
