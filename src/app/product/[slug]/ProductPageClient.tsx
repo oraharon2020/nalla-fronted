@@ -179,6 +179,7 @@ interface ProductPageClientProps {
     regularPrice?: string;
     salePrice?: string;
     onSale: boolean;
+    stockStatus?: 'instock' | 'outofstock' | 'onbackorder';
     image?: { sourceUrl: string; altText?: string };
     galleryImages?: { sourceUrl: string; altText?: string }[];
     attributes?: {
@@ -505,9 +506,25 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
           {/* Product Info */}
           <div>
             {/* Title */}
-            <h1 className="text-lg md:text-xl lg:text-2xl font-medium text-gray-900 mb-1 md:mb-2">
-              {product.name}
-            </h1>
+            <div className="flex items-start justify-between gap-2 mb-1 md:mb-2">
+              <h1 className="text-lg md:text-xl lg:text-2xl font-medium text-gray-900">
+                {product.name}
+              </h1>
+              {/* Stock Status Badge */}
+              {product.stockStatus && (
+                <span 
+                  className={`shrink-0 text-xs font-medium px-2 py-1 rounded-full ${
+                    product.stockStatus === 'instock' 
+                      ? 'bg-green-100 text-green-700' 
+                      : product.stockStatus === 'onbackorder'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-gray-100 text-gray-500'
+                  }`}
+                >
+                  {product.stockStatus === 'instock' ? 'במלאי' : product.stockStatus === 'onbackorder' ? 'בהזמנה מיוחדת' : 'אזל'}
+                </span>
+              )}
+            </div>
             
             <p className="text-xs text-gray-400 mb-3 md:mb-4">מק״ט: {product.databaseId}</p>
 

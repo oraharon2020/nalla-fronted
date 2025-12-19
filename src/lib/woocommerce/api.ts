@@ -418,6 +418,7 @@ export function transformProduct(wooProduct: WooProduct, variations?: WooVariati
     salePrice: wooProduct.sale_price ? `${wooProduct.sale_price} ₪` : undefined,
     onSale: wooProduct.on_sale,
     sku: wooProduct.sku,
+    stockStatus: wooProduct.stock_status as 'instock' | 'outofstock' | 'onbackorder',
     image: wooProduct.images?.[0] ? {
       sourceUrl: wooProduct.images[0].src,
       altText: wooProduct.images[0].alt || wooProduct.name,

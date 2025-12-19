@@ -43,6 +43,7 @@ export interface Product {
   salePrice?: string;
   onSale: boolean;
   sku?: string;
+  stockStatus?: 'instock' | 'outofstock' | 'onbackorder';
   image?: ProductImage;
   galleryImages?: ProductImage[];
   productCategories?: {
