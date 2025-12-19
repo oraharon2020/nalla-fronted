@@ -814,6 +814,12 @@ export default function CheckoutPage() {
                             </p>
                           )}
                           {item.adminFields && (
+                            item.adminFields.width || 
+                            item.adminFields.depth || 
+                            item.adminFields.height || 
+                            item.adminFields.freeComments || 
+                            item.adminFields.uploadedFile
+                          ) && (
                             <div className="text-xs text-blue-600 mt-1 space-y-0.5 bg-blue-50 p-2 rounded">
                               {/* Dimensions */}
                               {(item.adminFields.width || item.adminFields.depth || item.adminFields.height) && (

@@ -157,8 +157,14 @@ export function CartSidebar() {
                       </p>
                     )}
                     
-                    {/* Admin Fields Display */}
+                    {/* Admin Fields Display - only show if there's actual content */}
                     {item.adminFields && (
+                      item.adminFields.width || 
+                      item.adminFields.depth || 
+                      item.adminFields.height || 
+                      item.adminFields.freeComments || 
+                      item.adminFields.uploadedFile
+                    ) && (
                       <div className="mt-2 text-xs space-y-1 bg-blue-50 p-2 rounded">
                         {/* Dimensions */}
                         {(item.adminFields.width || item.adminFields.depth || item.adminFields.height) && (
