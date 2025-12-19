@@ -112,7 +112,7 @@ function ExpandableShortDescription({ html, className }: { html: string; classNa
       <div className="relative">
         <div 
           className={`text-sm text-gray-600 leading-relaxed overflow-hidden transition-all duration-300 ${
-            isExpanded ? 'max-h-[500px]' : 'max-h-[3em]'
+            isExpanded ? 'max-h-[500px]' : 'max-h-[4.5em]'
           }`}
           dangerouslySetInnerHTML={{ __html: html }}
         />
