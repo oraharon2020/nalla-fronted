@@ -12,6 +12,7 @@ import { useWishlistStore } from '@/lib/store/wishlist';
 import { AdminProductFields } from '@/components/product/AdminProductFields';
 import { ProductVideo } from '@/components/product/ProductVideo';
 import { ColorSwatch, findSwatchByName } from '@/lib/woocommerce/api';
+import { siteConfig } from '@/config/site';
 
 // Color mapping for visual display
 const colorMap: Record<string, string> = {
@@ -375,6 +376,13 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
           price: priceValue,
           quantity: quantity,
         }],
+      });
+      
+      // Track Add to Cart - Google Ads Conversion
+      (window as any).gtag('event', 'conversion', {
+        send_to: `${siteConfig.analytics.googleAds}/${siteConfig.analytics.googleAdsAddToCartLabel}`,
+        value: priceValue * quantity,
+        currency: 'ILS',
       });
     }
     

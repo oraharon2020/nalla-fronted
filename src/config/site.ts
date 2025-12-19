@@ -66,6 +66,7 @@ export const siteConfig = {
     googleTagManager: 'GT-WBL97X64',
     googleAds: 'AW-16598610854',
     googleAdsConversionLabel: '8F3sCJ7tmrwZEKbn6uo9', // Purchase conversion
+    googleAdsAddToCartLabel: 'KtOHCIW4mdQbEKbn6uo9', // Add to cart conversion
     googleVerification: 'MFPhXQELpvk-2gH-jHTP0R4LTOxhJxrH-DVa8l6Hqis',
     facebookPixel: '421335350861171',
     facebookDomainVerification: 'v0s7x4i0ko65qjr2nczfx0yoshknu0',
