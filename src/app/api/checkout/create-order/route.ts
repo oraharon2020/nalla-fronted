@@ -77,37 +77,37 @@ export async function POST(request: NextRequest) {
         lineItem.meta_data = [];
         
         if (item.admin_fields.width) {
-          lineItem.meta_data.push({ key: '_admin_width', value: item.admin_fields.width });
+          lineItem.meta_data.push({ key: 'רוחב', value: item.admin_fields.width });
         }
         if (item.admin_fields.depth) {
-          lineItem.meta_data.push({ key: '_admin_depth', value: item.admin_fields.depth });
+          lineItem.meta_data.push({ key: 'עומק', value: item.admin_fields.depth });
         }
         if (item.admin_fields.height) {
-          lineItem.meta_data.push({ key: '_admin_height', value: item.admin_fields.height });
+          lineItem.meta_data.push({ key: 'גובה', value: item.admin_fields.height });
         }
         if (item.admin_fields.additional_fee) {
-          lineItem.meta_data.push({ key: '_admin_additional_fee', value: item.admin_fields.additional_fee });
+          lineItem.meta_data.push({ key: 'תוספת מחיר', value: item.admin_fields.additional_fee });
         }
         if (item.admin_fields.additional_fee_reason) {
-          lineItem.meta_data.push({ key: '_admin_additional_fee_reason', value: item.admin_fields.additional_fee_reason });
+          lineItem.meta_data.push({ key: 'סיבת תוספת', value: item.admin_fields.additional_fee_reason });
         }
         if (item.admin_fields.discount_type) {
-          lineItem.meta_data.push({ key: '_admin_discount_type', value: item.admin_fields.discount_type });
+          lineItem.meta_data.push({ key: 'סוג הנחה', value: item.admin_fields.discount_type === 'percent' ? 'אחוזים' : 'סכום קבוע' });
         }
         if (item.admin_fields.discount_value) {
-          lineItem.meta_data.push({ key: '_admin_discount_value', value: item.admin_fields.discount_value });
+          lineItem.meta_data.push({ key: 'ערך הנחה', value: item.admin_fields.discount_value });
         }
         if (item.admin_fields.free_comments) {
-          lineItem.meta_data.push({ key: '_admin_comments', value: item.admin_fields.free_comments });
+          lineItem.meta_data.push({ key: 'הערות נציג', value: item.admin_fields.free_comments });
         }
         if (item.admin_fields.uploaded_file) {
-          lineItem.meta_data.push({ key: '_admin_uploaded_file', value: item.admin_fields.uploaded_file });
+          lineItem.meta_data.push({ key: 'קובץ מצורף', value: item.admin_fields.uploaded_file });
         }
         if (item.admin_fields.uploaded_file_name) {
-          lineItem.meta_data.push({ key: '_admin_uploaded_file_name', value: item.admin_fields.uploaded_file_name });
+          lineItem.meta_data.push({ key: 'שם קובץ', value: item.admin_fields.uploaded_file_name });
         }
         if (item.admin_fields.original_price) {
-          lineItem.meta_data.push({ key: '_admin_original_price', value: item.admin_fields.original_price });
+          lineItem.meta_data.push({ key: 'מחיר מקורי', value: item.admin_fields.original_price });
         }
         if (item.admin_fields.final_price) {
           // Use the final price from admin fields
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
           lineItem.price = finalPrice;
           lineItem.subtotal = (finalPrice * item.quantity).toString();
           lineItem.total = (finalPrice * item.quantity).toString();
-          lineItem.meta_data.push({ key: '_admin_final_price', value: item.admin_fields.final_price });
+          lineItem.meta_data.push({ key: 'מחיר סופי', value: item.admin_fields.final_price });
         }
       }
       
