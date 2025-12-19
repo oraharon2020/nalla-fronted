@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { siteConfig } from '@/config/site';
+import { siteConfig, getApiEndpoint } from '@/config/site';
 
-// Meshulam API configuration
-const MESHULAM_API_KEY = 'ae67b1668109'; // Production API key from Meshulam plugin
-
-// Page codes for different payment methods (from WordPress)
+// Fallback page codes (will be overridden by WordPress settings)
 const PAGE_CODES = {
-  credit_card: '81e04dc34850',
-  bit: 'e10278843d0e', // Will be fetched from WordPress
-  apple_pay: 'e10278843d0e', // Will be fetched from WordPress
-  google_pay: 'e10278843d0e', // Will be fetched from WordPress
+  credit_card: siteConfig.meshulam.pageCodes.creditCard,
+  bit: siteConfig.meshulam.pageCodes.bit,
+  apple_pay: siteConfig.meshulam.pageCodes.applePay,
+  google_pay: siteConfig.meshulam.pageCodes.googlePay,
 };
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || siteConfig.vercelUrl;
@@ -43,7 +40,7 @@ interface CreatePaymentRequest {
 // Get Meshulam user ID and page codes from WordPress
 async function getMeshulamConfig(): Promise<{ userId: string; pageCodes: typeof PAGE_CODES }> {
   try {
-    const response = await fetch(`${WP_URL}/wp-json/bellano/v1/meshulam-config`);
+    const response = await fetch(getApiEndpoint('meshulam-config'));
     if (response.ok) {
       const data = await response.json();
       return {
@@ -70,13 +67,13 @@ export async function POST(request: NextRequest) {
     // Get config from WordPress (or use fallback)
     const config = await getMeshulamConfig();
     
-    // Determine if sandbox mode (check WordPress or env)
-    const isSandbox = process.env.MESHULAM_SANDBOX === 'true';
+    // Determine if sandbox mode
+    const isSandbox = siteConfig.meshulam.isSandbox;
     const apiUrl = isSandbox 
       ? 'https://sandbox.meshulam.co.il/api/light/server/1.0/createPaymentProcess'
       : 'https://secure.meshulam.co.il/api/light/server/1.0/createPaymentProcess';
     
-    const apiKey = isSandbox ? '305a9a777e42' : MESHULAM_API_KEY;
+    const apiKey = isSandbox ? siteConfig.meshulam.sandboxApiKey : siteConfig.meshulam.apiKey;
     
     // Get the correct page code for the payment method
     const pageCode = config.pageCodes[payment_type] || PAGE_CODES.credit_card;
@@ -101,14 +98,14 @@ export async function POST(request: NextRequest) {
     
     // Order reference
     formData.append('cField1', order_id.toString()); // Store WC order ID
-    formData.append('description', `הזמנה #${order_id} - בלאנו`);
+    formData.append('description', `הזמנה #${order_id} - ${siteConfig.name}`);
     
     // Callback URLs
     formData.append('successUrl', `${SITE_URL}/checkout/success?order_id=${order_id}`);
     formData.append('cancelUrl', `${SITE_URL}/checkout?cancelled=true`);
     
     // Webhook URL - goes to WordPress to update order status
-    formData.append('notifyUrl', `${WP_URL}/wp-json/bellano/v1/meshulam-webhook`);
+    formData.append('notifyUrl', getApiEndpoint('meshulam-webhook'));
     
     // Product data
     items.forEach((item, index) => {
