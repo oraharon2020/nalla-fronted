@@ -450,6 +450,9 @@ export default function CheckoutPage() {
                       required
                     />
                   </div>
+                  <div className="md:col-span-2">
+                    <p className="text-xs text-gray-500">* לקבלת חשבונית על שם העסק, יש למלא את שם העסק בשדות שם פרטי ושם משפחה</p>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">אימייל *</label>
                     <input

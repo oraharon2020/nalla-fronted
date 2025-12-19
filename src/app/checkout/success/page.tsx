@@ -180,7 +180,7 @@ function SuccessContent() {
             </div>
 
             <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gray-900">
-              {isPhoneOrder ? 'ההזמנה נשלחה בהצלחה! 📞' : 'ההזמנה בוצעה בהצלחה! 🎉'}
+              {isPhoneOrder ? 'ההזמנה נשלחה בהצלחה!' : 'ההזמנה בוצעה בהצלחה! 🎉'}
             </h1>
             <p className="text-lg text-gray-600">
               תודה שבחרת ב{siteConfig.name}!
