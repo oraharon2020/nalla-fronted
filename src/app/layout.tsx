@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Rubik, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Header, Footer, FloatingButtons } from "@/components/layout";
 import { OrganizationJsonLd, WebsiteJsonLd, LocalBusinessJsonLd } from "@/components/seo";
@@ -112,30 +113,28 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         
-        {/* Google Tag Manager */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=GT-WBL97X64"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('set', 'linker', {'domains': ['bellano.co.il']});
-              gtag('config', 'GT-WBL97X64');
-              gtag('config', 'AW-16598610854');
-            `,
-          }}
-        />
-        
         {/* JSON-LD Structured Data */}
         <OrganizationJsonLd />
         <WebsiteJsonLd />
         <LocalBusinessJsonLd />
       </head>
       <body className={`${rubik.variable} ${inter.variable} font-sans antialiased`}>
+        {/* Google Tag Manager - loaded after page is interactive */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=GT-WBL97X64"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('set', 'linker', {'domains': ['bellano.co.il']});
+            gtag('config', 'GT-WBL97X64');
+            gtag('config', 'AW-16598610854');
+          `}
+        </Script>
+        
         <Header />
         <main className="min-h-screen">{children}</main>
         <Footer />
