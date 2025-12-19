@@ -60,7 +60,9 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { toggleItem, isInWishlist, isHydrated } = useWishlistStore();
   const isWishlisted = isHydrated && isInWishlist(product.id);
-  const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [variationImage, setVariationImage] = useState<string | null>(null);
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
   
   // Get unique colors from variations (deduplicate by colorName)
   const uniqueColors = useMemo(() => {
@@ -78,6 +80,32 @@ export function ProductCard({ product }: ProductCardProps) {
     
     return unique;
   }, [product.variations]);
+  
+  // Fetch variation image when color is selected
+  const handleColorClick = async (colorName: string) => {
+    if (selectedColor === colorName) {
+      // Deselect - go back to original image
+      setSelectedColor(null);
+      setVariationImage(null);
+      return;
+    }
+    
+    setSelectedColor(colorName);
+    setIsLoadingImage(true);
+    
+    try {
+      const response = await fetch(`/api/variation-image?productId=${product.databaseId}&colorName=${encodeURIComponent(colorName)}`);
+      const data = await response.json();
+      
+      if (data.image) {
+        setVariationImage(data.image);
+      }
+    } catch (error) {
+      console.error('Failed to fetch variation image:', error);
+    } finally {
+      setIsLoadingImage(false);
+    }
+  };
   
   // Fallback to color options from attributes if no variations
   const colorAttribute = product.attributes?.nodes?.find(
@@ -112,9 +140,9 @@ export function ProductCard({ product }: ProductCardProps) {
       )
     : 0;
 
-  // Get display image - use selected variation image if available
-  const displayImage = selectedVariation?.image?.sourceUrl || product.image?.sourceUrl;
-  const displayImageAlt = selectedVariation?.image?.altText || product.image?.altText || product.name;
+  // Get display image - use variation image if loaded
+  const displayImage = variationImage || product.image?.sourceUrl;
+  const displayImageAlt = product.image?.altText || product.name;
 
   return (
     <div className="group">
@@ -126,7 +154,7 @@ export function ProductCard({ product }: ProductCardProps) {
               src={displayImage}
               alt={displayImageAlt}
               fill
-              className="object-cover transition-all duration-300 group-hover:scale-105"
+              className={`object-cover transition-all duration-300 group-hover:scale-105 ${isLoadingImage ? 'opacity-50' : ''}`}
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               priority={false}
             />
@@ -136,6 +164,13 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
         </Link>
+        
+        {/* Loading indicator */}
+        {isLoadingImage && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+            <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
 
         {/* Discount Badge */}
         {hasDiscount && discountPercentage > 0 && (
@@ -190,17 +225,18 @@ export function ProductCard({ product }: ProductCardProps) {
               // Use swatchImage for the circle
               const swatchImageUrl = variation.swatchImage || variation.image?.sourceUrl;
               const hasSwatchImage = !!swatchImageUrl;
-              const isSelected = selectedVariation?.id === variation.id;
+              const isSelected = selectedColor === variation.colorName;
               
               return (
                 <button
                   key={variation.id}
-                  onClick={() => setSelectedVariation(isSelected ? null : variation)}
+                  onClick={() => handleColorClick(variation.colorName || '')}
+                  disabled={isLoadingImage}
                   className={`relative rounded-full overflow-hidden border shadow-sm cursor-pointer transition-all ${
                     isSelected 
                       ? 'ring-2 ring-black ring-offset-1 border-black' 
                       : 'border-gray-200 hover:border-gray-400'
-                  } ${index >= 4 ? 'hidden md:block' : ''}`}
+                  } ${index >= 4 ? 'hidden md:block' : ''} ${isLoadingImage ? 'opacity-50' : ''}`}
                   title={variation.colorName || ''}
                   style={{ width: 28, height: 28 }}
                 >
