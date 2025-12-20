@@ -192,9 +192,10 @@ interface ProductPageClientProps {
   faqs?: FAQItem[];
   video?: ProductVideoData | null;
   swatches?: Record<string, ColorSwatch>;
+  category?: { name: string; slug: string };
 }
 
-export function ProductPageClient({ product, variations = [], faqs = [], video = null, swatches = {} }: ProductPageClientProps) {
+export function ProductPageClient({ product, variations = [], faqs = [], video = null, swatches = {}, category }: ProductPageClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -442,7 +443,11 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
           <nav className="text-xs text-gray-500 flex items-center gap-1.5">
             <Link href="/" className="hover:text-black">דף הבית</Link>
             <span>/</span>
-            <Link href="/categories" className="hover:text-black">קטגוריות</Link>
+            {category?.slug ? (
+              <Link href={`/category/${category.slug}`} className="hover:text-black">{category.name}</Link>
+            ) : (
+              <Link href="/categories" className="hover:text-black">מוצרים</Link>
+            )}
             <span>/</span>
             <span className="text-gray-900">{product.name}</span>
           </nav>

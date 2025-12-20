@@ -184,7 +184,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* FAQ Schema for product questions */}
         <FAQJsonLd questions={faqs} />
         
-        <ProductPageClient product={product} variations={variations} faqs={faqs} video={video} swatches={swatches} />
+        <ProductPageClient 
+          product={product} 
+          variations={variations} 
+          faqs={faqs} 
+          video={video} 
+          swatches={swatches}
+          category={categorySlug ? { name: categoryName, slug: categorySlug } : undefined}
+        />
       </>
     );
   } catch (error) {
