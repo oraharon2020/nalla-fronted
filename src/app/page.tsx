@@ -5,6 +5,13 @@ import { Truck, ShieldCheck, CreditCard, RotateCcw } from 'lucide-react';
 import { NewsletterForm } from '@/components/home/NewsletterForm';
 import { siteConfig, getApiEndpoint } from '@/config/site';
 
+// Helper to get optimized image URL through Next.js
+const getOptimizedImageUrl = (src: string, width: number = 750) => {
+  if (!src) return '';
+  // Use Next.js image optimization API
+  return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=75`;
+};
+
 // Types for homepage banners
 interface HomepageBanner {
   mediaType: 'image' | 'video';
@@ -107,7 +114,7 @@ async function HeroSection() {
             muted
             loop
             playsInline
-            poster={videoPoster || imageUrl}
+            poster={getOptimizedImageUrl(videoPoster || imageUrl, 1200)}
             className="absolute inset-0 w-full h-full object-cover hidden md:block"
           >
             <source src={videoUrl} type="video/mp4" />
@@ -129,7 +136,7 @@ async function HeroSection() {
             muted
             loop
             playsInline
-            poster={videoPoster || mobileImageUrl}
+            poster={getOptimizedImageUrl(videoPoster || mobileImageUrl, 750)}
             className="absolute inset-0 w-full h-full object-cover md:hidden"
           >
             <source src={mobileVideoUrl} type="video/mp4" />

@@ -38,14 +38,14 @@ export async function getYoastSEO(path: string): Promise<YoastSEOData | null> {
     });
     
     if (!response.ok) {
-      console.error('Yoast API error:', response.status);
+      // Silently fail - will use fallback SEO
       return null;
     }
     
     const data = await response.json();
     return data.json || null;
-  } catch (error) {
-    console.error('Error fetching Yoast SEO:', error);
+  } catch {
+    // Silently fail - will use fallback SEO
     return null;
   }
 }
