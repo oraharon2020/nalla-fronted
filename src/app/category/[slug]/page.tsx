@@ -113,6 +113,16 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <>
+      {/* Prefetch product pages for faster navigation */}
+      {products.slice(0, 12).map((product) => (
+        <link 
+          key={product.slug} 
+          rel="prefetch" 
+          href={`/product/${product.slug}`} 
+          as="document"
+        />
+      ))}
+      
       {/* JSON-LD Breadcrumb */}
       <BreadcrumbJsonLd 
         items={[
