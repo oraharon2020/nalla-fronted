@@ -2,7 +2,6 @@
 
 import { useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -191,23 +190,19 @@ export function ProductCard({ product }: ProductCardProps) {
     <div ref={cardRef} className="group">
       {/* Image Container */}
       <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden mb-3">
-        {/* Clickable overlay - always on top for instant clicks */}
-        <Link 
+        {/* Clickable overlay - native <a> for instant response */}
+        <a 
           href={`/product/${product.slug}`}
           className="absolute inset-0 z-10"
           aria-label={`צפה במוצר ${product.name}`}
-          prefetch={false}
         />
         
         {/* Product Image */}
         {displayImage ? (
-          <Image
+          <img
             src={displayImage}
             alt={displayImageAlt}
-            fill
-            className={`object-cover transition-all duration-300 group-hover:scale-105 ${isLoadingImage ? 'opacity-50' : ''}`}
-            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 300px"
-            quality={75}
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${isLoadingImage ? 'opacity-50' : ''}`}
             loading="lazy"
             decoding="async"
           />
@@ -268,11 +263,11 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product Info */}
       <div className="text-center space-y-2">
         {/* Product Name */}
-        <Link href={`/product/${product.slug}`} prefetch={false}>
+        <a href={`/product/${product.slug}`}>
           <h3 className="font-medium text-base hover:text-primary transition-colors line-clamp-2">
             {product.name}
           </h3>
-        </Link>
+        </a>
 
         {/* Price */}
         <div className="flex items-center justify-center gap-2">
