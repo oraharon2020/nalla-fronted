@@ -4,6 +4,17 @@ const nextConfig: NextConfig = {
   // Redirects from old WordPress URLs to new Next.js URLs
   async redirects() {
     return [
+      // WordPress Admin - redirect to admin subdomain
+      {
+        source: '/wp-admin/:path*',
+        destination: 'https://admin.bellano.co.il/wp-admin/:path*',
+        permanent: false,
+      },
+      {
+        source: '/wp-login.php',
+        destination: 'https://admin.bellano.co.il/wp-login.php',
+        permanent: false,
+      },
       // Category pages: /product-category/X → /category/X
       {
         source: '/product-category/:slug*',
@@ -131,6 +142,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'bellano.co.il',
+        pathname: '/wp-content/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'admin.bellano.co.il',
         pathname: '/wp-content/**',
       },
       {

@@ -485,9 +485,14 @@ class Bellano_REST_API {
         
         // Attributes
         foreach ($product->get_attributes() as $attr) {
+            // Get the attribute label (Hebrew name) instead of slug
+            $attr_name = $attr->get_name();
+            $attr_label = wc_attribute_label($attr_name);
+            
             $attribute_data = [
                 'id' => $attr->get_id(),
-                'name' => $attr->get_name(),
+                'name' => $attr_label,
+                'slug' => $attr_name,
                 'position' => $attr->get_position(),
                 'visible' => $attr->get_visible(),
                 'variation' => $attr->get_variation(),
@@ -558,8 +563,15 @@ class Bellano_REST_API {
         
         // Attributes
         foreach ($variation->get_variation_attributes() as $attr_name => $attr_value) {
+            // Remove "attribute_" prefix to get taxonomy name
+            $taxonomy = str_replace('attribute_', '', $attr_name);
+            
+            // Get the label (Hebrew name) using WooCommerce function
+            $attr_label = wc_attribute_label($taxonomy);
+            
             $data['attributes'][] = [
-                'name' => str_replace('attribute_', '', $attr_name),
+                'name' => $attr_label,
+                'slug' => $taxonomy,
                 'option' => $attr_value,
             ];
         }
