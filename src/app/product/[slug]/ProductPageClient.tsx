@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, Minus, Plus, Truck, ShieldCheck, CreditCard, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
+import { ShareButtons } from '@/components/product/ShareButtons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -725,6 +726,13 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                     : 'text-gray-500'
                 }`} />
               </button>
+
+              {/* Share */}
+              <ShareButtons 
+                url={`${siteConfig.url}/product/${product.slug}`}
+                title={product.name}
+                image={product.image?.sourceUrl}
+              />
             </div>
 
             {/* Info badges */}
