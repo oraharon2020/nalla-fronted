@@ -196,6 +196,7 @@ export function ProductCard({ product }: ProductCardProps) {
           href={`/product/${product.slug}`}
           className="absolute inset-0 z-10"
           aria-label={`צפה במוצר ${product.name}`}
+          prefetch={false}
         />
         
         {/* Product Image */}
@@ -208,6 +209,7 @@ export function ProductCard({ product }: ProductCardProps) {
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 300px"
             quality={75}
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -266,7 +268,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product Info */}
       <div className="text-center space-y-2">
         {/* Product Name */}
-        <Link href={`/product/${product.slug}`}>
+        <Link href={`/product/${product.slug}`} prefetch={false}>
           <h3 className="font-medium text-base hover:text-primary transition-colors line-clamp-2">
             {product.name}
           </h3>
