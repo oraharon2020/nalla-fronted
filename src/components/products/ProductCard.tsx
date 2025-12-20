@@ -1,13 +1,65 @@
 'use client';
 
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import type { Product, ProductVariation } from '@/lib/types';
+
+// Prefetch queue - shared across all cards
+const prefetchedUrls = new Set<string>();
+const prefetchQueue: string[] = [];
+let isPrefetching = false;
+
+// Process prefetch queue during idle time
+const processPrefetchQueue = () => {
+  if (isPrefetching || prefetchQueue.length === 0) return;
+  
+  isPrefetching = true;
+  
+  const processNext = () => {
+    const url = prefetchQueue.shift();
+    if (!url) {
+      isPrefetching = false;
+      return;
+    }
+    
+    if (prefetchedUrls.has(url)) {
+      // Already prefetched, skip to next
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(processNext, { timeout: 1000 });
+      } else {
+        setTimeout(processNext, 100);
+      }
+      return;
+    }
+    
+    // Create invisible link to trigger prefetch
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.href = url;
+    link.as = 'document';
+    document.head.appendChild(link);
+    prefetchedUrls.add(url);
+    
+    // Process next after a small delay
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(processNext, { timeout: 2000 });
+    } else {
+      setTimeout(processNext, 200);
+    }
+  };
+  
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(processNext, { timeout: 1000 });
+  } else {
+    setTimeout(processNext, 100);
+  }
+};
 
 // Color mapping for visual display (fallback when no image)
 const colorMap: Record<string, string> = {
@@ -121,6 +173,32 @@ export function ProductCard({ product }: ProductCardProps) {
   
   // Reference to card element
   const cardRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  
+  // Queue prefetch when card becomes visible
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    
+    const productUrl = `/product/${product.slug}`;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          // Add to prefetch queue (will be processed during idle time)
+          if (!prefetchedUrls.has(productUrl) && !prefetchQueue.includes(productUrl)) {
+            prefetchQueue.push(productUrl);
+            processPrefetchQueue();
+          }
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' } // Start queueing before visible
+    );
+    
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [product.slug]);
   
   // Prefetch on hover (for desktop) - removed auto-prefetch to avoid blocking clicks
   const handleColorHover = (colorName: string) => {
@@ -191,22 +269,12 @@ export function ProductCard({ product }: ProductCardProps) {
     <div ref={cardRef} className="group">
       {/* Image Container */}
       <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden mb-3">
-        {/* Clickable overlay - prefetch only on hover/touch for instant navigation */}
+        {/* Clickable overlay - page already prefetched in background */}
         <Link 
           href={`/product/${product.slug}`}
           className="absolute inset-0 z-10"
           aria-label={`צפה במוצר ${product.name}`}
           prefetch={false}
-          onMouseEnter={(e) => {
-            // Prefetch on hover for desktop
-            const link = e.currentTarget;
-            link.setAttribute('data-prefetch', 'true');
-          }}
-          onTouchStart={(e) => {
-            // Prefetch on touch for mobile - starts loading immediately
-            const link = e.currentTarget;
-            link.setAttribute('data-prefetch', 'true');
-          }}
         />
         
         {/* Product Image */}
