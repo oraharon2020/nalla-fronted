@@ -121,6 +121,13 @@ class Bellano_REST_API {
             'callback' => [$this, 'get_color_swatches'],
             'permission_callback' => '__return_true'
         ]);
+        
+        // Full product data - single API call for everything
+        register_rest_route('bellano/v1', '/product-full/(?P<slug>[a-zA-Z0-9-]+)', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_full_product_data'],
+            'permission_callback' => '__return_true'
+        ]);
     }
     
     public function get_homepage_data() {
@@ -313,5 +320,250 @@ class Bellano_REST_API {
             'success' => true,
             'swatches' => $swatches
         ], 200);
+    }
+    
+    /**
+     * Get full product data in a single API call
+     * Returns: product, variations, FAQs, video, swatches, and Yoast SEO
+     */
+    public function get_full_product_data($request) {
+        $slug = sanitize_text_field($request['slug']);
+        
+        // Get the product by slug
+        $args = [
+            'post_type' => 'product',
+            'name' => $slug,
+            'posts_per_page' => 1,
+            'post_status' => 'publish'
+        ];
+        $query = new WP_Query($args);
+        
+        if (!$query->have_posts()) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Product not found'
+            ], 404);
+        }
+        
+        $post = $query->posts[0];
+        $product = wc_get_product($post->ID);
+        
+        if (!$product) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Product not found'
+            ], 404);
+        }
+        
+        $product_id = $product->get_id();
+        
+        // Build WooCommerce REST API style response
+        $product_data = $this->format_product_for_api($product);
+        
+        // Get variations if variable product
+        $variations = [];
+        if ($product->is_type('variable')) {
+            $variation_ids = $product->get_children();
+            foreach ($variation_ids as $variation_id) {
+                $variation = wc_get_product($variation_id);
+                if ($variation) {
+                    $variations[] = $this->format_variation_for_api($variation);
+                }
+            }
+        }
+        
+        // Get FAQs
+        $faqs = $this->plugin->faq->get_product_faq($product_id);
+        
+        // Get Video
+        $video = $this->plugin->product_video->get_product_video($product_id);
+        
+        // Get Color Swatches (cached)
+        static $cached_swatches = null;
+        if ($cached_swatches === null) {
+            $swatches_response = $this->get_color_swatches();
+            $cached_swatches = $swatches_response->get_data()['swatches'] ?? [];
+        }
+        
+        // Get Yoast SEO data
+        $yoast_data = null;
+        if (function_exists('YoastSEO')) {
+            $meta = YoastSEO()->meta->for_post($product_id);
+            if ($meta) {
+                $yoast_data = [
+                    'title' => $meta->title ?? '',
+                    'description' => $meta->description ?? '',
+                    'canonical' => $meta->canonical ?? '',
+                    'og_title' => $meta->open_graph_title ?? '',
+                    'og_description' => $meta->open_graph_description ?? '',
+                    'og_image' => $meta->open_graph_images[0]['url'] ?? '',
+                    'og_type' => $meta->open_graph_type ?? 'product',
+                    'twitter_title' => $meta->twitter_title ?? '',
+                    'twitter_description' => $meta->twitter_description ?? '',
+                    'twitter_image' => $meta->twitter_image ?? '',
+                    'schema' => $meta->schema ?? null,
+                ];
+            }
+        }
+        
+        return new WP_REST_Response([
+            'success' => true,
+            'product' => $product_data,
+            'variations' => $variations,
+            'faqs' => $faqs['faqs'] ?? [],
+            'video' => $video,
+            'swatches' => $cached_swatches,
+            'seo' => $yoast_data
+        ], 200);
+    }
+    
+    /**
+     * Format product for API response (WooCommerce REST API style)
+     */
+    private function format_product_for_api($product) {
+        $data = [
+            'id' => $product->get_id(),
+            'name' => $product->get_name(),
+            'slug' => $product->get_slug(),
+            'type' => $product->get_type(),
+            'status' => $product->get_status(),
+            'description' => $product->get_description(),
+            'short_description' => $product->get_short_description(),
+            'sku' => $product->get_sku(),
+            'price' => $product->get_price(),
+            'regular_price' => $product->get_regular_price(),
+            'sale_price' => $product->get_sale_price(),
+            'price_html' => $product->get_price_html(),
+            'on_sale' => $product->is_on_sale(),
+            'stock_status' => $product->get_stock_status(),
+            'stock_quantity' => $product->get_stock_quantity(),
+            'manage_stock' => $product->get_manage_stock(),
+            'weight' => $product->get_weight(),
+            'dimensions' => [
+                'length' => $product->get_length(),
+                'width' => $product->get_width(),
+                'height' => $product->get_height(),
+            ],
+            'categories' => [],
+            'tags' => [],
+            'images' => [],
+            'attributes' => [],
+            'variations' => $product->is_type('variable') ? $product->get_children() : [],
+            'meta_data' => [],
+        ];
+        
+        // Categories
+        foreach ($product->get_category_ids() as $cat_id) {
+            $term = get_term($cat_id, 'product_cat');
+            if ($term && !is_wp_error($term)) {
+                $data['categories'][] = [
+                    'id' => $term->term_id,
+                    'name' => $term->name,
+                    'slug' => $term->slug,
+                ];
+            }
+        }
+        
+        // Images
+        $image_id = $product->get_image_id();
+        if ($image_id) {
+            $data['images'][] = [
+                'id' => $image_id,
+                'src' => wp_get_attachment_url($image_id),
+                'name' => get_the_title($image_id),
+                'alt' => get_post_meta($image_id, '_wp_attachment_image_alt', true),
+            ];
+        }
+        foreach ($product->get_gallery_image_ids() as $gallery_id) {
+            $data['images'][] = [
+                'id' => $gallery_id,
+                'src' => wp_get_attachment_url($gallery_id),
+                'name' => get_the_title($gallery_id),
+                'alt' => get_post_meta($gallery_id, '_wp_attachment_image_alt', true),
+            ];
+        }
+        
+        // Attributes
+        foreach ($product->get_attributes() as $attr) {
+            $attribute_data = [
+                'id' => $attr->get_id(),
+                'name' => $attr->get_name(),
+                'position' => $attr->get_position(),
+                'visible' => $attr->get_visible(),
+                'variation' => $attr->get_variation(),
+                'options' => [],
+            ];
+            
+            if ($attr->is_taxonomy()) {
+                $terms = wc_get_product_terms($product->get_id(), $attr->get_name(), ['fields' => 'all']);
+                foreach ($terms as $term) {
+                    $attribute_data['options'][] = $term->name;
+                }
+            } else {
+                $attribute_data['options'] = $attr->get_options();
+            }
+            
+            $data['attributes'][] = $attribute_data;
+        }
+        
+        // Custom meta
+        $meta_keys = ['_availability_type', '_custom_order_time'];
+        foreach ($meta_keys as $key) {
+            $value = get_post_meta($product->get_id(), $key, true);
+            if ($value) {
+                $data['meta_data'][] = [
+                    'key' => $key,
+                    'value' => $value,
+                ];
+            }
+        }
+        
+        return $data;
+    }
+    
+    /**
+     * Format variation for API response
+     */
+    private function format_variation_for_api($variation) {
+        $data = [
+            'id' => $variation->get_id(),
+            'sku' => $variation->get_sku(),
+            'price' => $variation->get_price(),
+            'regular_price' => $variation->get_regular_price(),
+            'sale_price' => $variation->get_sale_price(),
+            'on_sale' => $variation->is_on_sale(),
+            'stock_status' => $variation->get_stock_status(),
+            'stock_quantity' => $variation->get_stock_quantity(),
+            'manage_stock' => $variation->get_manage_stock(),
+            'weight' => $variation->get_weight(),
+            'dimensions' => [
+                'length' => $variation->get_length(),
+                'width' => $variation->get_width(),
+                'height' => $variation->get_height(),
+            ],
+            'image' => null,
+            'attributes' => [],
+        ];
+        
+        // Image
+        $image_id = $variation->get_image_id();
+        if ($image_id) {
+            $data['image'] = [
+                'id' => $image_id,
+                'src' => wp_get_attachment_url($image_id),
+                'name' => get_the_title($image_id),
+                'alt' => get_post_meta($image_id, '_wp_attachment_image_alt', true),
+            ];
+        }
+        
+        // Attributes
+        foreach ($variation->get_variation_attributes() as $attr_name => $attr_value) {
+            $data['attributes'][] = [
+                'name' => str_replace('attribute_', '', $attr_name),
+                'option' => $attr_value,
+            ];
+        }
+        
+        return $data;
     }
 }

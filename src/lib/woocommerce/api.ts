@@ -1,5 +1,6 @@
 // WooCommerce REST API Configuration
-import { siteConfig } from '@/config/site';
+import { siteConfig, getApiEndpoint } from '@/config/site';
+import { cache } from 'react';
 
 const WOOCOMMERCE_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
 const CONSUMER_KEY = process.env.WOOCOMMERCE_CONSUMER_KEY || '';
@@ -210,6 +211,69 @@ export async function getProductBySlug(slug: string): Promise<WooProduct | null>
   const products = await wooFetch<WooProduct[]>(`products?slug=${slug}`);
   return products[0] || null;
 }
+
+/**
+ * Full product data response type
+ */
+export interface FullProductData {
+  success: boolean;
+  product: WooProduct;
+  variations: WooVariation[];
+  faqs: { question: string; answer: string }[];
+  video: {
+    url: string;
+    thumbnail: string | null;
+    type: 'file' | 'youtube';
+    youtubeId: string | null;
+  } | null;
+  swatches: Record<string, {
+    id: number;
+    name: string;
+    slug: string;
+    image?: string;
+    color?: string;
+  }>;
+  seo: {
+    title: string;
+    description: string;
+    canonical: string;
+    og_title: string;
+    og_description: string;
+    og_image: string;
+    og_type: string;
+    twitter_title: string;
+    twitter_description: string;
+    twitter_image: string;
+  } | null;
+}
+
+/**
+ * Get full product data in a single API call (cached per request)
+ * This fetches product, variations, FAQs, video, swatches, and SEO in one call
+ * Uses React's cache() to deduplicate between generateMetadata and page component
+ */
+export const getFullProductData = cache(async (slug: string): Promise<FullProductData | null> => {
+  try {
+    const response = await fetch(getApiEndpoint(`product-full/${slug}`), {
+      next: { revalidate: 600 } // 10 minutes cache
+    });
+    
+    if (!response.ok) {
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching full product data:', error);
+    return null;
+  }
+});
 
 /**
  * Get single product by ID

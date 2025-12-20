@@ -1,9 +1,8 @@
 import { ProductPageClient } from './ProductPageClient';
-import { getProductBySlug, getProductVariations, transformProduct, getColorSwatches, getProducts } from '@/lib/woocommerce/api';
+import { getFullProductData, transformProduct, getProducts } from '@/lib/woocommerce/api';
 import { notFound } from 'next/navigation';
 import { ProductJsonLd, BreadcrumbJsonLd, FAQJsonLd } from '@/components/seo';
-import { siteConfig, getApiEndpoint } from '@/config/site';
-import { getYoastSEO, yoastToMetadata } from '@/lib/wordpress/seo';
+import { siteConfig } from '@/config/site';
 
 const SITE_URL = siteConfig.url;
 
@@ -35,56 +34,6 @@ const defaultFaqs = [
   },
 ];
 
-// Fetch product FAQs from WordPress
-async function getProductFaqs(productId: number) {
-  try {
-    const response = await fetch(
-      getApiEndpoint(`product-faq/${productId}`),
-      { next: { revalidate: 300 } }
-    );
-    
-    if (!response.ok) {
-      return defaultFaqs;
-    }
-    
-    const data = await response.json();
-    return data.faqs && data.faqs.length > 0 ? data.faqs : defaultFaqs;
-  } catch (error) {
-    console.error('Error fetching product FAQs:', error);
-    return defaultFaqs;
-  }
-}
-
-// Fetch product video from WordPress
-async function getProductVideo(productId: number) {
-  try {
-    const response = await fetch(
-      getApiEndpoint(`product-video/${productId}`),
-      { next: { revalidate: 300 } }
-    );
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    const data = await response.json();
-    
-    if (!data.hasVideo || !data.video) {
-      return null;
-    }
-    
-    return {
-      url: data.video.url,
-      thumbnail: data.video.thumbnail || null,
-      type: data.video.type as 'file' | 'youtube',
-      youtubeId: data.video.youtubeId || null,
-    };
-  } catch (error) {
-    console.error('Error fetching product video:', error);
-    return null;
-  }
-}
-
 // ISR - Revalidate every 30 minutes (products rarely change)
 // First visit generates the page, then served from cache
 export const revalidate = 1800;
@@ -110,27 +59,52 @@ export async function generateMetadata({ params }: ProductPageProps) {
   const { slug } = await params;
   
   try {
-    // Try to get Yoast SEO data from WordPress first
-    const yoastData = await getYoastSEO(`/product/${slug}/`);
+    // Single API call - cached and shared with page component
+    const data = await getFullProductData(slug);
     
-    const wooProduct = await getProductBySlug(slug);
-    if (!wooProduct) {
+    if (!data) {
       return { title: 'מוצר לא נמצא | בלאנו' };
     }
     
+    const { product: wooProduct, seo } = data;
     const product = transformProduct(wooProduct);
+    
     const fallbackDescription = product.description?.replace(/<[^>]*>/g, '').slice(0, 160) || 
       `${product.name} - רהיט מעוצב באיכות גבוהה. משלוח חינם עד הבית!`;
     const fallbackImage = product.image?.sourceUrl;
     
-    // If Yoast data exists, use it (what you configure in WordPress)
-    if (yoastData) {
-      return yoastToMetadata(yoastData, {
-        title: `${product.name} | בלאנו`,
-        description: fallbackDescription,
-        url: `${SITE_URL}/product/${slug}`,
-        image: fallbackImage,
-      });
+    // If Yoast SEO data exists from WordPress
+    if (seo?.title) {
+      return {
+        title: seo.title || `${product.name} | בלאנו`,
+        description: seo.description || fallbackDescription,
+        alternates: {
+          canonical: seo.canonical || `${SITE_URL}/product/${slug}`,
+        },
+        openGraph: {
+          title: seo.og_title || `${product.name} | בלאנו`,
+          description: seo.og_description || fallbackDescription,
+          url: `${SITE_URL}/product/${slug}`,
+          type: seo.og_type || 'website',
+          images: seo.og_image ? [{ 
+            url: seo.og_image,
+            width: 1200,
+            height: 630,
+            alt: product.name,
+          }] : fallbackImage ? [{ 
+            url: fallbackImage,
+            width: 800,
+            height: 600,
+            alt: product.name,
+          }] : [],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: seo.twitter_title || `${product.name} | בלאנו`,
+          description: seo.twitter_description || fallbackDescription,
+          images: seo.twitter_image ? [seo.twitter_image] : fallbackImage ? [fallbackImage] : [],
+        },
+      };
     }
     
     // Fallback to auto-generated metadata
@@ -169,22 +143,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   
   try {
-    const wooProduct = await getProductBySlug(slug);
+    // Single API call - cached and shared with generateMetadata
+    const data = await getFullProductData(slug);
     
-    if (!wooProduct) {
+    if (!data) {
       notFound();
     }
     
-    // Fetch everything in parallel for speed
-    const isVariable = wooProduct.type === 'variable' && wooProduct.variations?.length > 0;
+    const { product: wooProduct, variations, faqs: apiFaqs, video, swatches } = data;
     
-    const [variations, faqs, video, swatches] = await Promise.all([
-      isVariable ? getProductVariations(wooProduct.id).catch(() => []) : Promise.resolve([]),
-      getProductFaqs(wooProduct.id),
-      getProductVideo(wooProduct.id),
-      getColorSwatches(),
-    ]);
+    // Use API FAQs or fallback to default
+    const faqs = apiFaqs && apiFaqs.length > 0 ? apiFaqs : defaultFaqs;
     
+    // Transform product with variations and swatches
     const product = transformProduct(wooProduct, variations, swatches);
 
     // Get category name for breadcrumb
