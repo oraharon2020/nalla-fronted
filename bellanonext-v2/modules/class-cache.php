@@ -165,8 +165,20 @@ class Bellano_Cache {
     public function clear_product_cache($product_id) {
         $product = wc_get_product($product_id);
         if ($product) {
+            // Clear product page
             $this->clear_vercel_cache('/product/' . $product->get_slug());
+            
+            // Clear homepage (shows featured products)
             $this->clear_vercel_cache('/');
+            
+            // Clear all category pages this product belongs to
+            $categories = $product->get_category_ids();
+            foreach ($categories as $cat_id) {
+                $term = get_term($cat_id, 'product_cat');
+                if ($term && !is_wp_error($term)) {
+                    $this->clear_vercel_cache('/category/' . $term->slug);
+                }
+            }
         }
     }
     

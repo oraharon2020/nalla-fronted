@@ -83,7 +83,9 @@ class Bellano_Settings {
         // Auto-clear cache hooks
         add_action('update_option_bellano_banners', [$this->cache, 'clear_homepage_cache']);
         add_action('woocommerce_update_product', [$this->cache, 'clear_product_cache']);
+        add_action('woocommerce_new_product', [$this->cache, 'clear_product_cache']);
         add_action('edited_product_cat', [$this->cache, 'clear_category_cache']);
+        add_action('created_product_cat', [$this->cache, 'clear_category_cache']);
     }
     
     public function register_settings() {

@@ -466,7 +466,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                   priority
                   fetchPriority="high"
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  quality={85}
+                  quality={75}
                 />
               )}
               {hasDiscount && discountPercentage > 0 && (
