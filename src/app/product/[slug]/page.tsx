@@ -1,5 +1,5 @@
 import { ProductPageClient } from './ProductPageClient';
-import { getProductBySlug, getProductVariations, transformProduct, getColorSwatches } from '@/lib/woocommerce/api';
+import { getProductBySlug, getProductVariations, transformProduct, getColorSwatches, getProducts } from '@/lib/woocommerce/api';
 import { notFound } from 'next/navigation';
 import { ProductJsonLd, BreadcrumbJsonLd, FAQJsonLd } from '@/components/seo';
 import { siteConfig, getApiEndpoint } from '@/config/site';
@@ -88,6 +88,20 @@ async function getProductVideo(productId: number) {
 // ISR - Revalidate every 30 minutes (products rarely change)
 // First visit generates the page, then served from cache
 export const revalidate = 1800;
+
+// Pre-generate all product pages at build time
+export async function generateStaticParams() {
+  try {
+    // Fetch all products (up to 100)
+    const products = await getProducts({ per_page: 100 });
+    return products.map((product) => ({
+      slug: product.slug,
+    }));
+  } catch (error) {
+    console.error('Error generating product params:', error);
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: ProductPageProps) {
   const { slug } = await params;
