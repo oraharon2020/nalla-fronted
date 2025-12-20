@@ -230,6 +230,8 @@ export interface FullProductData {
     id: number;
     name: string;
     slug: string;
+    attribute: string;
+    attribute_slug: string;
     image?: string;
     color?: string;
   }>;
