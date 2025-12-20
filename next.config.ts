@@ -201,8 +201,10 @@ const nextConfig: NextConfig = {
   experimental: {
     // Optimize package imports
     optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-popover', 'zustand'],
-    // Optimize CSS loading
+    // Optimize CSS loading - critical CSS inlining
     optimizeCss: true,
+    // Use modern output for smaller bundles
+    webpackMemoryOptimizations: true,
   },
   
   // Turbopack for faster dev builds (Next.js 15+)
