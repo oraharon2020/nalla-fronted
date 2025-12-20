@@ -210,6 +210,16 @@ export const getWpUrl = (path: string = '') => {
   return `${siteConfig.wordpressUrl}${path}`;
 };
 
+// Helper function to fix media URLs - convert bellano.co.il to admin.bellano.co.il
+export const fixMediaUrl = (url: string | undefined | null): string => {
+  if (!url) return '';
+  // Replace any bellano.co.il/wp-content URL with admin.bellano.co.il
+  return url.replace(
+    /https?:\/\/(www\.)?bellano\.co\.il\/wp-content/g,
+    'https://admin.bellano.co.il/wp-content'
+  );
+};
+
 // Helper function to get API endpoint
 export const getApiEndpoint = (endpoint: string) => {
   return `${siteConfig.wordpressUrl}/wp-json/${siteConfig.prefix}/v1/${endpoint}`;

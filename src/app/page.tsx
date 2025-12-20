@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { getProductsWithSwatches, getCategories, transformCategory } from '@/lib/woocommerce';
 import { Truck, ShieldCheck, CreditCard, RotateCcw } from 'lucide-react';
 import { NewsletterForm } from '@/components/home/NewsletterForm';
-import { siteConfig, getApiEndpoint } from '@/config/site';
+import { siteConfig, getApiEndpoint, fixMediaUrl } from '@/config/site';
 
 // Helper to get optimized image URL through Next.js
 const getOptimizedImageUrl = (src: string, width: number = 750) => {
@@ -59,8 +59,8 @@ async function HeroSection() {
   const mediaType = banner?.mediaType || 'image';
   const imageUrl = banner?.image || siteConfig.defaultBannerImage;
   const mobileImageUrl = banner?.mobileImage || imageUrl;
-  const videoUrl = banner?.video || '';
-  const mobileVideoUrl = banner?.mobileVideo || videoUrl; // Fallback to main video
+  const videoUrl = fixMediaUrl(banner?.video) || '';
+  const mobileVideoUrl = fixMediaUrl(banner?.mobileVideo) || videoUrl; // Fallback to main video
   const videoPoster = banner?.videoPoster || imageUrl;
   const title = banner?.title || '';
   const titleFont = banner?.titleFont || 'hebrew';
