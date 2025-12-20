@@ -146,7 +146,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'admin.bellano.co.il',
+        hostname: 'bellano.co.il',
         pathname: '/wp-content/**',
       },
       {
