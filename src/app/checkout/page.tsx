@@ -715,12 +715,13 @@ export default function CheckoutPage() {
               {/* Payment Options - Only show for credit card and Apple Pay */}
               {(paymentMethod === 'credit_card' || paymentMethod === 'apple_pay') && (
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h2 className="text-lg font-bold mb-4">מספר תשלומים</h2>
+                  <h2 className="text-lg font-bold mb-1">מספר תשלומים</h2>
+                  <p className="text-sm text-green-600 mb-4">✓ ללא ריבית על כל התשלומים</p>
                   
                   {/* Quick Options */}
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     {[
-                      { num: 1, label: 'תשלום אחד', sublabel: 'ללא ריבית' },
+                      { num: 1, label: 'תשלום אחד', sublabel: formatPrice(getTotal()) },
                       { num: 3, label: '3 תשלומים', sublabel: formatPrice(getTotal() / 3) + ' לחודש' },
                       { num: 6, label: '6 תשלומים', sublabel: formatPrice(getTotal() / 6) + ' לחודש' },
                     ].map(({ num, label, sublabel }) => (
@@ -755,8 +756,8 @@ export default function CheckoutPage() {
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num) => (
                         <option key={num} value={num}>
                           {num === 1 
-                            ? 'תשלום אחד - ללא ריבית' 
-                            : `${num} תשלומים - ${formatPrice(getTotal() / num)} לחודש`
+                            ? 'תשלום אחד' 
+                            : `${num} תשלומים ללא ריבית - ${formatPrice(getTotal() / num)} לחודש`
                           }
                         </option>
                       ))}
