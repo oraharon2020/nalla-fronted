@@ -1,5 +1,5 @@
 {
-  "regions": ["fra1"],
+  "regions": ["dxb1"],
   "headers": [
     {
       "source": "/api/(.*)",

@@ -600,12 +600,12 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                 {/* Desktop - full description */}
                 <HtmlContent 
                   html={product.shortDescription}
-                  className="text-sm text-gray-600 leading-relaxed mb-4 md:mb-6 hidden md:block"
+                  className="text-sm text-gray-600 leading-relaxed mb-4 md:mb-6 hidden md:block [&_*]:!font-sans"
                 />
                 {/* Mobile - expandable description */}
                 <ExpandableShortDescription 
                   html={product.shortDescription}
-                  className="md:hidden mb-4"
+                  className="md:hidden mb-4 [&_*]:!font-sans"
                 />
               </>
             )}
@@ -825,7 +825,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                 {activeTab === 'description' ? (
                   <HtmlContent 
                     html={product.description || ''}
-                    className="text-sm text-gray-600 leading-relaxed"
+                    className="text-sm text-gray-600 leading-relaxed [&_*]:!font-sans [&_p]:mb-3 [&_ul]:list-disc [&_ul]:mr-5 [&_li]:mb-1"
                   />
                 ) : (
                   <div className="text-sm">
