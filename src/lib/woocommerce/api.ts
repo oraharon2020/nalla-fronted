@@ -87,6 +87,14 @@ export interface WooVariation {
   image: { src: string; alt: string };
 }
 
+export interface WooTag {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  count: number;
+}
+
 // API Functions
 
 /**
@@ -109,6 +117,62 @@ export async function getCategories(params?: {
 export async function getCategoryBySlug(slug: string): Promise<WooCategory | null> {
   const categories = await wooFetch<WooCategory[]>(`products/categories?slug=${slug}`);
   return categories[0] || null;
+}
+
+/**
+ * Get all product tags
+ */
+export async function getTags(params?: {
+  per_page?: number;
+  hide_empty?: boolean;
+}): Promise<WooTag[]> {
+  const searchParams = new URLSearchParams();
+  searchParams.append('per_page', String(params?.per_page || 100));
+  searchParams.append('hide_empty', String(params?.hide_empty ?? true));
+  
+  return wooFetch<WooTag[]>(`products/tags?${searchParams}`);
+}
+
+/**
+ * Get single tag by slug
+ */
+export async function getTagBySlug(slug: string): Promise<WooTag | null> {
+  const tags = await wooFetch<WooTag[]>(`products/tags?slug=${slug}`);
+  return tags[0] || null;
+}
+
+/**
+ * Get products by tag ID
+ */
+export async function getProductsByTag(
+  tagId: number,
+  params?: { per_page?: number; page?: number }
+): Promise<WooProduct[]> {
+  const searchParams = new URLSearchParams();
+  searchParams.append('per_page', String(params?.per_page || 24));
+  searchParams.append('page', String(params?.page || 1));
+  searchParams.append('tag', String(tagId));
+  searchParams.append('status', 'publish');
+  
+  return wooFetch<WooProduct[]>(`products?${searchParams}`);
+}
+
+/**
+ * Get products by tag slug (with swatches)
+ */
+export async function getProductsByTagSlugWithSwatches(
+  tagSlug: string,
+  params?: { per_page?: number; page?: number }
+): Promise<ReturnType<typeof transformProduct>[]> {
+  const tag = await getTagBySlug(tagSlug);
+  if (!tag) return [];
+  
+  const [products, swatches] = await Promise.all([
+    getProductsByTag(tag.id, params),
+    getColorSwatches()
+  ]);
+  
+  return products.map(product => transformProduct(product, undefined, swatches));
 }
 
 /**

@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { getProducts, getCategories } from '@/lib/woocommerce';
+import { getProducts, getCategories, getTags } from '@/lib/woocommerce';
 import { siteConfig } from '@/config/site';
 
 const SITE_URL = siteConfig.url;
@@ -75,5 +75,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching categories for sitemap:', error);
   }
 
-  return [...staticPages, ...categoryPages, ...productPages];
+  // Get all tags
+  let tagPages: MetadataRoute.Sitemap = [];
+  try {
+    const tags = await getTags({ per_page: 100, hide_empty: true });
+    tagPages = tags.map((tag) => ({
+      url: `${SITE_URL}/product-tag/${tag.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }));
+  } catch (error) {
+    console.error('Error fetching tags for sitemap:', error);
+  }
+
+  return [...staticPages, ...categoryPages, ...tagPages, ...productPages];
 }
