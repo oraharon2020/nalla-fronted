@@ -85,11 +85,9 @@ async function getProductVideo(productId: number) {
   }
 }
 
-// Force dynamic rendering - no static generation
-export const dynamic = 'force-dynamic';
-
-// Revalidate every 5 minutes
-export const revalidate = 300;
+// ISR - Revalidate every 30 minutes (products rarely change)
+// First visit generates the page, then served from cache
+export const revalidate = 1800;
 
 export async function generateMetadata({ params }: ProductPageProps) {
   const { slug } = await params;
