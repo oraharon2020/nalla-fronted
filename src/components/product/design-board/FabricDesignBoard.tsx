@@ -486,64 +486,21 @@ export function FabricDesignBoard({
     const startX = 200;
     const startY = 200;
 
-    // Create main line with arrow markers using a simple approach
-    // Left arrow head (triangle pointing left)
-    const leftArrow = new fabric.Polygon(
-      [
-        { x: 0, y: 0 },
-        { x: 12, y: -6 },
-        { x: 12, y: 6 },
-      ],
-      {
-        left: startX,
-        top: startY,
-        fill: shapeColor,
-        originX: 'left',
-        originY: 'center',
-        selectable: false,
-        evented: false,
-      }
-    );
+    // Create a simple double-headed arrow using Path
+    // This creates: left arrow head + line + right arrow head
+    const arrowPath = `
+      M 0 0 L 12 -6 L 12 -2 L ${lineWidth - 12} -2 L ${lineWidth - 12} -6 L ${lineWidth} 0 L ${lineWidth - 12} 6 L ${lineWidth - 12} 2 L 12 2 L 12 6 Z
+    `;
 
-    // Main line
-    const line = new fabric.Line([12, 0, lineWidth - 12, 0], {
-      left: startX + 12,
-      top: startY,
-      stroke: shapeColor,
-      strokeWidth: 2,
-      originY: 'center',
-      selectable: false,
-      evented: false,
-    });
-
-    // Right arrow head (triangle pointing right)
-    const rightArrow = new fabric.Polygon(
-      [
-        { x: 0, y: 0 },
-        { x: -12, y: -6 },
-        { x: -12, y: 6 },
-      ],
-      {
-        left: startX + lineWidth,
-        top: startY,
-        fill: shapeColor,
-        originX: 'right',
-        originY: 'center',
-        selectable: false,
-        evented: false,
-      }
-    );
-
-    // Group only the arrow elements (not stretchable)
-    const arrowGroup = new fabric.Group([leftArrow, line, rightArrow], {
+    const arrow = new fabric.Path(arrowPath, {
       left: startX,
       top: startY,
+      fill: shapeColor,
+      originY: 'center',
       cornerStyle: 'circle',
       cornerColor: '#7c3aed',
       borderColor: '#7c3aed',
       transparentCorners: false,
-      lockScalingX: true,
-      lockScalingY: true,
     });
 
     // Create dimension text as separate editable element
@@ -562,7 +519,7 @@ export function FabricDesignBoard({
       transparentCorners: false,
     });
 
-    canvas.add(arrowGroup);
+    canvas.add(arrow);
     canvas.add(dimensionText);
     canvas.setActiveObject(dimensionText);
     canvas.renderAll();
