@@ -74,25 +74,17 @@ export async function POST(request: NextRequest) {
     const lineItems = items.map((item) => {
       const lineItem: any = {
         product_id: item.product_id,
-        variation_id: item.variation_id || undefined,
+        // Don't send variation_id - WooCommerce auto-adds variation attributes which causes duplicates
+        // We'll send all attributes as meta_data instead for full control over display
         quantity: item.quantity,
       };
       
       // Initialize meta_data array
       lineItem.meta_data = [];
       
-      // Add variation attributes in two formats:
-      // 1. As a single combined field for display (to avoid WooCommerce duplicating built-in variation attributes)
-      // 2. As individual fields for the illustration plugin to read (plugin needs separate fields for dimensions)
+      // Add variation attributes as individual fields
+      // Each attribute will appear separately in the order
       if (item.variation_attributes && item.variation_attributes.length > 0) {
-        // Combined field for display
-        const attributesString = item.variation_attributes
-          .map(attr => `${attr.name}: ${attr.value}`)
-          .join(' | ');
-        lineItem.meta_data.push({ key: 'פרטי הזמנה', value: attributesString });
-        
-        // Individual fields for plugin processing
-        // Using original Hebrew names so the illustration plugin can read them
         item.variation_attributes.forEach(attr => {
           lineItem.meta_data.push({ key: attr.name, value: attr.value });
         });
