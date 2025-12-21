@@ -7,6 +7,7 @@ import {
   ChevronUp, ChevronDown, Scissors, Wand2, Clipboard
 } from 'lucide-react';
 import * as fabric from 'fabric';
+import { fixMediaUrl } from '@/config/site';
 
 interface ProductSearchResult {
   id: number;
@@ -239,7 +240,9 @@ export function FabricDesignBoard({
     if (!canvas) return;
 
     try {
-      const img = await fabric.FabricImage.fromURL(src, { crossOrigin: 'anonymous' });
+      // Fix the media URL to use admin.bellano.co.il
+      const fixedSrc = fixMediaUrl(src);
+      const img = await fabric.FabricImage.fromURL(fixedSrc, { crossOrigin: 'anonymous' });
       
       // Scale if too large
       const maxSize = isInitial ? 500 : 300;
@@ -417,6 +420,7 @@ export function FabricDesignBoard({
           fill: shapeColor,
           scaleX: 1.5,
           scaleY: 1,
+          lockScalingY: true, // Prevent vertical scaling
         });
         break;
       default:
@@ -432,6 +436,84 @@ export function FabricDesignBoard({
 
     canvas.add(shape);
     canvas.setActiveObject(shape);
+    canvas.renderAll();
+    updateLayers();
+  };
+
+  // Add measurement ruler (line with arrows and dimension text)
+  const addMeasurementRuler = () => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+
+    // Create line
+    const line = new fabric.Line([0, 0, 200, 0], {
+      stroke: shapeColor,
+      strokeWidth: 2,
+      selectable: false,
+    });
+
+    // Create left arrow
+    const leftArrow = new fabric.Path('M 0 0 L 10 -5 L 10 5 Z', {
+      fill: shapeColor,
+      left: 0,
+      top: 0,
+      selectable: false,
+    });
+
+    // Create right arrow
+    const rightArrow = new fabric.Path('M 10 0 L 0 -5 L 0 5 Z', {
+      fill: shapeColor,
+      left: 200,
+      top: 0,
+      selectable: false,
+    });
+
+    // Create dimension text
+    const dimensionText = new fabric.IText('200 ס"מ', {
+      left: 100,
+      top: -25,
+      fontSize: 16,
+      fill: shapeColor,
+      fontFamily: 'Arial',
+      textAlign: 'center',
+      originX: 'center',
+    });
+
+    // Group all elements
+    const group = new fabric.Group([line, leftArrow, rightArrow, dimensionText], {
+      left: 200,
+      top: 200,
+      cornerStyle: 'circle',
+      cornerColor: '#7c3aed',
+      borderColor: '#7c3aed',
+      transparentCorners: false,
+    });
+
+    canvas.add(group);
+    canvas.setActiveObject(group);
+    canvas.renderAll();
+    updateLayers();
+  };
+
+  // Add quick text template
+  const addTextTemplate = (template: string) => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+
+    const text = new fabric.IText(template, {
+      left: 200,
+      top: 200,
+      fontSize: 24,
+      fill: textColor,
+      fontFamily: 'Arial',
+      cornerStyle: 'circle',
+      cornerColor: '#7c3aed',
+      borderColor: '#7c3aed',
+      transparentCorners: false,
+    });
+
+    canvas.add(text);
+    canvas.setActiveObject(text);
     canvas.renderAll();
     updateLayers();
   };
@@ -683,13 +765,54 @@ export function FabricDesignBoard({
       canvas.renderAll();
     }
 
-    // Download
+    // Download only - don't save to cart/admin fields
     const link = document.createElement('a');
     link.download = `design-${productName || 'bellano'}-${Date.now()}.png`;
     link.href = dataUrl;
     link.click();
+  };
 
-    onSave?.(dataUrl);
+  // Share to WhatsApp
+  const shareToWhatsApp = () => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+
+    // Hide crop rect if visible
+    const cropRect = canvas.getObjects().find((obj: any) => obj.isCropRect);
+    if (cropRect) cropRect.set('visible', false);
+
+    canvas.discardActiveObject();
+    canvas.renderAll();
+
+    const dataUrl = canvas.toDataURL({
+      format: 'png',
+      quality: 1,
+      multiplier: 2,
+    });
+
+    // Restore crop rect
+    if (cropRect) {
+      cropRect.set('visible', true);
+      canvas.renderAll();
+    }
+
+    // Create message text
+    const productText = productName ? `עיצוב ללקוח - ${productName}` : 'עיצוב ללקוח';
+    
+    // For mobile/web: Open WhatsApp with text (user will manually attach the image)
+    const message = encodeURIComponent(`${productText}\n\nצילום מסך של העיצוב מצורף 👆`);
+    const whatsappUrl = `https://wa.me/?text=${message}`;
+    
+    // Download image first for user to attach manually
+    const link = document.createElement('a');
+    link.download = `design-${productName || 'bellano'}-${Date.now()}.png`;
+    link.href = dataUrl;
+    link.click();
+    
+    // Open WhatsApp after a small delay
+    setTimeout(() => {
+      window.open(whatsappUrl, '_blank');
+    }, 500);
   };
 
   // Add product from search
@@ -724,6 +847,13 @@ export function FabricDesignBoard({
             >
               <Layers className="w-4 h-4" />
               שכבות
+            </button>
+            <button
+              onClick={shareToWhatsApp}
+              className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+            >
+              <Download className="w-4 h-4" />
+              שתף בוואטסאפ
             </button>
             <button
               onClick={handleExport}
@@ -803,8 +933,48 @@ export function FabricDesignBoard({
                 className="w-full flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm"
               >
                 <Type className="w-4 h-4" />
-                טקסט
+                טקסט חופשי
               </button>
+              
+              {/* Quick Text Templates */}
+              <div className="bg-purple-50 rounded-lg p-2 space-y-1">
+                <p className="text-xs text-purple-700 font-medium mb-1">תבניות טקסט מהיר:</p>
+                <div className="grid grid-cols-2 gap-1">
+                  <button
+                    onClick={() => addTextTemplate('מידות:')}
+                    className="px-2 py-1 bg-white hover:bg-purple-100 rounded text-xs"
+                  >
+                    מידות:
+                  </button>
+                  <button
+                    onClick={() => addTextTemplate('צבע:')}
+                    className="px-2 py-1 bg-white hover:bg-purple-100 rounded text-xs"
+                  >
+                    צבע:
+                  </button>
+                  <button
+                    onClick={() => addTextTemplate('הערות:')}
+                    className="px-2 py-1 bg-white hover:bg-purple-100 rounded text-xs"
+                  >
+                    הערות:
+                  </button>
+                  <button
+                    onClick={() => addTextTemplate('שם לקוח:')}
+                    className="px-2 py-1 bg-white hover:bg-purple-100 rounded text-xs"
+                  >
+                    שם לקוח:
+                  </button>
+                </div>
+              </div>
+
+              <button
+                onClick={addMeasurementRuler}
+                className="w-full flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm text-blue-700"
+              >
+                <Minus className="w-4 h-4" />
+                סרגל מידות
+              </button>
+
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => addShape('arrow')}
