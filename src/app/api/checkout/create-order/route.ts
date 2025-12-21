@@ -20,10 +20,16 @@ interface AdminFields {
   final_price?: string;
 }
 
+interface VariationAttribute {
+  name: string;
+  value: string;
+}
+
 interface OrderItem {
   product_id: number;
   variation_id?: number;
   quantity: number;
+  variation_attributes?: VariationAttribute[];
   admin_fields?: AdminFields;
 }
 
@@ -72,9 +78,18 @@ export async function POST(request: NextRequest) {
         quantity: item.quantity,
       };
       
+      // Initialize meta_data array
+      lineItem.meta_data = [];
+      
+      // Add variation attributes as meta data
+      if (item.variation_attributes && item.variation_attributes.length > 0) {
+        item.variation_attributes.forEach(attr => {
+          lineItem.meta_data.push({ key: attr.name, value: attr.value });
+        });
+      }
+      
       // If admin fields are present, add them as meta data and override price
       if (item.admin_fields) {
-        lineItem.meta_data = [];
         
         if (item.admin_fields.width) {
           lineItem.meta_data.push({ key: 'רוחב', value: item.admin_fields.width });

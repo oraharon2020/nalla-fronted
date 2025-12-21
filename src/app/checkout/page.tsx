@@ -211,6 +211,8 @@ export default function CheckoutPage() {
             product_id: item.databaseId,
             variation_id: item.variation?.id || 0,
             quantity: item.quantity,
+            // Include variation attributes
+            variation_attributes: item.variation?.attributes || [],
             // Include admin fields if present
             admin_fields: item.adminFields ? {
               width: item.adminFields.width,
