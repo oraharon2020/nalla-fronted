@@ -63,7 +63,7 @@ export interface WooProduct {
   bellano_availability?: 'in_stock' | 'custom_order'; // Custom field from Bellano plugin
   categories: { id: number; name: string; slug: string }[];
   images: { id: number; src: string; alt: string }[];
-  attributes: { id: number; name: string; options: string[]; variation: boolean }[];
+  attributes: { id: number; name: string; options: string[]; variation: boolean; visible?: boolean }[];
   variations: number[];
   related_ids: number[];
 }
