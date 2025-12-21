@@ -261,9 +261,8 @@ export default function CheckoutPage() {
           productName += ` (${attrs})`;
         }
         
-        // Parse the price and calculate unit price (item.price might be total line price)
-        const parsedPrice = parseFloat(item.price.replace(/[^\d.]/g, ''));
-        const unitPrice = parsedPrice / item.quantity;
+        // item.price is the unit price, not line total
+        const unitPrice = parseFloat(item.price.replace(/[^\d.]/g, ''));
         
         return {
           name: productName,
@@ -273,21 +272,33 @@ export default function CheckoutPage() {
         };
       });
       
-      // Calculate total from items
+      // Calculate total from items (unit price * quantity for each)
       const itemsTotal = paymentItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
-      // Add discount line item if coupon is applied
-      if (appliedCoupon && appliedCoupon.discount > 0) {
-        paymentItems.push({
-          name: `הנחה - קופון ${appliedCoupon.code}`,
-          price: -appliedCoupon.discount,
-          quantity: 1,
-          sku: 'discount',
-        });
-      }
+      // Determine final items to send to Meshulam
+      let finalPaymentItems = paymentItems;
+      let amountToCharge = itemsTotal;
       
-      // Apply discount if coupon exists - use finalTotal which already has discount applied
-      const amountToCharge = appliedCoupon ? finalTotal : itemsTotal;
+      // If coupon is applied, we need to adjust the prices proportionally
+      // so that items sum equals finalTotal
+      if (appliedCoupon && appliedCoupon.discount > 0) {
+        amountToCharge = finalTotal;
+        // Calculate discount ratio
+        const discountRatio = finalTotal / itemsTotal;
+        // Apply proportional discount to each item
+        finalPaymentItems = paymentItems.map(item => ({
+          ...item,
+          price: Math.round(item.price * discountRatio * 100) / 100, // Round to 2 decimals
+        }));
+        
+        // Adjust last item to ensure exact sum (handle rounding)
+        const adjustedTotal = finalPaymentItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const diff = amountToCharge - adjustedTotal;
+        if (Math.abs(diff) > 0.01 && finalPaymentItems.length > 0) {
+          const lastItem = finalPaymentItems[finalPaymentItems.length - 1];
+          lastItem.price = Math.round((lastItem.price + diff / lastItem.quantity) * 100) / 100;
+        }
+      }
       
       // For Bit, don't send installments
       const paymentsToSend = paymentMethod === 'bit' ? 1 : selectedPayments;
@@ -300,7 +311,7 @@ export default function CheckoutPage() {
           amount: amountToCharge, // Use amount with discount applied
           customer: customerData,
           payments: paymentsToSend,
-          items: paymentItems,
+          items: finalPaymentItems, // Use adjusted items if coupon applied
           payment_type: paymentMethod, // Send payment type to API
         }),
       });
