@@ -572,9 +572,10 @@ export function transformProduct(wooProduct: WooProduct, variations?: WooVariati
       })),
     },
     attributes: {
-      // Include all attributes that are used for variations (colors, sizes, etc.)
+      // Include all attributes (colors, sizes, materials, etc.)
+      // Don't filter by variation flag - include all visible attributes
       nodes: (wooProduct.attributes || [])
-        .filter(attr => attr.variation === true)
+        .filter(attr => attr.visible !== false) // Include visible attributes
         .map(attr => ({
           name: attr.name,
           options: attr.options,
