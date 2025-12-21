@@ -57,17 +57,6 @@ export async function POST(request: NextRequest) {
     const body: CreateOrderRequest = await request.json();
     const { customer, items, shipping_method, payment_method = 'credit_card', coupon_code } = body;
 
-    // Debug: Log received items with variation attributes
-    console.log('=== CREATE ORDER DEBUG ===');
-    items.forEach((item, idx) => {
-      console.log(`Item ${idx}:`, {
-        product_id: item.product_id,
-        variation_id: item.variation_id,
-        variation_attributes: item.variation_attributes,
-      });
-    });
-    console.log('=== END DEBUG ===');
-
     if (!WC_KEY || !WC_SECRET) {
       return NextResponse.json(
         { success: false, message: 'WooCommerce credentials not configured' },
@@ -92,13 +81,13 @@ export async function POST(request: NextRequest) {
       // Initialize meta_data array
       lineItem.meta_data = [];
       
-      // Always add variation attributes as meta data to ensure all selected options are visible
-      // Even when variation_id exists, we add them because WooCommerce only shows attributes
-      // that are defined on the variation itself. If some attributes are "Any", they won't appear.
+      // Add variation attributes as a single combined field to avoid conflicts with WooCommerce
+      // WooCommerce may filter/override meta_data keys that match variation attribute names
       if (item.variation_attributes && item.variation_attributes.length > 0) {
-        item.variation_attributes.forEach(attr => {
-          lineItem.meta_data.push({ key: attr.name, value: attr.value });
-        });
+        const attributesString = item.variation_attributes
+          .map(attr => `${attr.name}: ${attr.value}`)
+          .join(' | ');
+        lineItem.meta_data.push({ key: 'פרטי הזמנה', value: attributesString });
       }
       
       // If admin fields are present, add them as meta data and override price
@@ -149,13 +138,6 @@ export async function POST(request: NextRequest) {
       
       return lineItem;
     });
-    
-    // Debug: Log what we're sending to WooCommerce
-    console.log('=== LINE ITEMS TO WOOCOMMERCE ===');
-    lineItems.forEach((item, idx) => {
-      console.log(`Line Item ${idx}:`, JSON.stringify(item, null, 2));
-    });
-    console.log('=== END LINE ITEMS ===');
     
     // Create the order in WooCommerce
     const orderData = {
