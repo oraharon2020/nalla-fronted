@@ -81,7 +81,8 @@ export async function POST(request: NextRequest) {
       // Initialize meta_data array
       lineItem.meta_data = [];
       
-      // Add variation attributes as meta data
+      // Always add variation attributes as meta data
+      // This ensures all selected options (color, size, etc.) are visible in the order
       if (item.variation_attributes && item.variation_attributes.length > 0) {
         item.variation_attributes.forEach(attr => {
           lineItem.meta_data.push({ key: attr.name, value: attr.value });
