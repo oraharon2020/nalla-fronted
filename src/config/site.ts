@@ -169,16 +169,16 @@ export const siteConfig = {
   // Payment Gateway - Meshulam
   // Note: Page codes are fetched from WordPress, these are fallbacks
   meshulam: {
-    userId: process.env.MESHULAM_USER_ID || 'e1ee96ba76032485',
+    userId: process.env.MESHULAM_USER_ID || '6f6cab2bd0c86083',
     apiKey: process.env.MESHULAM_API_KEY || 'ae67b1668109',
     sandboxApiKey: process.env.MESHULAM_SANDBOX_API_KEY || '305a9a777e42',
     isSandbox: process.env.MESHULAM_SANDBOX === 'true',
     // Default page codes (will be overridden by WordPress settings)
     pageCodes: {
       creditCard: process.env.MESHULAM_PAGECODE_CREDIT || '81e04dc34850',
-      bit: process.env.MESHULAM_PAGECODE_BIT || '',
-      applePay: process.env.MESHULAM_PAGECODE_APPLE || '',
-      googlePay: process.env.MESHULAM_PAGECODE_GOOGLE || '',
+      bit: process.env.MESHULAM_PAGECODE_BIT || 'e10278843d0e',
+      applePay: process.env.MESHULAM_PAGECODE_APPLE || 'fc0ec4b9957e',
+      googlePay: process.env.MESHULAM_PAGECODE_GOOGLE || 'd189717e5d4c',
     },
   },
   
