@@ -184,7 +184,7 @@ export async function getProducts(params?: {
   page?: number;
   category?: number;
   search?: string;
-  orderby?: 'date' | 'price' | 'popularity' | 'rating';
+  orderby?: 'date' | 'price' | 'popularity' | 'rating' | 'menu_order';
   order?: 'asc' | 'desc';
   featured?: boolean;
   on_sale?: boolean;
@@ -345,13 +345,15 @@ export async function getSaleProducts(limit = 8): Promise<WooProduct[]> {
  */
 export async function getProductsByCategorySlug(
   categorySlug: string,
-  params?: { per_page?: number; page?: number; orderby?: 'date' | 'price' | 'popularity' | 'rating'; order?: 'asc' | 'desc' }
+  params?: { per_page?: number; page?: number; orderby?: 'date' | 'price' | 'popularity' | 'rating' | 'menu_order'; order?: 'asc' | 'desc' }
 ): Promise<WooProduct[]> {
   const category = await getCategoryBySlug(categorySlug);
   if (!category) return [];
   
   return getProducts({
     category: category.id,
+    orderby: 'menu_order',
+    order: 'asc',
     ...params,
   });
 }
@@ -365,7 +367,7 @@ export async function getProductsWithSwatches(params?: {
   page?: number;
   category?: number;
   search?: string;
-  orderby?: 'date' | 'price' | 'popularity' | 'rating';
+  orderby?: 'date' | 'price' | 'popularity' | 'rating' | 'menu_order';
   order?: 'asc' | 'desc';
 }): Promise<ReturnType<typeof transformProduct>[]> {
   // Fetch products and color swatches in parallel
@@ -383,13 +385,15 @@ export async function getProductsWithSwatches(params?: {
  */
 export async function getProductsByCategorySlugWithSwatches(
   categorySlug: string,
-  params?: { per_page?: number; page?: number; orderby?: 'date' | 'price' | 'popularity' | 'rating'; order?: 'asc' | 'desc' }
+  params?: { per_page?: number; page?: number; orderby?: 'date' | 'price' | 'popularity' | 'rating' | 'menu_order'; order?: 'asc' | 'desc' }
 ): Promise<ReturnType<typeof transformProduct>[]> {
   const category = await getCategoryBySlug(categorySlug);
   if (!category) return [];
   
   return getProductsWithSwatches({
     category: category.id,
+    orderby: 'menu_order',
+    order: 'asc',
     ...params,
   });
 }
