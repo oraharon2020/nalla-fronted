@@ -8,11 +8,17 @@ if (!defined('ABSPATH')) exit;
 
 class Bellano_Checkout {
     
+    // Hardcoded fallback userId (in case Grow plugin resets)
+    private $fallback_userId = '6f6cab2bd0c86083';
+    
     /**
      * Get Meshulam configuration for Next.js checkout
      */
     public function get_meshulam_config() {
-        $userId = get_option('meshulam_bit_payment_code', 'e1ee96ba76032485');
+        $userId = get_option('meshulam_bit_payment_code', '');
+        if (empty($userId)) {
+            $userId = $this->fallback_userId;
+        }
         
         // Get page codes for each payment method
         $pageCodes = [
@@ -208,6 +214,9 @@ class Bellano_Checkout {
         
         // Get Meshulam config
         $userId = get_option('meshulam_bit_payment_code', '');
+        if (empty($userId)) {
+            $userId = $this->fallback_userId;
+        }
         $isSandbox = isset($data['sandbox']) && $data['sandbox'];
         $apiKey = $isSandbox ? '305a9a777e42' : 'ae67b1668109';
         $apiUrl = $isSandbox 
@@ -291,4 +300,4 @@ class Bellano_Checkout {
             'process_id' => $result['data']['processId'],
             'process_token' => $result['data']['processToken'],
         ], 200);
-    }
+    }}

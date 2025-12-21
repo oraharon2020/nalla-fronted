@@ -228,16 +228,30 @@ export default function CheckoutPage() {
       }
 
       // Step 2: Get Meshulam payment URL
-      // Calculate items for payment - use the cart prices
-      const paymentItems = items.map(item => ({
-        name: item.name,
-        price: parseFloat(item.price.replace(/[^\d.]/g, '')),
-        quantity: item.quantity,
-        sku: item.databaseId.toString(),
-      }));
+      // Calculate items for payment - use the cart prices with variation info
+      const paymentItems = items.map(item => {
+        // Build product name with variation details
+        let productName = item.name;
+        if (item.variation?.attributes && item.variation.attributes.length > 0) {
+          const attrs = item.variation.attributes
+            .map(attr => `${attr.label}: ${attr.value}`)
+            .join(', ');
+          productName += ` (${attrs})`;
+        }
+        
+        return {
+          name: productName,
+          price: parseFloat(item.price.replace(/[^\d.]/g, '')),
+          quantity: item.quantity,
+          sku: item.variation?.id?.toString() || item.databaseId.toString(),
+        };
+      });
       
-      // Calculate total from items to ensure consistency with Meshulam
-      const calculatedTotal = paymentItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      // Calculate total from items
+      const itemsTotal = paymentItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      
+      // Apply discount if coupon exists - use finalTotal which already has discount applied
+      const amountToCharge = appliedCoupon ? finalTotal : itemsTotal;
       
       // For Bit, don't send installments
       const paymentsToSend = paymentMethod === 'bit' ? 1 : selectedPayments;
@@ -247,7 +261,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           order_id: orderData.order_id,
-          amount: calculatedTotal, // Use calculated total instead of WooCommerce total
+          amount: amountToCharge, // Use amount with discount applied
           customer: customerData,
           payments: paymentsToSend,
           items: paymentItems,
