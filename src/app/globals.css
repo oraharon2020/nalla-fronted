@@ -183,6 +183,10 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-heebo), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

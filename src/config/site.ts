@@ -87,9 +87,9 @@ export const siteConfig = {
 
   // Contact
   email: 'info@bellano.co.il',
-  phone: '054-9942466',
-  phoneClean: '0549942466', // Without dashes for tel: links
-  whatsapp: '972549942466', // International format for WhatsApp
+  phone: '03-5566696',
+  phoneClean: '035566696', // Without dashes for tel: links
+  whatsapp: '97235566696', // International format for WhatsApp
   
   // Social Media
   social: {

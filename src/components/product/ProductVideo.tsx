@@ -65,7 +65,11 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
             {/* Play button */}
             <button
               onClick={handleFullscreen}
-              className="absolute inset-0 flex items-center justify-center"
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                handleFullscreen();
+              }}
+              className="absolute inset-0 flex items-center justify-center touch-manipulation"
               aria-label={`נגן סרטון של ${productName}`}
             >
               <div className="w-16 h-16 md:w-20 md:h-20 bg-white/95 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -95,7 +99,9 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
               <video
                 src={video.url}
                 autoPlay
+                playsInline
                 controls
+                preload="metadata"
                 className="w-full h-full object-contain bg-black"
               />
             )}
@@ -129,7 +135,9 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
               <video
                 src={video.url}
                 autoPlay
+                playsInline
                 controls
+                preload="metadata"
                 className="w-full h-full object-contain rounded-lg"
               />
             )}

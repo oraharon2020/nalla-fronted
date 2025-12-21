@@ -123,7 +123,8 @@ class Bellano_REST_API {
         ]);
         
         // Full product data - single API call for everything
-        register_rest_route('bellano/v1', '/product-full/(?P<slug>[a-zA-Z0-9-]+)', [
+        // Support Hebrew slugs with [^/]+ pattern
+        register_rest_route('bellano/v1', '/product-full/(?P<slug>[^/]+)', [
             'methods' => 'GET',
             'callback' => [$this, 'get_full_product_data'],
             'permission_callback' => '__return_true'
@@ -327,7 +328,9 @@ class Bellano_REST_API {
      * Returns: product, variations, FAQs, video, swatches, and Yoast SEO
      */
     public function get_full_product_data($request) {
-        $slug = sanitize_text_field($request['slug']);
+        // URL decode the slug to handle Hebrew characters
+        $slug = urldecode($request['slug']);
+        $slug = sanitize_title($slug);
         
         // Get the product by slug
         $args = [
@@ -512,7 +515,7 @@ class Bellano_REST_API {
         }
         
         // Custom meta
-        $meta_keys = ['_availability_type', '_custom_order_time'];
+        $meta_keys = ['_bellano_availability_type', '_custom_order_time'];
         foreach ($meta_keys as $key) {
             $value = get_post_meta($product->get_id(), $key, true);
             if ($value) {
@@ -522,6 +525,9 @@ class Bellano_REST_API {
                 ];
             }
         }
+        
+        // Add bellano_availability as a direct field
+        $data['bellano_availability'] = get_post_meta($product->get_id(), '_bellano_availability_type', true) ?: 'in_stock';
         
         return $data;
     }
@@ -569,10 +575,19 @@ class Bellano_REST_API {
             // Get the label (Hebrew name) using WooCommerce function
             $attr_label = wc_attribute_label($taxonomy);
             
+            // Get the term name (Hebrew) instead of slug
+            $option_label = $attr_value;
+            if ($attr_value && taxonomy_exists($taxonomy)) {
+                $term = get_term_by('slug', $attr_value, $taxonomy);
+                if ($term && !is_wp_error($term)) {
+                    $option_label = $term->name;
+                }
+            }
+            
             $data['attributes'][] = [
                 'name' => $attr_label,
                 'slug' => $taxonomy,
-                'option' => $attr_value,
+                'option' => $option_label,
             ];
         }
         
