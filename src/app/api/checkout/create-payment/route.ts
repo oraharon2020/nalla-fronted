@@ -39,12 +39,14 @@ interface CreatePaymentRequest {
 
 // Get Meshulam user ID and page codes from WordPress
 async function getMeshulamConfig(): Promise<{ userId: string; pageCodes: typeof PAGE_CODES }> {
+  const fallbackUserId = siteConfig.meshulam.userId || 'e1ee96ba76032485';
+  
   try {
     const response = await fetch(getApiEndpoint('meshulam-config'));
     if (response.ok) {
       const data = await response.json();
       return {
-        userId: data.userId || 'e1ee96ba76032485',
+        userId: data.userId || fallbackUserId,
         pageCodes: {
           credit_card: data.pageCodes?.credit_card || PAGE_CODES.credit_card,
           bit: data.pageCodes?.bit || PAGE_CODES.bit,
@@ -56,7 +58,7 @@ async function getMeshulamConfig(): Promise<{ userId: string; pageCodes: typeof 
   } catch (error) {
     console.error('Error fetching Meshulam config:', error);
   }
-  return { userId: 'e1ee96ba76032485', pageCodes: PAGE_CODES }; // Fallback
+  return { userId: fallbackUserId, pageCodes: PAGE_CODES }; // Fallback
 }
 
 export async function POST(request: NextRequest) {

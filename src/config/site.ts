@@ -169,6 +169,7 @@ export const siteConfig = {
   // Payment Gateway - Meshulam
   // Note: Page codes are fetched from WordPress, these are fallbacks
   meshulam: {
+    userId: process.env.MESHULAM_USER_ID || 'e1ee96ba76032485',
     apiKey: process.env.MESHULAM_API_KEY || 'ae67b1668109',
     sandboxApiKey: process.env.MESHULAM_SANDBOX_API_KEY || '305a9a777e42',
     isSandbox: process.env.MESHULAM_SANDBOX === 'true',
