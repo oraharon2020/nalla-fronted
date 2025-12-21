@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Play, X, Volume2, VolumeX } from 'lucide-react';
+import { fixMediaUrl } from '@/config/site';
 
 interface ProductVideoProps {
   video: {
@@ -21,6 +22,10 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const fullscreenVideoRef = useRef<HTMLVideoElement>(null);
 
+  // Fix media URLs (bellano.co.il -> admin.bellano.co.il)
+  const videoUrl = fixMediaUrl(video.url);
+  const thumbnailSrc = fixMediaUrl(video.thumbnail);
+
   // Try to play video when it loads
   useEffect(() => {
     const videoElement = isFullscreen ? fullscreenVideoRef.current : videoRef.current;
@@ -32,7 +37,7 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
   }, [isPlaying, isFullscreen]);
 
   // Get YouTube thumbnail if no custom thumbnail
-  const thumbnailUrl = video.thumbnail || 
+  const thumbnailUrl = thumbnailSrc || 
     (video.youtubeId ? `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg` : null);
 
   // Handle play button click
@@ -111,7 +116,7 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
             ) : (
               <video
                 ref={videoRef}
-                src={video.url}
+                src={videoUrl}
                 autoPlay
                 muted={isMuted}
                 playsInline
@@ -165,7 +170,7 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
             ) : (
               <video
                 ref={fullscreenVideoRef}
-                src={video.url}
+                src={videoUrl}
                 autoPlay
                 muted={isMuted}
                 playsInline
