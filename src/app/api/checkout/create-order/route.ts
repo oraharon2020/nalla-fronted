@@ -44,18 +44,58 @@ interface CustomerData {
   notes: string;
 }
 
+interface UtmData {
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  gclid?: string;
+  fbclid?: string;
+  landing_page?: string;
+  referrer?: string;
+  timestamp?: string;
+}
+
 interface CreateOrderRequest {
   customer: CustomerData;
   items: OrderItem[];
   shipping_method: string;
   payment_method?: 'credit_card' | 'phone_order';
   coupon_code?: string | null;
+  utm_data?: UtmData | null;
+}
+
+// Helper to determine traffic source label
+function getTrafficSourceLabel(utm: UtmData | null | undefined): string {
+  if (!utm) return 'ישיר';
+  
+  if (utm.gclid) return 'Google Ads';
+  if (utm.fbclid) return 'Facebook Ads';
+  
+  if (utm.utm_source) {
+    const source = utm.utm_source.toLowerCase();
+    if (source.includes('google')) return 'Google';
+    if (source.includes('facebook') || source.includes('fb')) return 'Facebook';
+    if (source.includes('instagram') || source.includes('ig')) return 'Instagram';
+    if (source.includes('tiktok')) return 'TikTok';
+    if (source.includes('email') || source.includes('newsletter')) return 'Email';
+    return utm.utm_source;
+  }
+  
+  if (utm.referrer) {
+    if (utm.referrer.includes('google')) return 'Google (אורגני)';
+    if (utm.referrer.includes('facebook')) return 'Facebook (אורגני)';
+    return 'הפניה';
+  }
+  
+  return 'ישיר';
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: CreateOrderRequest = await request.json();
-    const { customer, items, shipping_method, payment_method = 'credit_card', coupon_code } = body;
+    const { customer, items, shipping_method, payment_method = 'credit_card', coupon_code, utm_data } = body;
 
     if (!WC_KEY || !WC_SECRET) {
       return NextResponse.json(
@@ -191,6 +231,17 @@ export async function POST(request: NextRequest) {
           value: 'bellano_nextjs_checkout',
         },
         ...(hasAdminFields ? [{ key: '_sales_rep_order', value: 'yes' }] : []),
+        // Traffic source tracking
+        {
+          key: 'מקור הגעה',
+          value: getTrafficSourceLabel(utm_data),
+        },
+        ...(utm_data?.utm_source ? [{ key: '_utm_source', value: utm_data.utm_source }] : []),
+        ...(utm_data?.utm_medium ? [{ key: '_utm_medium', value: utm_data.utm_medium }] : []),
+        ...(utm_data?.utm_campaign ? [{ key: '_utm_campaign', value: utm_data.utm_campaign }] : []),
+        ...(utm_data?.gclid ? [{ key: '_gclid', value: utm_data.gclid }] : []),
+        ...(utm_data?.fbclid ? [{ key: '_fbclid', value: utm_data.fbclid }] : []),
+        ...(utm_data?.landing_page ? [{ key: '_landing_page', value: utm_data.landing_page }] : []),
       ],
     };
 

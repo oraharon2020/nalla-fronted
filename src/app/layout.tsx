@@ -8,6 +8,7 @@ import { OrganizationJsonLd, WebsiteJsonLd, LocalBusinessJsonLd } from "@/compon
 import { siteConfig } from "@/config/site";
 import PromoPopup from "@/components/PromoPopup";
 import { AdminLoginModal } from "@/components/layout/AdminLoginModal";
+import { UtmTracker } from "@/components/UtmTracker";
 
 const rubik = Rubik({
   variable: "--font-rubik",
@@ -156,6 +157,7 @@ export default function RootLayout({
         <FloatingButtons />
         <PromoPopup />
         <AdminLoginModal />
+        <UtmTracker />
         <Analytics />
       </body>
     </html>

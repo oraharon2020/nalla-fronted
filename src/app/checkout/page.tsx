@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Loader2, ShoppingBag, CreditCard, Truck, ShieldCheck, CheckCircle, Phone, Smartphone, Wallet, Trash2, Pencil, Minus, Plus, Tag } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
+import { getStoredUtmParams, getTrafficSourceLabel } from '@/hooks/useUtmTracking';
 
 interface ShippingMethod {
   id: string;
@@ -233,6 +234,8 @@ export default function CheckoutPage() {
           payment_method: paymentMethod,
           // Include coupon if applied
           coupon_code: appliedCoupon?.code || null,
+          // Include UTM tracking data
+          utm_data: getStoredUtmParams(),
         }),
       });
 
