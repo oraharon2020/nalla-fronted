@@ -99,13 +99,17 @@ export async function POST(request: NextRequest) {
       // (attributes set to "Any" in WooCommerce - like length, depth, height)
       // These won't be auto-added by WooCommerce so we need to add them manually
       if (item.variation_attributes && item.variation_attributes.length > 0) {
-        // Get list of attributes that WooCommerce will auto-add (from variation)
-        // We'll add all attributes except the first one (color) which comes from variation
-        // Actually, let's add them all with a display prefix to avoid filtering
         item.variation_attributes.forEach((attr, index) => {
           // Skip the first attribute (usually color) as it comes from variation_id
           if (index > 0) {
-            lineItem.meta_data.push({ key: attr.name, value: attr.value });
+            // Use underscore prefix to prevent WooCommerce from filtering
+            // Also add display_key for proper display
+            lineItem.meta_data.push({ 
+              key: `_${attr.name}`, 
+              value: attr.value,
+              display_key: attr.name,
+              display_value: attr.value
+            });
           }
         });
       }
