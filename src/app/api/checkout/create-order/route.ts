@@ -80,26 +80,9 @@ export async function POST(request: NextRequest) {
       // Initialize meta_data array
       lineItem.meta_data = [];
       
-      // Add variation_id for stock management and pricing
-      // WooCommerce will auto-add the variation's defined attributes (like color)
+      // Add variation_id - WooCommerce should handle displaying the variation attributes
       if (item.variation_id) {
         lineItem.variation_id = item.variation_id;
-      }
-      
-      // Add variation attributes that are NOT part of the variation definition
-      // (attributes set to "Any" in WooCommerce - like length, depth, height)
-      // WooCommerce filters meta_data keys that match product attribute names,
-      // so we add underscore prefix to bypass the filter
-      if (item.variation_attributes && item.variation_attributes.length > 0) {
-        item.variation_attributes.forEach((attr, index) => {
-          // Skip the first attribute (usually color) as it comes from variation_id
-          if (index > 0) {
-            lineItem.meta_data.push({ 
-              key: `_${attr.name}`, 
-              value: attr.value
-            });
-          }
-        });
       }
       
       // If admin fields are present, add them as meta data and override price
