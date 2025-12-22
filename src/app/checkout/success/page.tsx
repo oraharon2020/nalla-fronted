@@ -12,6 +12,7 @@ interface OrderItem {
   quantity: number;
   price: string;
   image?: string;
+  attributes?: Array<{ name: string; value: string }>;
 }
 
 interface OrderData {
@@ -236,7 +237,7 @@ function SuccessContent() {
               </h3>
               <div className="space-y-4">
                 {orderData.items.map((item, index) => (
-                  <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                  <div key={index} className="flex items-start gap-4 p-3 bg-gray-50 rounded-lg">
                     {item.image && (
                       <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                         <Image
@@ -250,6 +251,15 @@ function SuccessContent() {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 truncate">{item.name}</p>
                       <p className="text-sm text-gray-500">כמות: {item.quantity}</p>
+                      {item.attributes && item.attributes.length > 0 && (
+                        <div className="mt-1 text-xs text-gray-500 space-y-0.5">
+                          {item.attributes.map((attr, attrIndex) => (
+                            <p key={attrIndex}>
+                              <span className="font-medium">{attr.name}:</span> {attr.value}
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <p className="font-bold text-gray-900">{item.price}</p>
                   </div>

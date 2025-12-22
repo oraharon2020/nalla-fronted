@@ -66,12 +66,48 @@ export async function GET(request: NextRequest) {
           quantity: number;
           total: string;
           image?: { src?: string };
-        }) => ({
-          name: item.name,
-          quantity: item.quantity,
-          price: `₪${parseFloat(item.total).toLocaleString()}`,
-          image: item.image?.src || null,
-        })),
+          meta_data?: Array<{ key: string; value: string; display_key?: string; display_value?: string }>;
+        }) => {
+          // Extract variation attributes from meta_data
+          const attributes: Array<{ name: string; value: string }> = [];
+          if (item.meta_data) {
+            item.meta_data.forEach((meta) => {
+              // Skip internal/empty meta
+              if (!meta.value || meta.value === '' || meta.key.startsWith('_') || 
+                  meta.key.startsWith('pa_') || meta.key === 'סוג הנחה' || 
+                  meta.key === 'מחיר מקורי' || meta.key === 'מחיר סופי' ||
+                  meta.key.startsWith('bellano_attr_')) {
+                
+                // Handle bellano_attr_ prefix
+                if (meta.key.startsWith('bellano_attr_') && meta.value) {
+                  const displayKey = meta.key.replace('bellano_attr_', '').replace(/_/g, ' ');
+                  attributes.push({
+                    name: displayKey,
+                    value: meta.value
+                  });
+                }
+                return;
+              }
+              
+              // Use display_key if available, otherwise use key
+              const displayKey = meta.display_key || meta.key;
+              const displayValue = meta.display_value || meta.value;
+              
+              attributes.push({
+                name: displayKey,
+                value: displayValue
+              });
+            });
+          }
+          
+          return {
+            name: item.name,
+            quantity: item.quantity,
+            price: `₪${parseFloat(item.total).toLocaleString()}`,
+            image: item.image?.src || null,
+            attributes: attributes.length > 0 ? attributes : undefined,
+          };
+        }),
         billing: {
           first_name: data.billing.first_name,
           last_name: data.billing.last_name,
