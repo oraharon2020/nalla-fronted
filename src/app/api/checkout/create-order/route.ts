@@ -85,6 +85,25 @@ export async function POST(request: NextRequest) {
         lineItem.variation_id = item.variation_id;
       }
       
+      // Add ALL variation attributes twice:
+      // 1. With underscore prefix (hidden from display) - for illustration plugin to read
+      // 2. With display name - for showing in order details to customer
+      if (item.variation_attributes && item.variation_attributes.length > 0) {
+        item.variation_attributes.forEach((attr) => {
+          // Add hidden field with underscore for plugin (won't show in order)
+          lineItem.meta_data.push({ 
+            key: `_${attr.name}`, 
+            value: attr.value
+          });
+          
+          // Add display field for order details (with prefix to avoid WooCommerce filtering)
+          lineItem.meta_data.push({ 
+            key: `בחירת ${attr.name}`, 
+            value: attr.value
+          });
+        });
+      }
+      
       // If admin fields are present, add them as meta data and override price
       if (item.admin_fields) {
         
