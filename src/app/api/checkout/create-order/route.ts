@@ -120,31 +120,20 @@ export async function POST(request: NextRequest) {
       // Initialize meta_data array
       lineItem.meta_data = [];
       
-      // Add variation_id - WooCommerce needs this for pricing and stock
+      // Add variation_id - WooCommerce handles displaying attributes
       if (item.variation_id) {
         lineItem.variation_id = item.variation_id;
       }
       
-      // Add variation attributes as meta_data with special display key
-      // WooCommerce REST API requires meta_data for displaying attributes in emails
+      // Add variation attributes as meta_data
+      // The PHP plugin will ensure these are displayed properly in emails
       if (item.variation_attributes && item.variation_attributes.length > 0) {
         item.variation_attributes.forEach((attr) => {
-          // Add visible attribute for email display
-          // Using the attribute name directly - WooCommerce will display these in emails
+          // Add visible attribute
           lineItem.meta_data.push({ 
             key: attr.name,
-            value: attr.value,
-            display_key: attr.name,
-            display_value: attr.value
+            value: attr.value
           });
-          
-          // Also add hidden meta for illustration plugin (non-color only)
-          if (attr.name !== 'צבע' && attr.name.toLowerCase() !== 'color') {
-            lineItem.meta_data.push({ 
-              key: `_${attr.name}`, 
-              value: attr.value
-            });
-          }
         });
       }
       
