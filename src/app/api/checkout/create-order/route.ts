@@ -125,14 +125,16 @@ export async function POST(request: NextRequest) {
         lineItem.variation_id = item.variation_id;
       }
       
-      // Add variation attributes as meta_data
-      // The PHP plugin will ensure these are displayed properly in emails
+      // Add variation attributes as meta_data for display in emails
+      // Use special format that WooCommerce will display in emails
       if (item.variation_attributes && item.variation_attributes.length > 0) {
         item.variation_attributes.forEach((attr) => {
-          // Add visible attribute
+          // Use bellano_attr_ prefix (without underscore at start - WooCommerce hides underscore-prefixed meta)
           lineItem.meta_data.push({ 
-            key: attr.name,
-            value: attr.value
+            key: `bellano_attr_${attr.name.replace(/\s+/g, '_')}`,
+            value: attr.value,
+            display_key: attr.name,
+            display_value: attr.value
           });
         });
       }
