@@ -61,7 +61,7 @@ export default function PromoPopup() {
     <>
       {/* Backdrop */}
       <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/40 z-[100] transition-opacity duration-300 ${
           isClosing ? 'opacity-0' : 'opacity-100'
         }`}
         onClick={handleClose}
@@ -74,88 +74,69 @@ export default function PromoPopup() {
         }`}
       >
         <div 
-          className="relative w-full max-w-[360px] bg-white overflow-hidden shadow-2xl rounded-2xl"
+          className="relative w-full max-w-[320px] bg-white overflow-hidden shadow-xl rounded-3xl"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Top Gold Accent Bar */}
-          <div className="h-1 w-full bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-400" />
-          
           {/* Close Button */}
           <button
             onClick={handleClose}
-            className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-10"
+            className="absolute top-4 left-4 w-7 h-7 flex items-center justify-center text-gray-300 hover:text-gray-500 transition-colors z-10"
             aria-label="סגור"
           >
-            <X className="w-4 h-4 text-gray-500" />
+            <X className="w-5 h-5" strokeWidth={1.5} />
           </button>
 
           {/* Content */}
-          <div className="px-6 pt-8 pb-6">
+          <div className="px-8 pt-12 pb-8">
             
-            {/* Menorah Icon */}
-            <div className="text-center mb-4">
-              <span className="text-4xl">🕎</span>
-            </div>
-
-            {/* Headlines - Centered & Clean */}
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-0.5">
-                {content.headline}
-              </h2>
-              <p className="text-sm text-gray-400 font-light tracking-wider">
+            {/* Headline */}
+            <div className="text-center mb-8">
+              <p className="text-[11px] text-gray-400 uppercase tracking-[0.2em] mb-3">
                 {content.englishText}
               </p>
+              <h2 className="text-2xl font-light text-gray-900 tracking-wide">
+                {content.headline}
+              </h2>
             </div>
 
-            {/* Discount Box */}
-            <div className="bg-gray-50 rounded-xl p-5 mb-5 text-center">
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-5xl font-black text-gray-900">7</span>
-                <span className="text-3xl font-bold text-gray-900">%</span>
-              </div>
-              <p className="text-sm text-gray-600 mt-1">{content.discountText}</p>
-            </div>
-
-            {/* Coupon Code Section */}
-            <div className="mb-5">
-              <p className="text-xs text-gray-400 text-center mb-2 uppercase tracking-wider">
-                {content.couponLabel}
+            {/* Discount */}
+            <div className="text-center mb-8">
+              <span className="text-6xl font-extralight text-gray-900 tracking-tight">
+                7<span className="text-3xl">%</span>
+              </span>
+              <p className="text-[13px] text-gray-500 mt-2 font-light">
+                {content.discountText}
               </p>
-              <div className="flex gap-2">
-                <div className="flex-1 bg-gray-900 text-white px-4 py-3 rounded-lg text-center">
-                  <span className="font-mono text-lg font-bold tracking-widest">
-                    {content.couponCode}
-                  </span>
+            </div>
+
+            {/* Coupon Code */}
+            <div className="mb-6">
+              <button
+                onClick={handleCopy}
+                className="w-full group"
+              >
+                <div className={`border ${copied ? 'border-gray-900 bg-gray-900' : 'border-gray-200 bg-gray-50 hover:border-gray-300'} rounded-xl py-4 px-6 transition-all duration-200`}>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-[0.15em] mb-1">
+                    {content.couponLabel}
+                  </p>
+                  <p className={`font-mono text-lg tracking-[0.1em] transition-colors ${copied ? 'text-white' : 'text-gray-900'}`}>
+                    {copied ? '✓ הועתק' : content.couponCode}
+                  </p>
                 </div>
-                <button
-                  onClick={handleCopy}
-                  className={`px-5 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                    copied 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-amber-400 text-gray-900 hover:bg-amber-500'
-                  }`}
-                >
-                  {copied ? '✓' : content.copyButtonText}
-                </button>
-              </div>
-              {copied && (
-                <p className="text-green-600 text-xs text-center mt-2 font-medium">
-                  {content.copiedText}
-                </p>
-              )}
+              </button>
             </div>
 
             {/* CTA Button */}
             <Link
               href={content.ctaLink}
               onClick={handleClose}
-              className="block w-full bg-gray-900 text-white py-3.5 rounded-lg font-semibold text-center hover:bg-gray-800 transition-colors"
+              className="block w-full bg-gray-900 text-white py-4 rounded-xl text-[13px] font-medium text-center hover:bg-gray-800 transition-colors tracking-wide"
             >
-              {content.ctaText} ←
+              {content.ctaText}
             </Link>
 
-            {/* Footer Note */}
-            <p className="text-gray-400 text-[11px] text-center mt-4">
+            {/* Footer */}
+            <p className="text-gray-300 text-[10px] text-center mt-6 tracking-wide">
               {content.footerNote}
             </p>
           </div>
