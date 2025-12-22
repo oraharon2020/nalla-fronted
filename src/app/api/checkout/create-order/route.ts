@@ -125,19 +125,24 @@ export async function POST(request: NextRequest) {
         lineItem.variation_id = item.variation_id;
       }
       
-      // Add variation attributes with underscore prefix (hidden from display)
-      // Skip color (צבע) as WooCommerce already displays it from variation_id
-      // This is for the illustration plugin to read the other attributes
+      // Send variation attributes through the proper 'variation' field
+      // This is how WooCommerce natively handles variation data (like the regular WC checkout)
       if (item.variation_attributes && item.variation_attributes.length > 0) {
+        lineItem.variation = {};
         item.variation_attributes.forEach((attr) => {
-          // Skip color attribute - WooCommerce handles it
-          if (attr.name === 'צבע' || attr.name.toLowerCase() === 'color') {
-            return;
+          // Use the attribute slug format: "attribute_pa_צבע" or "attribute_צבע"
+          const attrKey = `attribute_${attr.name}`;
+          lineItem.variation[attrKey] = attr.value;
+        });
+        
+        // Also add hidden meta for illustration plugin
+        item.variation_attributes.forEach((attr) => {
+          if (attr.name !== 'צבע' && attr.name.toLowerCase() !== 'color') {
+            lineItem.meta_data.push({ 
+              key: `_${attr.name}`, 
+              value: attr.value
+            });
           }
-          lineItem.meta_data.push({ 
-            key: `_${attr.name}`, 
-            value: attr.value
-          });
         });
       }
       
