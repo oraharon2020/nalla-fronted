@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const WC_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://admin.bellano.co.il';
-const WC_KEY = process.env.WC_CONSUMER_KEY;
-const WC_SECRET = process.env.WC_CONSUMER_SECRET;
+const WC_KEY = process.env.WC_CONSUMER_KEY || process.env.WOOCOMMERCE_CONSUMER_KEY;
+const WC_SECRET = process.env.WC_CONSUMER_SECRET || process.env.WOOCOMMERCE_CONSUMER_SECRET;
 
 /**
  * Meshulam Payment Webhook
@@ -12,6 +12,9 @@ const WC_SECRET = process.env.WC_CONSUMER_SECRET;
  */
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
+  
+  // Debug log
+  console.log('Webhook called, WC_KEY exists:', !!WC_KEY, 'WC_SECRET exists:', !!WC_SECRET);
   
   try {
     // Parse form data (Meshulam sends as application/x-www-form-urlencoded)
