@@ -96,10 +96,10 @@ export async function POST(request: NextRequest) {
       payments,
       orderId: order_id.toString(),
       description: `הזמנה #${order_id} - ${siteConfig.name}`,
-      successUrl: `${SITE_URL}/checkout/success?order_id=${order_id}`,
+      // Use WordPress endpoints for both success and notify (Meshulam can reach WordPress)
+      successUrl: getApiEndpoint('meshulam-success'),
       cancelUrl: `${SITE_URL}/checkout?cancelled=true`,
-      // Use Next.js webhook instead of WordPress (bypasses Imperva, faster)
-      notifyUrl: `${SITE_URL}/api/webhooks/meshulam`,
+      notifyUrl: getApiEndpoint('meshulam-webhook'),
       items: items.map(item => ({
         sku: item.sku,
         price: item.price,
