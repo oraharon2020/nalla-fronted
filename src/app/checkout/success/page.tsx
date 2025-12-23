@@ -93,8 +93,8 @@ function SuccessContent() {
     // Clear cart from localStorage
     localStorage.removeItem('cart-storage');
     
-    // Verify order status and get order data
-    const checkOrder = async () => {
+    // Verify order status and get order data with polling
+    const checkOrder = async (attempt = 1): Promise<void> => {
       if (!orderId) {
         setOrderStatus('error');
         return;
@@ -104,24 +104,37 @@ function SuccessContent() {
         const response = await fetch(`/api/checkout/order-status?order_id=${orderId}&include_details=true`);
         const data = await response.json();
         
-        if (data.success && (data.status === 'processing' || data.status === 'completed' || data.status === 'on-hold')) {
-          setOrderStatus('success');
-          if (data.order) {
-            setOrderData(data.order);
+        if (data.success && data.order) {
+          setOrderData(data.order);
+          
+          // Check if payment is complete
+          if (data.status === 'processing' || data.status === 'completed' || data.status === 'on-hold') {
+            setOrderStatus('success');
+            return;
           }
+        }
+        
+        // If still pending and we have more attempts, retry
+        if (attempt < 5) {
+          setTimeout(() => checkOrder(attempt + 1), 1500);
         } else {
-          // Wait a bit and check again - payment might still be processing
-          setTimeout(async () => {
-            const retryResponse = await fetch(`/api/checkout/order-status?order_id=${orderId}&include_details=true`);
-            const retryData = await retryResponse.json();
-            setOrderStatus('success'); // Show success anyway - webhook might be delayed
-            if (retryData.order) {
-              setOrderData(retryData.order);
-            }
-          }, 2000);
+          // Show success anyway after max attempts - we got here from payment page
+          setOrderStatus('success');
+          // Set minimal order data if we don't have it
+          if (!orderData) {
+            setOrderData({
+              id: orderId,
+              status: 'pending',
+              total: '0',
+              currency: 'ILS',
+              items: [],
+              billing: { first_name: '', last_name: '', email: '', phone: '' }
+            });
+          }
         }
       } catch {
-        setOrderStatus('success'); // Show success - we got here from payment page
+        // On error, show success anyway - we got here from payment page
+        setOrderStatus('success');
       }
     };
 
