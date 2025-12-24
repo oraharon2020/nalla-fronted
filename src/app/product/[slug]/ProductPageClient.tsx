@@ -582,7 +582,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                       : 'bg-slate-100 text-slate-600'
                   }`}
                 >
-                  {product.assemblyIncluded !== false ? 'מגיע מורכב' : 'הרכבה עצמאית'}
+                  {product.assemblyIncluded !== false ? 'מגיע מורכב' : 'נדרש הרכבה'}
                 </span>
               </div>
             </div>

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getProductsWithSwatches, getCategories, transformCategory } from '@/lib/woocommerce';
 import { Truck, ShieldCheck, CreditCard, RotateCcw } from 'lucide-react';
-import { NewsletterForm } from '@/components/home/NewsletterForm';
+import { WhatsAppSubscribeForm } from '@/components/home/WhatsAppSubscribeForm';
 import { siteConfig, getApiEndpoint, fixMediaUrl } from '@/config/site';
 
 // Helper to get optimized image URL through Next.js
@@ -571,11 +571,11 @@ function NewsletterSection() {
             הישארו <span className="font-bold">מעודכנים</span>
           </h2>
           <p className="text-white/60 mb-10 text-lg">
-            הצטרפו לרשימת התפוצה שלנו וקבלו עדכונים על מוצרים חדשים, 
-            מבצעים בלעדיים והשראה לעיצוב הבית
+            קבלו עדכונים על מוצרים חדשים ומבצעים בלעדיים 
+            ישירות לוואטסאפ
           </p>
           
-          <NewsletterForm />
+          <WhatsAppSubscribeForm />
           
           <p className="text-white/30 text-xs mt-6">
             לא נשלח ספאם. ניתן לבטל בכל עת.
