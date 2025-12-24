@@ -250,12 +250,14 @@ export default function CheckoutPage() {
       });
 
       const orderData = await orderResponse.json();
+      console.log('Order response:', orderData);
 
       if (!orderData.success) {
         throw new Error(orderData.message || 'שגיאה ביצירת ההזמנה');
       }
 
       setOrderId(orderData.order_id);
+      console.log('Order created:', orderData.order_id);
 
       // If phone order - redirect to success page with phone_order flag
       if (paymentMethod === 'phone_order') {
@@ -283,6 +285,8 @@ export default function CheckoutPage() {
       // Amount to charge (with coupon discount if applied)
       const amountToCharge = appliedCoupon ? finalTotal : subtotal;
       
+      console.log('Amount to charge:', amountToCharge);
+      
       // Send single item with total amount to avoid Meshulam sum mismatch issues
       const finalPaymentItems = [{
         name: productNames.length > 100 ? productNames.substring(0, 97) + '...' : productNames,
@@ -293,6 +297,8 @@ export default function CheckoutPage() {
       
       // For Bit, don't send installments
       const paymentsToSend = paymentMethod === 'bit' ? 1 : selectedPayments;
+      
+      console.log('Creating payment...', { amount: amountToCharge, payments: paymentsToSend });
       
       const paymentResponse = await fetch('/api/checkout/create-payment', {
         method: 'POST',
@@ -308,6 +314,7 @@ export default function CheckoutPage() {
       });
 
       const paymentData = await paymentResponse.json();
+      console.log('Payment response:', paymentData);
 
       if (!paymentData.success) {
         throw new Error(paymentData.message || 'שגיאה ביצירת התשלום');
