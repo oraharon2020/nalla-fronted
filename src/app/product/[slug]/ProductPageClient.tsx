@@ -184,6 +184,7 @@ interface ProductPageClientProps {
     salePrice?: string;
     onSale: boolean;
     availabilityType?: 'in_stock' | 'custom_order';
+    assemblyIncluded?: boolean;
     image?: { sourceUrl: string; altText?: string };
     galleryImages?: { sourceUrl: string; altText?: string }[];
     attributes?: {
@@ -760,6 +761,12 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                 <CreditCard className="w-4 h-4" />
                 <span>עד 12 תשלומים</span>
               </div>
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{product.assemblyIncluded !== false ? 'מגיע מורכב' : 'דרושה הרכבה עצמית'}</span>
+              </div>
             </div>
 
             {/* AI Product Chat */}
@@ -774,6 +781,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                     name: a.name,
                     options: a.options || [],
                   })) || [],
+                  assemblyIncluded: product.assemblyIncluded !== false,
                 }}
               />
             )}

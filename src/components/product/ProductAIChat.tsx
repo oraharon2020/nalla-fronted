@@ -14,6 +14,7 @@ interface ProductInfo {
     depth?: string;
     height?: string;
   };
+  assemblyIncluded?: boolean;
 }
 
 interface Message {
@@ -103,6 +104,35 @@ export default function ProductAIChat({ product }: ProductAIChatProps) {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  // Resize handle - supports both mouse and touch
+  const handleResizeStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    
+    const startY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const startHeight = container.offsetHeight;
+    
+    const onMove = (moveEvent: MouseEvent | TouchEvent) => {
+      const currentY = 'touches' in moveEvent ? moveEvent.touches[0].clientY : (moveEvent as MouseEvent).clientY;
+      const deltaY = currentY - startY;
+      const newHeight = Math.max(176, Math.min(500, startHeight + deltaY));
+      container.style.height = `${newHeight}px`;
+    };
+    
+    const onEnd = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onEnd);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+    };
+    
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
   };
 
   // Closed state - elegant minimal trigger
@@ -223,32 +253,13 @@ export default function ProductAIChat({ product }: ProductAIChatProps) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Resize handle */}
+        {/* Resize handle - supports touch */}
         <div 
-          className="flex justify-center py-1 cursor-ns-resize hover:bg-slate-50 transition-colors border-t border-slate-100/50"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            const startY = e.clientY;
-            const container = messagesContainerRef.current;
-            if (!container) return;
-            const startHeight = container.offsetHeight;
-            
-            const onMouseMove = (moveEvent: MouseEvent) => {
-              const deltaY = moveEvent.clientY - startY;
-              const newHeight = Math.max(176, Math.min(500, startHeight + deltaY));
-              container.style.height = `${newHeight}px`;
-            };
-            
-            const onMouseUp = () => {
-              document.removeEventListener('mousemove', onMouseMove);
-              document.removeEventListener('mouseup', onMouseUp);
-            };
-            
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-          }}
+          className="flex justify-center py-2 cursor-ns-resize hover:bg-slate-50 active:bg-slate-100 transition-colors border-t border-slate-100/50 touch-none"
+          onMouseDown={handleResizeStart}
+          onTouchStart={handleResizeStart}
         >
-          <div className="w-8 h-1 bg-slate-200 rounded-full" />
+          <div className="w-10 h-1.5 bg-slate-300 rounded-full" />
         </div>
 
         {/* Input area */}
@@ -267,9 +278,9 @@ export default function ProductAIChat({ product }: ProductAIChatProps) {
               }}
               placeholder="מה תרצו לדעת?"
               rows={1}
-              className="flex-1 px-3.5 py-2 bg-slate-50/50 border border-slate-200/60 rounded-lg text-sm focus:outline-none focus:border-slate-400 focus:bg-white placeholder:text-slate-400 transition-all resize-none min-h-[40px] max-h-[100px]"
+              className="flex-1 px-3.5 py-2 bg-slate-50/50 border border-slate-200/60 rounded-lg text-base focus:outline-none focus:border-slate-400 focus:bg-white placeholder:text-slate-400 transition-all resize-none min-h-[44px] max-h-[100px]"
               disabled={isLoading}
-              style={{ height: 'auto', overflow: 'hidden' }}
+              style={{ height: 'auto', overflow: 'hidden', fontSize: '16px' }}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement;
                 target.style.height = 'auto';

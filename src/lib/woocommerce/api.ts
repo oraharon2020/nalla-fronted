@@ -61,6 +61,7 @@ export interface WooProduct {
   on_sale: boolean;
   stock_status: string;
   bellano_availability?: 'in_stock' | 'custom_order'; // Custom field from Bellano plugin
+  bellano_assembly?: boolean; // Custom field - product comes assembled (default: true)
   categories: { id: number; name: string; slug: string }[];
   images: { id: number; src: string; alt: string }[];
   attributes: { id: number; name: string; options: string[]; variation: boolean; visible?: boolean }[];
@@ -556,6 +557,7 @@ export function transformProduct(wooProduct: WooProduct, variations?: WooVariati
     onSale: wooProduct.on_sale,
     sku: wooProduct.sku,
     availabilityType: wooProduct.bellano_availability || 'in_stock',
+    assemblyIncluded: wooProduct.bellano_assembly !== false, // Default to true if not specified
     image: wooProduct.images?.[0] ? {
       sourceUrl: wooProduct.images[0].src,
       altText: wooProduct.images[0].alt || wooProduct.name,
