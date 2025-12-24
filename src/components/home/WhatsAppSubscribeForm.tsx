@@ -80,8 +80,8 @@ export function WhatsAppSubscribeForm() {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="מספר טלפון (למשל: 0541234567)"
-          className="w-full px-5 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all text-base"
-          dir="ltr"
+          className="w-full px-5 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all text-base text-right"
+          dir="rtl"
           disabled={status === 'loading'}
         />
 

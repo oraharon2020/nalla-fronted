@@ -15,6 +15,7 @@ import { ProductVideo } from '@/components/product/ProductVideo';
 import { ColorSwatch, findSwatchByName } from '@/lib/woocommerce/api';
 import { siteConfig } from '@/config/site';
 import ProductAIChat from '@/components/product/ProductAIChat';
+import CompleteTheLook from '@/components/product/CompleteTheLook';
 import featureFlags from '@/config/features';
 
 // Color mapping for visual display
@@ -171,6 +172,21 @@ interface ProductVideoData {
   youtubeId: string | null;
 }
 
+interface RelatedProductData {
+  id: number;
+  name: string;
+  slug: string;
+  price: string;
+  regular_price?: string;
+  image: string;
+}
+
+interface RelatedData {
+  enabled: boolean;
+  discount: number;
+  products: RelatedProductData[];
+}
+
 interface ProductPageClientProps {
   product: {
     id: string;
@@ -196,9 +212,10 @@ interface ProductPageClientProps {
   video?: ProductVideoData | null;
   swatches?: Record<string, ColorSwatch>;
   category?: { name: string; slug: string };
+  relatedData?: RelatedData | null;
 }
 
-export function ProductPageClient({ product, variations = [], faqs = [], video = null, swatches = {}, category }: ProductPageClientProps) {
+export function ProductPageClient({ product, variations = [], faqs = [], video = null, swatches = {}, category, relatedData }: ProductPageClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -902,6 +919,19 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
             </div>
           </div>
         </div>
+
+        {/* Complete The Look - Bundle Section */}
+        <CompleteTheLook
+          currentProduct={{
+            id: product.id,
+            databaseId: product.databaseId,
+            name: product.name,
+            slug: product.slug,
+            price: currentPrice,
+            image: product.image,
+          }}
+          relatedData={relatedData}
+        />
       </div>
     </div>
   );

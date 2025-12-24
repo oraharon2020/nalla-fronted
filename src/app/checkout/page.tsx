@@ -199,6 +199,16 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Debug: log cart data
+    console.log('Cart items:', items);
+    console.log('Subtotal:', subtotal);
+    console.log('Final total:', finalTotal);
+
+    if (subtotal <= 0) {
+      setError('סכום ההזמנה אינו תקין. נסו לרענן את הדף.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {

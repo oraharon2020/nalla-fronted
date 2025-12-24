@@ -62,6 +62,18 @@ export interface WooProduct {
   stock_status: string;
   bellano_availability?: 'in_stock' | 'custom_order'; // Custom field from Bellano plugin
   bellano_assembly?: boolean; // Custom field - product comes assembled (default: true)
+  bellano_related?: {
+    enabled: boolean;
+    discount: number;
+    products: {
+      id: number;
+      name: string;
+      slug: string;
+      price: string;
+      regular_price?: string;
+      image: string;
+    }[];
+  } | null; // Custom field - complete the look bundle
   categories: { id: number; name: string; slug: string }[];
   images: { id: number; src: string; alt: string }[];
   attributes: { id: number; name: string; options: string[]; variation: boolean; visible?: boolean }[];

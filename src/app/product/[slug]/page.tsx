@@ -162,6 +162,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     const categoryName = wooProduct.categories?.[0]?.name || 'מוצרים';
     const categorySlug = wooProduct.categories?.[0]?.slug || '';
 
+    // Get related products data (complete the look)
+    const relatedData = wooProduct.bellano_related || null;
+
     return (
       <>
         {/* JSON-LD Structured Data */}
@@ -191,6 +194,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           video={video} 
           swatches={swatches}
           category={categorySlug ? { name: categoryName, slug: categorySlug } : undefined}
+          relatedData={relatedData}
         />
       </>
     );
