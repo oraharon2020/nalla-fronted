@@ -1,0 +1,7 @@
+# Bellano Memory Fix - Add this to the TOP of your .htaccess file
+# Or upload this file to /home/bellano/htdocs/www.bellano.co.il/
+
+php_value memory_limit 1024M
+php_value max_execution_time 300
+
+# END Bellano Memory Fix

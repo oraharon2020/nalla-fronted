@@ -1,0 +1,15 @@
+===== הוסף את השורות האלה ל-wp-config.php =====
+===== הוסף לפני השורה: /* That's all, stop editing! */ =====
+
+define('WP_MEMORY_LIMIT', '1024M');
+define('WP_MAX_MEMORY_LIMIT', '1024M');
+
+===== סוף הקוד להוספה =====
+
+הנתיב לקובץ בשרת:
+/home/bellano/htdocs/www.bellano.co.il/wp-config.php
+
+אפשר לערוך דרך:
+1. SFTP - פתח את הקובץ וערוך
+2. cPanel File Manager
+3. SSH לשרת

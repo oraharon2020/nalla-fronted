@@ -20,10 +20,10 @@ interface Product {
 }
 
 const quickPrompts = [
-  { icon: Sofa, text: 'אני מחפש ספה לסלון קטן', category: 'סלון' },
+  { icon: Home, text: 'אני מחפש מזנון לסלון מודרני', category: 'סלון' },
   { icon: Bed, text: 'מיטה זוגית בסגנון מודרני', category: 'חדר שינה' },
-  { icon: UtensilsCrossed, text: 'פינת אוכל ל-6 סועדים', category: 'פינת אוכל' },
-  { icon: Home, text: 'ריהוט לדירת סטודיו', category: 'כללי' },
+  { icon: UtensilsCrossed, text: 'שולחן אוכל ל-6 סועדים', category: 'פינת אוכל' },
+  { icon: Sofa, text: 'קונסולה לכניסה לבית', category: 'כניסה' },
 ];
 
 export default function DesignAssistantPage() {

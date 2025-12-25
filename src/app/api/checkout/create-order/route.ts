@@ -225,10 +225,10 @@ export async function POST(request: NextRequest) {
       coupon_lines: coupon_code ? [{ code: coupon_code }] : [],
       meta_data: [
         {
-          key: '_created_via',
+          key: 'bellano_created_via',
           value: 'bellano_nextjs_checkout',
         },
-        ...(hasAdminFields ? [{ key: '_sales_rep_order', value: 'yes' }] : []),
+        ...(hasAdminFields ? [{ key: 'bellano_sales_rep_order', value: 'yes' }] : []),
         // Traffic source tracking
         {
           key: 'מקור הגעה',
