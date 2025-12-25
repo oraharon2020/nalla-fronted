@@ -547,6 +547,9 @@ class Bellano_REST_API {
         $assembly = get_post_meta($product->get_id(), '_bellano_assembly', true);
         $data['bellano_assembly'] = ($assembly === '' || $assembly === '1') ? true : false;
         
+        // Add bellano_related (Complete The Look) data
+        $data['bellano_related'] = Bellano_Related_Products::get_related_products_data($product->get_id());
+        
         return $data;
     }
     

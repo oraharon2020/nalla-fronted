@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Minus, Plus, Trash2, ShoppingBag, X, FileText, Ruler, Tag, Loader2 } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, X, FileText, Ruler, Tag, Loader2, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 
 interface AppliedCoupon {
@@ -27,6 +27,16 @@ export function CartSidebar() {
       minimumFractionDigits: 0,
     }).format(price);
   };
+
+  // Calculate bundle savings
+  const bundleSavings = items.reduce((total, item) => {
+    if (item.bundleDiscount && item.originalPrice) {
+      const originalNum = parseInt(item.originalPrice.replace(/[^\d]/g, '')) || 0;
+      const currentNum = parseInt(item.price.replace(/[^\d]/g, '')) || 0;
+      return total + (originalNum - currentNum) * item.quantity;
+    }
+    return total;
+  }, 0);
 
   const subtotal = getTotal();
   const discount = appliedCoupon?.discount || 0;
@@ -159,6 +169,19 @@ export function CartSidebar() {
                       </p>
                     )}
                     
+                    {/* Bundle Discount Badge */}
+                    {item.bundleDiscount && item.bundleDiscount > 0 && (
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                          <Sparkles className="w-3 h-3" />
+                          {item.bundleDiscount}% הנחת באנדל
+                        </span>
+                        {item.originalPrice && (
+                          <span className="text-[10px] text-gray-400 line-through">{item.originalPrice}</span>
+                        )}
+                      </div>
+                    )}
+                    
                     {/* Admin Fields Display - only show if there's actual content */}
                     {item.adminFields && (
                       item.adminFields.width || 
@@ -273,16 +296,33 @@ export function CartSidebar() {
                 )}
               </div>
 
-              {/* Subtotal */}
+              {/* Bundle Savings Info - show original price and savings */}
+              {bundleSavings > 0 && (
+                <>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-500">מחיר מלא</span>
+                    <span className="text-gray-400 line-through">{formatPrice(subtotal + bundleSavings)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm text-amber-600">
+                    <span className="flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      הנחת באנדל
+                    </span>
+                    <span className="font-medium">-{formatPrice(bundleSavings)}</span>
+                  </div>
+                </>
+              )}
+
+              {/* Subtotal (after bundle discount) */}
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">סה״כ ביניים</span>
+                <span className="text-gray-600">{bundleSavings > 0 ? 'סה״כ אחרי הנחה' : 'סה״כ ביניים'}</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
               
-              {/* Discount */}
+              {/* Coupon Discount */}
               {appliedCoupon && (
                 <div className="flex justify-between items-center text-sm text-green-600">
-                  <span>הנחה</span>
+                  <span>הנחת קופון</span>
                   <span>-{formatPrice(discount)}</span>
                 </div>
               )}

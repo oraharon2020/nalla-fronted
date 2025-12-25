@@ -31,6 +31,9 @@ interface OrderItem {
   quantity: number;
   variation_attributes?: VariationAttribute[];
   admin_fields?: AdminFields;
+  bundle_discount?: number; // Bundle discount percentage
+  price?: string; // Actual price (may include bundle discount)
+  original_price?: string; // Original price before bundle discount
 }
 
 interface CustomerData {
@@ -182,6 +185,26 @@ export async function POST(request: NextRequest) {
           lineItem.subtotal = (finalPrice * item.quantity).toString();
           lineItem.total = (finalPrice * item.quantity).toString();
           lineItem.meta_data.push({ key: 'מחיר סופי', value: item.admin_fields.final_price });
+        }
+      }
+      
+      // Handle bundle discount - override price if bundle discount applied
+      if (item.bundle_discount && item.bundle_discount > 0 && item.price) {
+        const bundlePrice = parseFloat(item.price.replace(/[^\d.]/g, ''));
+        if (!isNaN(bundlePrice) && bundlePrice > 0) {
+          lineItem.price = bundlePrice;
+          lineItem.subtotal = (bundlePrice * item.quantity).toString();
+          lineItem.total = (bundlePrice * item.quantity).toString();
+          lineItem.meta_data.push({ 
+            key: 'הנחת באנדל', 
+            value: `${item.bundle_discount}%` 
+          });
+          if (item.original_price) {
+            lineItem.meta_data.push({ 
+              key: 'מחיר מקורי', 
+              value: item.original_price 
+            });
+          }
         }
       }
       

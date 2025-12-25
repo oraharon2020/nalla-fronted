@@ -24,6 +24,7 @@ require_once BELLANO_PLUGIN_DIR . 'modules/class-cache.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-upgrades.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-auth.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-product-video.php';
+require_once BELLANO_PLUGIN_DIR . 'modules/class-related-products.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-rest-api.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-checkout.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-featured-categories.php';

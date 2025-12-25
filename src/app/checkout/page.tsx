@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Loader2, ShoppingBag, CreditCard, Truck, ShieldCheck, CheckCircle, Phone, Smartphone, Wallet, Trash2, Pencil, Minus, Plus, Tag } from 'lucide-react';
+import { ArrowRight, Loader2, ShoppingBag, CreditCard, Truck, ShieldCheck, CheckCircle, Phone, Smartphone, Wallet, Trash2, Pencil, Minus, Plus, Tag, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 import { getStoredUtmParams, getTrafficSourceLabel } from '@/hooks/useUtmTracking';
 
@@ -105,6 +105,16 @@ export default function CheckoutPage() {
   const subtotal = getTotal();
   const discount = appliedCoupon?.discount || 0;
   const finalTotal = Math.max(0, subtotal - discount);
+  
+  // Calculate bundle savings
+  const bundleSavings = items.reduce((total, item) => {
+    if (item.bundleDiscount && item.originalPrice) {
+      const originalNum = parseInt(item.originalPrice.replace(/[^\d]/g, '')) || 0;
+      const currentNum = parseInt(item.price.replace(/[^\d]/g, '')) || 0;
+      return total + (originalNum - currentNum) * item.quantity;
+    }
+    return total;
+  }, 0);
 
   const validateCoupon = async (code?: string) => {
     const codeToValidate = code || couponCode.trim();
@@ -224,6 +234,10 @@ export default function CheckoutPage() {
             quantity: item.quantity,
             // Include variation attributes
             variation_attributes: item.variation?.attributes || [],
+            // Include bundle discount info for price override
+            bundle_discount: item.bundleDiscount,
+            price: item.price, // Send the actual price (already discounted if bundle)
+            original_price: item.originalPrice, // Original price before bundle discount
             // Include admin fields if present
             admin_fields: item.adminFields ? {
               width: item.adminFields.width,
@@ -880,6 +894,20 @@ export default function CheckoutPage() {
                               {item.variation.attributes.map((attr) => attr.value).join(' • ')}
                             </p>
                           )}
+                          
+                          {/* Bundle Discount Badge */}
+                          {item.bundleDiscount && item.bundleDiscount > 0 && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                                <Sparkles className="w-3 h-3" />
+                                {item.bundleDiscount}% הנחת באנדל
+                              </span>
+                              {item.originalPrice && (
+                                <span className="text-[10px] text-gray-400 line-through">{item.originalPrice}</span>
+                              )}
+                            </div>
+                          )}
+                          
                           {item.adminFields && (
                             item.adminFields.width || 
                             item.adminFields.depth || 
@@ -995,13 +1023,29 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="border-t pt-4 space-y-2">
+                  {/* Bundle Savings Info */}
+                  {bundleSavings > 0 && (
+                    <>
+                      <div className="flex justify-between text-gray-500 text-sm">
+                        <span>מחיר מלא</span>
+                        <span className="line-through">{formatPrice(subtotal + bundleSavings)}</span>
+                      </div>
+                      <div className="flex justify-between text-amber-600 text-sm">
+                        <span className="flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          הנחת באנדל
+                        </span>
+                        <span className="font-medium">-{formatPrice(bundleSavings)}</span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between text-gray-600">
-                    <span>סה״כ מוצרים</span>
+                    <span>{bundleSavings > 0 ? 'סה״כ אחרי הנחה' : 'סה״כ מוצרים'}</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
                   {appliedCoupon && (
                     <div className="flex justify-between text-green-600">
-                      <span>הנחה ({appliedCoupon.code})</span>
+                      <span>הנחת קופון ({appliedCoupon.code})</span>
                       <span>-{formatPrice(discount)}</span>
                     </div>
                   )}

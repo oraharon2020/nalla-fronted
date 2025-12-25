@@ -34,6 +34,8 @@ export interface CartItem {
     attributes: { name: string; value: string }[];
   };
   adminFields?: AdminFieldsData;
+  bundleDiscount?: number; // Discount percentage if part of a bundle
+  originalPrice?: string; // Original price before bundle discount
 }
 
 interface CartStore {

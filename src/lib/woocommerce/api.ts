@@ -67,12 +67,19 @@ export interface WooProduct {
     discount: number;
     products: {
       id: number;
+      parent_id?: number;
       name: string;
       slug: string;
       price: string;
       regular_price?: string;
       image: string;
+      is_variation?: boolean;
+      variation_attributes?: string[];
     }[];
+    variation_bundles?: Record<string, {
+      products: number[];
+      discount: number | null;
+    }> | null;
   } | null; // Custom field - complete the look bundle
   categories: { id: number; name: string; slug: string }[];
   images: { id: number; src: string; alt: string }[];

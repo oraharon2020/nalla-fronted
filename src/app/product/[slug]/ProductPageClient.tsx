@@ -793,6 +793,21 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
               </div>
             </div>
 
+            {/* Complete The Look - Bundle Section */}
+            <CompleteTheLook
+              currentProduct={{
+                id: product.id,
+                databaseId: product.databaseId,
+                name: product.name,
+                slug: product.slug,
+                price: currentPrice,
+                image: product.image,
+              }}
+              selectedVariation={selectedVariation}
+              selectedAttributes={selectedAttributes}
+              relatedData={relatedData}
+            />
+
             {/* AI Product Chat */}
             {featureFlags.aiProductChat && (
               <ProductAIChat 
@@ -920,18 +935,6 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
           </div>
         </div>
 
-        {/* Complete The Look - Bundle Section */}
-        <CompleteTheLook
-          currentProduct={{
-            id: product.id,
-            databaseId: product.databaseId,
-            name: product.name,
-            slug: product.slug,
-            price: currentPrice,
-            image: product.image,
-          }}
-          relatedData={relatedData}
-        />
       </div>
     </div>
   );
