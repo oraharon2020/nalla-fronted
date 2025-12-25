@@ -20,6 +20,10 @@ async function saveConversationToSheets(
     const timestamp = now.toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
     const date = now.toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' });
     
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
     await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -32,8 +36,10 @@ async function saveConversationToSheets(
         assistantResponse: assistantResponse.substring(0, 1000),
         products: recommendedProducts.join(', '),
       }),
+      signal: controller.signal,
     });
     
+    clearTimeout(timeoutId);
     console.log('✅ Conversation saved to Google Sheets');
   } catch (error) {
     console.error('Error saving to Google Sheets:', error);
@@ -303,14 +309,18 @@ ${productCatalog}
     // Generate session ID from conversation length (simple approach)
     const sessionId = `session_${Date.now()}_${history.length}`;
     
-    // Save to Google Sheets (async, don't wait)
-    saveConversationToSheets(
-      sessionId,
-      message,
-      cleanResponse,
-      recommendedProducts.map(p => p.name),
-      detectedCategory
-    ).catch(err => console.error('Sheets save error:', err));
+    // Save to Google Sheets (wait for it to complete)
+    try {
+      await saveConversationToSheets(
+        sessionId,
+        message,
+        cleanResponse,
+        recommendedProducts.map(p => p.name),
+        detectedCategory
+      );
+    } catch (err) {
+      console.error('Sheets save error:', err);
+    }
 
     return NextResponse.json({
       success: true,

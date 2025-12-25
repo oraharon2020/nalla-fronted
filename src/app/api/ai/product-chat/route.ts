@@ -177,6 +177,9 @@ ${product.dimensions ? `מידות: רוחב ${product.dimensions.width || 'לא
     // Log to Google Sheets
     const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbziWAkdFQKyNFAY35BpzaZHyb9_i1er-i-T6eLw5TZb1DoN9Ot0V6HKt8Kd-7iJmtwFbg/exec';
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       await fetch(GOOGLE_SHEETS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -186,7 +189,10 @@ ${product.dimensions ? `מידות: רוחב ${product.dimensions.width || 'לא
           question: message,
           answer: assistantMessage,
         }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
     } catch (e) {
       console.error('Failed to log to Google Sheets:', e);
     }
