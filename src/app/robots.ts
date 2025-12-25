@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
           '/wishlist/',
           '/_next/',
           '/admin/',
+          '/design-assistant/',
         ],
       },
     ],
