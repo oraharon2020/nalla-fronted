@@ -140,36 +140,32 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </nav>
 
         {/* Category Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">{categoryName}</h1>
-          {category?.description ? (
+          {category?.description && (
             <ExpandableDescription description={category.description} />
-          ) : (
-            <p className="text-muted-foreground text-sm">
-              מבחר רחב של {categoryName} איכותיים בעיצוב מודרני
-            </p>
           )}
         </div>
 
-      {/* Sort Options */}
-      <div className="flex justify-between items-center mb-6">
-        <p className="text-sm text-muted-foreground">
-          {products.length} מוצרים
-        </p>
-        <div className="flex items-center gap-2">
-          <label htmlFor="sort-select" className="text-sm text-muted-foreground sr-only">מיון לפי</label>
-          <select 
-            id="sort-select"
-            className="border rounded-md px-3 py-2 text-sm bg-background"
-            aria-label="מיין מוצרים"
-          >
-            <option value="default">מיון בחירת מחדל</option>
-            <option value="price-low">מחיר: נמוך לגבוה</option>
-            <option value="price-high">מחיר: גבוה לנמוך</option>
-            <option value="newest">חדשים ביותר</option>
-          </select>
+        {/* Sort Options */}
+        <div className="flex justify-between items-center mb-6">
+          <p className="text-sm text-muted-foreground">
+            {products.length} מוצרים
+          </p>
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort-select" className="text-sm text-muted-foreground sr-only">מיון לפי</label>
+            <select 
+              id="sort-select"
+              className="border rounded-md px-3 py-2 text-sm bg-background"
+              aria-label="מיין מוצרים"
+            >
+              <option value="default">מיון בחירת מחדל</option>
+              <option value="price-low">מחיר: נמוך לגבוה</option>
+              <option value="price-high">מחיר: גבוה לנמוך</option>
+              <option value="newest">חדשים ביותר</option>
+            </select>
+          </div>
         </div>
-      </div>
 
         {/* Products Grid */}
         {products.length > 0 ? (

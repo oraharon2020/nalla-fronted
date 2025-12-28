@@ -4,6 +4,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Header, Footer, FloatingButtons } from "@/components/layout";
+import { AdminBar } from "@/components/layout/AdminBar";
 import { OrganizationJsonLd, WebsiteJsonLd, LocalBusinessJsonLd } from "@/components/seo";
 import { siteConfig } from "@/config/site";
 import PromoPopup from "@/components/PromoPopup";
@@ -151,6 +152,7 @@ export default function RootLayout({
           />
         </noscript>
         
+        <AdminBar />
         <Header />
         <main className="min-h-screen">{children}</main>
         <Footer />

@@ -565,7 +565,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                           className="object-contain pointer-events-none"
                           sizes="80px"
                           loading="lazy"
-                          quality={60}
+                          quality={70}
                           draggable={false}
                         />
                       )}
