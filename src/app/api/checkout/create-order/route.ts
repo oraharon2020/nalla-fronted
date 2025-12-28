@@ -20,6 +20,9 @@ interface AdminFields {
   final_price?: string;
   tambour_color?: string;
   tambour_price?: number;
+  glass_option?: boolean;
+  glass_label?: string;
+  glass_price?: number;
 }
 
 interface VariationAttribute {
@@ -185,6 +188,13 @@ export async function POST(request: NextRequest) {
           lineItem.meta_data.push({ 
             key: 'צבע טמבור', 
             value: item.admin_fields.tambour_color + (item.admin_fields.tambour_price ? ` (+${item.admin_fields.tambour_price}₪)` : '')
+          });
+        }
+        // Glass option - add to order meta
+        if (item.admin_fields.glass_option) {
+          lineItem.meta_data.push({ 
+            key: item.admin_fields.glass_label || 'תוספת זכוכית', 
+            value: item.admin_fields.glass_price ? `+${item.admin_fields.glass_price}₪` : 'כן'
           });
         }
         if (item.admin_fields.final_price) {

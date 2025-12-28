@@ -559,6 +559,20 @@ class Bellano_REST_API {
             $data['bellano_tambour'] = null;
         }
         
+        // Add bellano_glass (Glass option)
+        $glass_enabled = get_post_meta($product->get_id(), '_bellano_glass_enabled', true);
+        $glass_price = get_post_meta($product->get_id(), '_bellano_glass_price', true);
+        $glass_label = get_post_meta($product->get_id(), '_bellano_glass_label', true);
+        if ($glass_enabled === '1') {
+            $data['bellano_glass'] = [
+                'enabled' => true,
+                'price' => $glass_price !== '' ? (int) $glass_price : 350,
+                'label' => $glass_label !== '' ? $glass_label : 'הוסף זכוכית',
+            ];
+        } else {
+            $data['bellano_glass'] = null;
+        }
+        
         // Add bellano_related (Complete The Look) data
         $data['bellano_related'] = Bellano_Related_Products::get_related_products_data($product->get_id());
         

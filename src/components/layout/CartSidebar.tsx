@@ -193,6 +193,16 @@ export function CartSidebar() {
                       </p>
                     )}
                     
+                    {/* Glass Option - show separately */}
+                    {item.adminFields?.glassOption && (
+                      <p className="text-xs text-gray-600 mt-1">
+                        {item.adminFields.glassLabel || 'תוספת זכוכית'}
+                        {item.adminFields.glassPrice && (
+                          <span className="text-gray-400"> (+{item.adminFields.glassPrice}₪)</span>
+                        )}
+                      </p>
+                    )}
+                    
                     {/* Admin Fields Display - only show if there's actual content */}
                     {item.adminFields && (
                       item.adminFields.width || 

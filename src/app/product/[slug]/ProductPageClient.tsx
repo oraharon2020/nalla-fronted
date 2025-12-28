@@ -206,6 +206,7 @@ interface ProductPageClientProps {
     availabilityType?: 'in_stock' | 'custom_order';
     assemblyIncluded?: boolean;
     tambourColor?: { enabled: boolean; price: number } | null;
+    glassOption?: { enabled: boolean; price: number; label: string } | null;
     image?: { sourceUrl: string; altText?: string };
     galleryImages?: { sourceUrl: string; altText?: string }[];
     attributes?: {
@@ -233,6 +234,9 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
   
   // Tambour color state
   const [tambourColor, setTambourColor] = useState<string>('');
+  
+  // Glass option state
+  const [glassSelected, setGlassSelected] = useState<boolean>(false);
 
   const { addItem } = useCartStore();
   const { toggleItem, isInWishlist, isHydrated: wishlistHydrated } = useWishlistStore();
@@ -389,9 +393,14 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
       ? product.tambourColor.price 
       : 0;
     
-    // Use admin price if set, otherwise use regular price + tambour
+    // Calculate glass price addition
+    const glassPriceAdd = glassSelected && product.glassOption?.enabled 
+      ? product.glassOption.price 
+      : 0;
+    
+    // Use admin price if set, otherwise use regular price + options
     const basePrice = adminPrice !== null ? adminPrice : parseFloat(currentPrice.replace(/[^\d.]/g, '')) || 0;
-    const finalPriceValue = basePrice + tambourPriceAdd;
+    const finalPriceValue = basePrice + tambourPriceAdd + glassPriceAdd;
     const finalPrice = `${finalPriceValue} ₪`;
     const priceValue = finalPriceValue;
     
@@ -447,6 +456,12 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
       ...(tambourColor.trim() ? {
         tambourColor: tambourColor.trim(),
         tambourPrice: tambourPriceAdd,
+      } : {}),
+      // Glass option data
+      ...(glassSelected && product.glassOption?.enabled ? {
+        glassOption: true,
+        glassLabel: product.glassOption.label,
+        glassPrice: glassPriceAdd,
       } : {}),
     };
     
@@ -747,12 +762,32 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
             {/* Tambour Color Option */}
             {product.tambourColor?.enabled && (
               <div className="mb-4 md:mb-6">
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  צבע טמבור מיוחד
-                  <span className="text-gray-400 font-normal mr-2">
-                    (+{product.tambourColor.price.toLocaleString()}₪)
-                  </span>
-                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="text-xs font-medium text-gray-700">
+                    צבע טמבור מיוחד
+                    <span className="text-gray-400 font-normal mr-2">
+                      (+{product.tambourColor.price.toLocaleString()}₪)
+                    </span>
+                  </label>
+                  <div className="group relative">
+                    <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                    <div className="absolute bottom-full right-0 mb-2 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-lg">
+                      <p className="mb-2">ניתן לצבוע את המוצר בכל צבע מפלטת טמבור.</p>
+                      <p className="mb-2">בחרו צבע מהמניפה והקלידו את מספר הצבע.</p>
+                      <a 
+                        href="https://tambour.co.il/color-fan/color-chart/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-300 hover:text-blue-200 underline"
+                      >
+                        למניפת הצבעים של טמבור ←
+                      </a>
+                      <div className="absolute bottom-0 right-4 transform translate-y-full">
+                        <div className="border-8 border-transparent border-t-gray-900"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <input
                   type="text"
                   value={tambourColor}
@@ -762,8 +797,36 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                   dir="rtl"
                 />
                 <p className="mt-1.5 text-xs text-gray-400">
-                  אופציונלי - השאר ריק אם לא צריך צבע מיוחד
+                  אופציונלי - השאר ריק אם לא צריך צבע מיוחד | 
+                  <a 
+                    href="https://tambour.co.il/color-fan/color-chart/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-gray-500 hover:text-black underline mr-1"
+                  >
+                    צפה במניפת הצבעים
+                  </a>
                 </p>
+              </div>
+            )}
+
+            {/* Glass Option */}
+            {product.glassOption?.enabled && (
+              <div className="mb-4 md:mb-6">
+                <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={glassSelected}
+                    onChange={(e) => setGlassSelected(e.target.checked)}
+                    className="w-5 h-5 accent-black cursor-pointer"
+                  />
+                  <span className="text-sm text-gray-700">
+                    {product.glassOption.label}
+                    <span className="text-gray-400 font-normal mr-2">
+                      (+{product.glassOption.price.toLocaleString()}₪)
+                    </span>
+                  </span>
+                </label>
               </div>
             )}
 
@@ -867,6 +930,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                   })) || [],
                   assemblyIncluded: product.assemblyIncluded !== false,
                   availabilityType: product.availabilityType,
+                  tambourColor: product.tambourColor,
                   bundleInfo: relatedData ? {
                     enabled: relatedData.enabled,
                     discount: relatedData.discount,

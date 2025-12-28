@@ -17,6 +17,9 @@ export interface AdminFieldsData {
   finalPrice?: string;
   tambourColor?: string;
   tambourPrice?: number;
+  glassOption?: boolean;
+  glassLabel?: string;
+  glassPrice?: number;
 }
 
 export interface CartItem {

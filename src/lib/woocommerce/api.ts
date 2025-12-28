@@ -63,6 +63,7 @@ export interface WooProduct {
   bellano_availability?: 'in_stock' | 'custom_order'; // Custom field from Bellano plugin
   bellano_assembly?: boolean; // Custom field - product comes assembled (default: true)
   bellano_tambour?: { enabled: boolean; price: number } | null; // Custom field - Tambour color option
+  bellano_glass?: { enabled: boolean; price: number; label: string } | null; // Custom field - Glass option
   bellano_related?: {
     enabled: boolean;
     discount: number;
@@ -579,6 +580,7 @@ export function transformProduct(wooProduct: WooProduct, variations?: WooVariati
     availabilityType: wooProduct.bellano_availability || 'in_stock',
     assemblyIncluded: wooProduct.bellano_assembly !== false, // Default to true if not specified
     tambourColor: wooProduct.bellano_tambour || null, // { enabled: boolean, price: number }
+    glassOption: wooProduct.bellano_glass || null, // { enabled: boolean, price: number, label: string }
     image: wooProduct.images?.[0] ? {
       sourceUrl: wooProduct.images[0].src,
       altText: wooProduct.images[0].alt || wooProduct.name,

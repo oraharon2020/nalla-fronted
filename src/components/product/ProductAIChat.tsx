@@ -16,6 +16,8 @@ interface ProductInfo {
   };
   assemblyIncluded?: boolean;
   availabilityType?: 'in_stock' | 'custom_order';
+  tambourColor?: { enabled: boolean; price: number } | null;
+  glassOption?: { enabled: boolean; price: number; label: string } | null;
   bundleInfo?: {
     enabled: boolean;
     discount: number;

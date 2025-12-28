@@ -31,6 +31,7 @@ require_once BELLANO_PLUGIN_DIR . 'modules/class-featured-categories.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-contact-form.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-product-availability.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-tambour-color.php';
+require_once BELLANO_PLUGIN_DIR . 'modules/class-glass-option.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-product-assembly.php';
 
 /**
@@ -53,6 +54,7 @@ class Bellano_Settings {
     public $contact_form;
     public $product_availability;
     public $tambour_color;
+    public $glass_option;
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -75,6 +77,7 @@ class Bellano_Settings {
         $this->contact_form = new Bellano_Contact_Form();
         $this->product_availability = new Bellano_Product_Availability();
         $this->tambour_color = new Bellano_Tambour_Color();
+        $this->glass_option = new Bellano_Glass_Option();
         
         // Register hooks
         add_action('admin_menu', [$this->admin_pages, 'add_admin_menu']);
