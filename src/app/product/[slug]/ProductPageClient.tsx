@@ -342,6 +342,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
     : product.regularPrice;
 
   // Build gallery images including variation images - memoize to prevent recreation
+  // Deduplicate images by URL to avoid showing same image multiple times
   const allImages = useMemo(() => {
     const galleryImages = product.galleryImages || [];
     const variationImages = variations
@@ -355,16 +356,37 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
         )]
       : [...galleryImages, ...variationImages];
     
-    return images;
+    // Deduplicate by extracting base URL (remove query params and resize variations)
+    const getBaseUrl = (url: string) => {
+      // Remove query params and common image processing suffixes
+      return url.split('?')[0].replace(/-\d+x\d+\./, '.');
+    };
+    
+    const seen = new Set<string>();
+    const uniqueImages = images.filter(img => {
+      if (!img.sourceUrl) return false;
+      const baseUrl = getBaseUrl(img.sourceUrl);
+      if (seen.has(baseUrl)) return false;
+      seen.add(baseUrl);
+      return true;
+    });
+    
+    return uniqueImages;
   }, [product.image, product.galleryImages, variations]);
 
   // Update main image when variation changes - only if user hasn't manually selected
   const [manualImageSelect, setManualImageSelect] = useState(false);
   
+  // Helper to get base URL for comparison
+  const getBaseUrl = (url: string) => {
+    return url.split('?')[0].replace(/-\d+x\d+\./, '.');
+  };
+  
   useEffect(() => {
     if (selectedVariation?.image?.src && !manualImageSelect) {
+      const variationBaseUrl = getBaseUrl(selectedVariation.image.src);
       const variationImageIndex = allImages.findIndex(
-        img => img.sourceUrl === selectedVariation.image.src
+        img => img.sourceUrl && getBaseUrl(img.sourceUrl) === variationBaseUrl
       );
       if (variationImageIndex !== -1) {
         setSelectedImage(variationImageIndex);

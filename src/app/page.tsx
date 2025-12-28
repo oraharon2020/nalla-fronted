@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { getProductsWithSwatches, getCategories, transformCategory } from '@/lib/woocommerce';
 import { Truck, ShieldCheck, CreditCard, RotateCcw } from 'lucide-react';
 import { WhatsAppSubscribeForm } from '@/components/home/WhatsAppSubscribeForm';
+import { GoogleReviews } from '@/components/home/GoogleReviews';
 import { siteConfig, getApiEndpoint, fixMediaUrl } from '@/config/site';
 
 // Helper to get optimized image URL through Next.js
@@ -670,6 +671,7 @@ export default async function HomePage() {
       <CustomFurnitureSection />
       <BestSellersSection />
       <InstagramSection />
+      <GoogleReviews />
       <NewsletterSection />
     </div>
   );
