@@ -88,12 +88,13 @@ export async function POST(request: NextRequest) {
     // Use WordPress proxy to bypass Imperva blocking on Vercel
     const proxyUrl = getApiEndpoint('meshulam-proxy');
     
-    // Use admin.bellano.co.il for Meshulam callbacks - it's on an Israeli server
-    // and has X-Frame-Options: ALLOWALL set, which allows iframe redirects
+    // Use the OFFICIAL Meshulam plugin's WC-API endpoints on admin.bellano.co.il
+    // These are registered by the Grow/Meshulam plugin and work correctly
     const WP_CALLBACK_URL = 'https://admin.bellano.co.il';
     
-    // WordPress wc-api will receive the callback, update the order, and redirect to Next.js success page
-    const successUrl = `${WP_CALLBACK_URL}/?wc-api=bellano_meshulam_success`;
+    // Use official Meshulam plugin endpoints - they handle everything correctly
+    // Our WordPress code intercepts these and redirects Next.js orders to Next.js success page
+    const successUrl = `${WP_CALLBACK_URL}/?wc-api=meshulam_payment_gateway_direct_j4execute`;
     
     const proxyData = {
       sandbox: isSandbox,
@@ -105,11 +106,11 @@ export async function POST(request: NextRequest) {
       payments,
       orderId: order_id.toString(),
       description: `הזמנה #${order_id} - ${siteConfig.name}`,
-      // Success callback goes to WordPress (Israeli server - Meshulam allows it)
+      // Success callback goes to official Meshulam endpoint on WordPress
       successUrl: successUrl,
       cancelUrl: `${SITE_URL}/checkout?cancelled=true`,
-      // Notify also goes to WordPress for order status updates
-      notifyUrl: `${WP_CALLBACK_URL}/?wc-api=bellano_meshulam_notify`,
+      // Notify goes to official Meshulam endpoint too
+      notifyUrl: `${WP_CALLBACK_URL}/?wc-api=meshulam_server_response_direct_j4execute`,
       items: items.map(item => ({
         sku: item.sku,
         price: item.price,
