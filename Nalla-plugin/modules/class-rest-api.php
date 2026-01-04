@@ -43,6 +43,11 @@ class Bellano_REST_API {
             'permission_callback' => '__return_true'
         ]);
         
+        // ============================================
+        // DISABLED - Meshulam/Checkout routes
+        // These conflict with existing site checkout
+        // ============================================
+        /*
         // Cart - Create checkout with items
         register_rest_route('bellano/v1', '/create-checkout', [
             'methods' => 'POST',
@@ -84,6 +89,8 @@ class Bellano_REST_API {
             'callback' => [$this->plugin->checkout, 'proxy_meshulam_payment'],
             'permission_callback' => '__return_true'
         ]);
+        */
+        // ============================================
         
         // Check admin
         register_rest_route('bellano/v1', '/check-admin', [

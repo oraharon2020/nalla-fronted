@@ -33,21 +33,25 @@ interface BestSellersCarouselProps {
 
 export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: BestSellersCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [canScrollStart, setCanScrollStart] = useState(false);
+  const [canScrollEnd, setCanScrollEnd] = useState(true);
   const { toggleItem, isInWishlist, isHydrated } = useWishlistStore();
 
   const checkScroll = () => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setCanScrollLeft(scrollLeft > 10);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+      // In RTL, scrollLeft is negative or uses different logic
+      // We check if we can scroll in either direction
+      const maxScroll = scrollWidth - clientWidth;
+      setCanScrollStart(Math.abs(scrollLeft) > 10);
+      setCanScrollEnd(Math.abs(scrollLeft) < maxScroll - 10);
     }
   };
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const scrollAmount = 350;
+      // In RTL layout, we need to invert the scroll direction
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
@@ -67,7 +71,7 @@ export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: Be
   };
 
   return (
-    <section className="py-20 md:py-28 bg-white">
+    <section className="py-10 md:py-14 bg-white">
       <div className="max-w-[1300px] mx-auto px-4">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-10">
@@ -78,10 +82,10 @@ export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: Be
           {/* Navigation Arrows */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => scroll('left')}
-              disabled={!canScrollLeft}
+              onClick={() => scroll('right')}
+              disabled={!canScrollStart}
               className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${
-                canScrollLeft
+                canScrollStart
                   ? 'border-gray-300 hover:border-gray-900 hover:bg-gray-900 hover:text-white'
                   : 'border-gray-200 text-gray-300 cursor-not-allowed'
               }`}
@@ -90,10 +94,10 @@ export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: Be
               <ChevronRight className="w-5 h-5" />
             </button>
             <button
-              onClick={() => scroll('right')}
-              disabled={!canScrollRight}
+              onClick={() => scroll('left')}
+              disabled={!canScrollEnd}
               className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${
-                canScrollRight
+                canScrollEnd
                   ? 'border-gray-900 bg-gray-900 text-white hover:bg-gray-700'
                   : 'border-gray-200 text-gray-300 cursor-not-allowed'
               }`}

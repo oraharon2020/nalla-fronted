@@ -26,7 +26,7 @@ require_once BELLANO_PLUGIN_DIR . 'modules/class-auth.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-product-video.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-related-products.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-rest-api.php';
-require_once BELLANO_PLUGIN_DIR . 'modules/class-checkout.php';
+// require_once BELLANO_PLUGIN_DIR . 'modules/class-checkout.php'; // Disabled - Meshulam integration conflicts with existing site
 require_once BELLANO_PLUGIN_DIR . 'modules/class-featured-categories.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-contact-form.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-product-availability.php';
@@ -50,7 +50,7 @@ class Bellano_Settings {
     public $auth;
     public $product_video;
     public $rest_api;
-    public $checkout;
+    // public $checkout; // Disabled - Meshulam integration
     public $contact_form;
     public $product_availability;
     public $tambour_color;
@@ -73,7 +73,7 @@ class Bellano_Settings {
         $this->auth = new Bellano_Auth();
         $this->product_video = new Bellano_Product_Video();
         $this->rest_api = new Bellano_REST_API($this);
-        $this->checkout = new Bellano_Checkout();
+        // $this->checkout = new Bellano_Checkout(); // Disabled - Meshulam integration
         $this->contact_form = new Bellano_Contact_Form();
         $this->product_availability = new Bellano_Product_Availability();
         $this->tambour_color = new Bellano_Tambour_Color();

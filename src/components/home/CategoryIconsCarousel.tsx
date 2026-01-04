@@ -103,7 +103,7 @@ export function CategoryIconsCarousel({ categories: propCategories }: CategoryIc
     if (scrollRef.current) {
       const scrollAmount = 200;
       scrollRef.current.scrollBy({
-        left: direction === 'right' ? -scrollAmount : scrollAmount,
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
       });
     }
@@ -111,12 +111,12 @@ export function CategoryIconsCarousel({ categories: propCategories }: CategoryIc
 
   return (
     <div className="bg-white border-b border-gray-100">
-      <div className="max-w-[1300px] mx-auto px-4 py-6">
-        <div className="flex items-center gap-4">
+      <div className="max-w-[1300px] mx-auto px-2 md:px-4 py-3 md:py-6">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Right Arrow */}
           <button
             onClick={() => scroll('right')}
-            className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+            className={`flex-shrink-0 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all ${
               canScrollRight 
                 ? 'bg-gray-100 hover:bg-gray-200 text-gray-600' 
                 : 'text-gray-300 cursor-default'
@@ -124,13 +124,13 @@ export function CategoryIconsCarousel({ categories: propCategories }: CategoryIc
             disabled={!canScrollRight}
             aria-label="הקודם"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
           </button>
 
           {/* Categories Container - spread across full width */}
           <div
             ref={scrollRef}
-            className="flex-1 flex justify-between overflow-x-auto scrollbar-hide"
+            className="flex-1 flex justify-between overflow-x-auto scrollbar-hide gap-1 md:gap-0"
             style={{ 
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',
@@ -140,24 +140,24 @@ export function CategoryIconsCarousel({ categories: propCategories }: CategoryIc
               <Link
                 key={category.id}
                 href={category.link}
-                className="flex flex-col items-center gap-2 min-w-[80px] group"
+                className="flex flex-col items-center gap-1 md:gap-2 min-w-[60px] md:min-w-[80px] group"
               >
                 {/* Icon Container */}
-                <div className="relative w-16 h-16 flex items-center justify-center transition-transform group-hover:scale-105">
+                <div className="relative w-10 h-10 md:w-16 md:h-16 flex items-center justify-center transition-transform group-hover:scale-105">
                   {category.icon ? (
                     // Use img tag for better SVG support
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={category.icon}
                       alt={category.name}
-                      className="w-14 h-14 object-contain"
+                      className="w-9 h-9 md:w-14 md:h-14 object-contain"
                     />
                   ) : (
                     <PlaceholderIcon />
                   )}
                 </div>
                 {/* Category Name */}
-                <span className="text-xs text-gray-600 text-center whitespace-nowrap group-hover:text-gray-900 transition-colors">
+                <span className="text-[10px] md:text-xs text-gray-600 text-center whitespace-nowrap group-hover:text-gray-900 transition-colors">
                   {category.name}
                 </span>
               </Link>
@@ -167,7 +167,7 @@ export function CategoryIconsCarousel({ categories: propCategories }: CategoryIc
           {/* Left Arrow */}
           <button
             onClick={() => scroll('left')}
-            className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+            className={`flex-shrink-0 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all ${
               canScrollLeft 
                 ? 'bg-gray-100 hover:bg-gray-200 text-gray-600' 
                 : 'text-gray-300 cursor-default'
@@ -175,7 +175,7 @@ export function CategoryIconsCarousel({ categories: propCategories }: CategoryIc
             disabled={!canScrollLeft}
             aria-label="הבא"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
       </div>

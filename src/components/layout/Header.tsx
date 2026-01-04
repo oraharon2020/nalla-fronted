@@ -36,22 +36,38 @@ export function Header() {
         <div className="max-w-[1300px] mx-auto px-4">
           {/* Top Row - Icons and Logo */}
           <div className="flex items-center justify-between py-4">
-            {/* Right Icons - Search & Social */}
+            {/* Right Side - Hamburger (mobile) / Search & Social (desktop) */}
             <div className="flex items-center gap-3">
+              {/* Mobile: Hamburger Menu */}
+              <button
+                className="lg:hidden p-1"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="פתח תפריט"
+              >
+                <div className="w-6 h-5 flex flex-col justify-between">
+                  <span className="w-full h-0.5 bg-black rounded-full"></span>
+                  <span className="w-4 h-0.5 bg-black rounded-full"></span>
+                  <span className="w-full h-0.5 bg-black rounded-full"></span>
+                </div>
+              </button>
+              
+              {/* Desktop: Search */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setSearchOpen(true)}
                 aria-label="חיפוש"
-                className="hover:bg-transparent"
+                className="hover:bg-transparent hidden lg:flex"
               >
                 <Search className="h-5 w-5" />
               </Button>
+              
+              {/* Desktop: Social Icons */}
               <a 
                 href="https://facebook.com/nalla" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
+                className="hidden lg:flex w-8 h-8 bg-black rounded-full items-center justify-center hover:bg-gray-800 transition-colors"
                 aria-label="פייסבוק"
               >
                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -62,7 +78,7 @@ export function Header() {
                 href="https://instagram.com/nalla" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
+                className="hidden lg:flex w-8 h-8 bg-black rounded-full items-center justify-center hover:bg-gray-800 transition-colors"
                 aria-label="אינסטגרם"
               >
                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -78,17 +94,26 @@ export function Header() {
                 alt={siteConfig.fullName}
                 width={180}
                 height={60}
-                className="h-14 w-auto"
+                className="h-10 lg:h-14 w-auto"
                 priority
               />
             </Link>
 
-            {/* Left Icons - Wishlist & Cart */}
-            <div className="flex items-center gap-3">
+            {/* Left Icons - Search (mobile), Wishlist & Cart */}
+            <div className="flex items-center gap-3 lg:gap-3">
+              {/* Mobile: Search */}
+              <button
+                onClick={() => setSearchOpen(true)}
+                aria-label="חיפוש"
+                className="lg:hidden"
+              >
+                <Search className="h-5 w-5" strokeWidth={1.5} />
+              </button>
+              
               <Link href="/wishlist" className="relative" aria-label="מועדפים">
-                <Heart className="h-6 w-6" strokeWidth={1.5} />
+                <Heart className="h-5 w-5 lg:h-6 lg:w-6" strokeWidth={1.5} />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-2 -left-2 text-xs font-medium">
+                  <span className="absolute -top-1.5 -left-1.5 text-[10px] lg:text-xs font-medium">
                     {wishlistCount}
                   </span>
                 )}
@@ -98,9 +123,9 @@ export function Header() {
                 className="relative"
                 aria-label="עגלת קניות"
               >
-                <ShoppingBag className="h-6 w-6" strokeWidth={1.5} />
+                <ShoppingBag className="h-5 w-5 lg:h-6 lg:w-6" strokeWidth={1.5} />
                 {itemCount > 0 && (
-                  <span className="absolute -top-2 -left-2 text-xs font-medium">
+                  <span className="absolute -top-1.5 -left-1.5 text-[10px] lg:text-xs font-medium">
                     {itemCount}
                   </span>
                 )}
@@ -148,17 +173,6 @@ export function Header() {
               צביעה בתנור
             </Link>
           </nav>
-
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden flex justify-center py-2 border-t border-gray-100">
-            <button
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="פתח תפריט"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-          </div>
         </div>
       </header>
 

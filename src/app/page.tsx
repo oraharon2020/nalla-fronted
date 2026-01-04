@@ -5,6 +5,7 @@ import { WhatsAppSubscribeForm } from '@/components/home/WhatsAppSubscribeForm';
 import { GoogleReviews } from '@/components/home/GoogleReviews';
 import { ShopByRoom } from '@/components/home/ShopByRoom';
 import { BestSellersCarousel } from '@/components/home/BestSellersCarousel';
+import { HappyHomesReviews } from '@/components/home/HappyHomesReviews';
 import { siteConfig, getApiEndpoint, fixMediaUrl } from '@/config/site';
 
 // Helper to get optimized image URL through Next.js
@@ -109,9 +110,9 @@ async function HeroSection() {
     <section className="py-4 px-4">
       <div className="max-w-[1300px] mx-auto">
         {/* Banner Image Container */}
-        <div className="relative h-[85vh] md:h-[85vh] overflow-hidden rounded-tr-[50px] rounded-br-[50px] rounded-bl-[50px] rounded-tl-none">
+        <div className="relative overflow-hidden rounded-tr-[50px] rounded-br-[50px] rounded-bl-[50px] rounded-tl-none">
       {/* Background - Video or Image */}
-      <div className="absolute inset-0 bg-[#f5f5f0]">
+      <div className="relative bg-[#f5f5f0]">
         {/* Desktop: Show video if available, otherwise image */}
         {hasDesktopVideo ? (
           <video
@@ -120,17 +121,15 @@ async function HeroSection() {
             loop
             playsInline
             poster={getOptimizedImageUrl(videoPoster || imageUrl, 1200)}
-            className="absolute inset-0 w-full h-full object-cover hidden md:block"
+            className="w-full h-auto hidden md:block"
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
         ) : (
-          <Image
+          <img
             src={imageUrl}
             alt="נלה - מעצבים את הבית"
-            fill
-            className="object-cover hidden md:block"
-            priority
+            className="w-full h-auto hidden md:block"
           />
         )}
         
@@ -142,17 +141,15 @@ async function HeroSection() {
             loop
             playsInline
             poster={getOptimizedImageUrl(videoPoster || mobileImageUrl, 750)}
-            className="absolute inset-0 w-full h-full object-cover md:hidden"
+            className="w-full h-auto md:hidden"
           >
             <source src={mobileVideoUrl} type="video/mp4" />
           </video>
         ) : (
-          <Image
+          <img
             src={mobileImageUrl}
             alt="נלה - מעצבים את הבית"
-            fill
-            className="object-cover md:hidden"
-            priority
+            className="w-full h-auto md:hidden"
           />
         )}
       </div>
@@ -185,8 +182,8 @@ async function HeroSection() {
         </div>
       
         {/* WELCOME HOME Text - Below banner with negative margin to overlap */}
-        <div className="flex justify-center -mt-[80px] md:-mt-[100px] lg:-mt-[70px] relative z-10">
-          <h1 className="font-english text-[80px] md:text-[100px] lg:text-[127px] font-[300] text-[#333] tracking-[0.2em] leading-none">
+        <div className="flex justify-center -mt-[20px] md:-mt-[100px] lg:-mt-[70px] relative z-10">
+          <h1 className="font-english text-[40px] md:text-[100px] lg:text-[127px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.2em] leading-none">
             WELCOME HOME
           </h1>
         </div>
@@ -243,7 +240,7 @@ async function CategoriesSection() {
   };
 
   return (
-    <section className="py-16 md:py-24 bg-[#fafaf8]">
+    <section className="py-10 md:py-14 bg-[#fafaf8]">
       <div className="max-w-[1300px] mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -320,7 +317,7 @@ async function NallaSaleSection() {
 // Choose Your Color Section - Tambour painting
 function ChooseColorSection() {
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-10 md:py-14 bg-white">
       <div className="max-w-[1300px] mx-auto px-4">
         <div className="flex flex-col md:flex-row-reverse items-center gap-8 md:gap-16">
           {/* Left - Image */}
@@ -367,17 +364,17 @@ function ChooseColorSection() {
 // Showroom Video Section
 function ShowroomSection() {
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-10 md:py-14 bg-white">
       <div className="max-w-[1300px] mx-auto px-4">
         {/* OUR SHOWROOM Title - Same style as WELCOME HOME */}
         <div className="flex justify-center relative z-10">
-          <h2 className="font-english text-[60px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.2em] leading-none">
+          <h2 className="font-english text-[32px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.2em] leading-none">
             OUR SHOWROOM
           </h2>
         </div>
         
         {/* Video - with negative margin to overlap title */}
-        <div className="relative w-full aspect-video rounded-[30px] overflow-hidden -mt-[50px] md:-mt-[70px] lg:-mt-[50px]">
+        <div className="relative w-full aspect-video rounded-[30px] overflow-hidden -mt-[15px] md:-mt-[70px] lg:-mt-[50px]">
           <video
             autoPlay
             muted
@@ -396,11 +393,11 @@ function ShowroomSection() {
 // Newsletter Section - Inspired Living design
 function NewsletterSection() {
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-10 md:py-14 bg-white">
       <div className="max-w-[1300px] mx-auto px-4">
         {/* INSPIRED LIVING Title */}
         <div className="flex justify-center mb-8">
-          <h2 className="font-english text-[60px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.1em] leading-none">
+          <h2 className="font-english text-[32px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.1em] leading-none">
             INSPIRED LIVING
           </h2>
         </div>
@@ -471,7 +468,7 @@ function InstagramSection() {
   const instagramHandle = siteConfig.social.instagramHandle;
 
   return (
-    <section className="py-16 md:py-20">
+    <section className="py-10 md:py-20">
       <div className="container mx-auto px-4 mb-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
@@ -527,6 +524,63 @@ function InstagramSection() {
   );
 }
 
+// Stone Travertine Collection Section
+function StoneTravertineSection() {
+  return (
+    <section className="py-10 md:py-14 bg-white">
+      <div className="max-w-[1300px] mx-auto px-4">
+        <div className="flex flex-col md:flex-row-reverse gap-6 md:gap-8">
+          {/* Right Side - Image + Text (60%) */}
+          <div className="w-full md:w-[60%]">
+            {/* Sideboard Image */}
+            <div className="relative rounded-[30px] rounded-tl-none overflow-hidden bg-[#f5f5f0] mb-6">
+              <Image
+                src="https://nalla.co.il/wp-content/uploads/2025/09/WhatsApp-Image-2025-07-07-at-12.15.58-1.jpg.webp"
+                alt="מזנון Stone Travertine"
+                width={800}
+                height={500}
+                className="w-full h-auto object-cover"
+              />
+            </div>
+            
+            {/* Title and CTA */}
+            <div className="text-left">
+              <h2 className="font-english text-[40px] md:text-[50px] lg:text-[60px] font-[400] text-[#333] tracking-wide leading-none mb-2">
+                STONE TRAVERTINE
+              </h2>
+              <p className="font-english text-sm md:text-base text-gray-500 tracking-[0.3em] mb-4">
+                .STONE. STYLE. STATEMENT
+              </p>
+              <Link 
+                href="/product-tag/stone-travertine"
+                className="inline-flex items-center gap-2 text-[#333] hover:text-black transition-colors group"
+              >
+                <span className="border-b border-gray-400 group-hover:border-black pb-1">
+                  לצפיה בקולקציה
+                </span>
+                <span className="group-hover:translate-x-1 transition-transform">↙</span>
+              </Link>
+            </div>
+          </div>
+          
+          {/* Left Side - Table Image (40%) */}
+          <div className="w-full md:w-[40%] flex items-end">
+            <div className="relative rounded-[30px] rounded-tl-none overflow-hidden bg-[#f5f5f0] w-full">
+              <Image
+                src="https://nalla.co.il/wp-content/uploads/2025/09/DSC_9517-1.jpg.webp"
+                alt="שולחן Stone Travertine"
+                width={600}
+                height={600}
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // Main Page Component
 export default async function HomePage() {
   return (
@@ -539,6 +593,8 @@ export default async function HomePage() {
       <ChooseColorSection />
       <NewsletterSection />
       <NallaSaleSection />
+      <StoneTravertineSection />
+      <HappyHomesReviews />
     </div>
   );
 }

@@ -10,7 +10,7 @@ export function ShopByRoom() {
   const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
 
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-10 md:py-14 bg-white">
       <div className="max-w-[1300px] mx-auto px-4">
         <div className="flex flex-col md:flex-row-reverse gap-8 md:gap-16 items-stretch">
           
@@ -25,12 +25,12 @@ export function ShopByRoom() {
             </div>
             
             {/* Room Names - with reasonable spacing */}
-            <div className="flex-1 flex flex-col justify-center gap-15 md:gap-7">
+            <div className="flex-1 flex flex-col justify-center gap-4 md:gap-7">
               {rooms.map((room) => (
                 <button
                   key={room.id}
                   onClick={() => setActiveRoom(room)}
-                  className={`block w-full text-left font-english text-4xl md:text-5xl lg:text-6xl tracking-wide transition-all duration-300 ${
+                  className={`block w-full text-left font-english text-3xl md:text-5xl lg:text-6xl tracking-wide transition-all duration-300 ${
                     activeRoom.id === room.id
                       ? 'text-gray-900 font-medium'
                       : 'text-gray-300 hover:text-gray-500 font-light'

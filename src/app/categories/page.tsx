@@ -10,7 +10,13 @@ export const metadata = {
 
 export default async function CategoriesPage() {
   // Fetch real categories from WooCommerce
-  const wooCategories = await getCategories({ per_page: 100, hide_empty: true });
+  let wooCategories = [];
+  try {
+    wooCategories = await getCategories({ per_page: 100, hide_empty: true });
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    wooCategories = [];
+  }
   
   // Filter out "uncategorized" category only
   const mainCategories = wooCategories.filter(
