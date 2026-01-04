@@ -10,7 +10,7 @@ export const metadata = {
 
 export default async function CategoriesPage() {
   // Fetch real categories from WooCommerce
-  let wooCategories = [];
+  let wooCategories: any[] = [];
   try {
     wooCategories = await getCategories({ per_page: 100, hide_empty: true });
   } catch (error) {
