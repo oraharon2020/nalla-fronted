@@ -1,10 +1,9 @@
-/* Custom Fonts - Ping (Hebrew) & Amadine (English) */
+/* Custom Fonts - Ping (Hebrew) & Amandine (English) */
 
 /* Ping Font - Hebrew */
 @font-face {
   font-family: 'Ping';
-  src: url('/fonts/Ping-Regular.woff2') format('woff2'),
-       url('/fonts/Ping-Regular.woff') format('woff');
+  src: url('/fonts/PingHebrew-Regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -12,27 +11,32 @@
 
 @font-face {
   font-family: 'Ping';
-  src: url('/fonts/Ping-Bold.woff2') format('woff2'),
-       url('/fonts/Ping-Bold.woff') format('woff');
+  src: url('/fonts/PingHebrew-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
-/* Amadine Font - English */
+/* Amandine Font - English */
 @font-face {
-  font-family: 'Amadine';
-  src: url('/fonts/Amadine-Regular.woff2') format('woff2'),
-       url('/fonts/Amadine-Regular.woff') format('woff');
+  font-family: 'Amandine';
+  src: url('/fonts/fonnts.com-Amandine_Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amandine';
+  src: url('/fonts/fonnts.com-Amandine_Regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Amadine';
-  src: url('/fonts/Amadine-Bold.woff2') format('woff2'),
-       url('/fonts/Amadine-Bold.woff') format('woff');
+  font-family: 'Amandine';
+  src: url('/fonts/fonnts.com-Amandine_Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -41,7 +45,7 @@
 /* Font Variables */
 :root {
   --font-ping: 'Ping', 'Rubik', sans-serif;
-  --font-amadine: 'Amadine', 'Inter', sans-serif;
+  --font-amandine: 'Amandine', 'Inter', sans-serif;
 }
 
 /* Hebrew text uses Ping */
@@ -49,8 +53,8 @@ body {
   font-family: var(--font-ping);
 }
 
-/* English text uses Amadine */
+/* English text uses Amandine */
 .font-english,
 [lang="en"] {
-  font-family: var(--font-amadine);
+  font-family: var(--font-amandine);
 }

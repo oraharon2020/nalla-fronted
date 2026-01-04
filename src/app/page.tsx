@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getProductsWithSwatches, getCategories, transformCategory } from '@/lib/woocommerce';
-import { Truck, ShieldCheck, CreditCard, RotateCcw } from 'lucide-react';
+import { getProductsWithSwatches, getCategories, transformCategory, getProductsByCategorySlugWithSwatches } from '@/lib/woocommerce';
 import { WhatsAppSubscribeForm } from '@/components/home/WhatsAppSubscribeForm';
 import { GoogleReviews } from '@/components/home/GoogleReviews';
+import { ShopByRoom } from '@/components/home/ShopByRoom';
+import { BestSellersCarousel } from '@/components/home/BestSellersCarousel';
 import { siteConfig, getApiEndpoint, fixMediaUrl } from '@/config/site';
 
 // Helper to get optimized image URL through Next.js
@@ -105,7 +106,10 @@ async function HeroSection() {
   const textPositionClass = positionClasses[textPosition] || positionClasses.center;
 
   return (
-    <section className="relative h-[85vh] md:h-[85vh] overflow-hidden">
+    <section className="py-4 px-4">
+      <div className="max-w-[1300px] mx-auto">
+        {/* Banner Image Container */}
+        <div className="relative h-[85vh] md:h-[85vh] overflow-hidden rounded-tr-[50px] rounded-br-[50px] rounded-bl-[50px] rounded-tl-none">
       {/* Background - Video or Image */}
       <div className="absolute inset-0 bg-[#f5f5f0]">
         {/* Desktop: Show video if available, otherwise image */}
@@ -123,7 +127,7 @@ async function HeroSection() {
         ) : (
           <Image
             src={imageUrl}
-            alt="בלאנו רהיטי מעצבים"
+            alt="נלה - מעצבים את הבית"
             fill
             className="object-cover hidden md:block"
             priority
@@ -145,17 +149,14 @@ async function HeroSection() {
         ) : (
           <Image
             src={mobileImageUrl}
-            alt="בלאנו רהיטי מעצבים"
+            alt="נלה - מעצבים את הבית"
             fill
             className="object-cover md:hidden"
             priority
           />
         )}
-        
-        {/* Overlay */}
-        <div className={`absolute inset-0 ${overlayClass}`} />
       </div>
-      
+
       {/* Content - Only show if there's any text */}
       {(title || subtitle || buttonText) && (
         <div className={`relative h-full flex ${textPositionClass} justify-center text-center`}>
@@ -181,11 +182,13 @@ async function HeroSection() {
           </div>
         </div>
       )}
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className={`w-6 h-10 border-2 ${textColor === 'white' ? 'border-white/50' : 'border-black/50'} rounded-full flex justify-center pt-2`}>
-          <div className={`w-1 h-2 ${textColor === 'white' ? 'bg-white/50' : 'bg-black/50'} rounded-full`} />
+        </div>
+      
+        {/* WELCOME HOME Text - Below banner with negative margin to overlap */}
+        <div className="flex justify-center -mt-[80px] md:-mt-[100px] lg:-mt-[70px] relative z-10">
+          <h1 className="font-english text-[80px] md:text-[100px] lg:text-[127px] font-[300] text-[#333] tracking-[0.2em] leading-none">
+            WELCOME HOME
+          </h1>
         </div>
       </div>
     </section>
@@ -241,18 +244,12 @@ async function CategoriesSection() {
 
   return (
     <section className="py-16 md:py-24 bg-[#fafaf8]">
-      <div className="container mx-auto px-4">
+      <div className="max-w-[1300px] mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="font-english text-gray-400 text-xs tracking-[0.3em] uppercase mb-4">
-            FIND YOUR STYLE
-          </p>
-          <h2 className="text-3xl md:text-5xl font-light mb-4">
-            מה אתם <span className="font-bold">מחפשים?</span>
+          <h2 className="text-3xl md:text-5xl font-light">
+            הקולקציות <span className="font-bold">שלנו</span>
           </h2>
-          <p className="text-gray-500 max-w-xl mx-auto">
-            בחרו קטגוריה וגלו מגוון רחב של רהיטים מעוצבים באיכות גבוהה
-          </p>
         </div>
 
         {/* Categories Grid - 2 cols mobile, 4 cols desktop */}
@@ -265,8 +262,8 @@ async function CategoriesSection() {
             >
               {/* Card Container */}
               <div className="flex flex-col">
-                {/* Image Container - Square with one sharp corner */}
-                <div className="relative aspect-square overflow-hidden rounded-2xl rounded-bl-none bg-white shadow-sm hover:shadow-xl transition-all duration-500">
+                {/* Image Container - Square with rounded corners except top-left */}
+                <div className="relative aspect-square overflow-hidden rounded-2xl rounded-tl-none bg-white shadow-sm hover:shadow-xl transition-all duration-500">
                   {/* Background Image */}
                   {category.image?.sourceUrl && (
                     <Image
@@ -278,31 +275,10 @@ async function CategoriesSection() {
                       quality={75}
                     />
                   )}
-                  
-                  {/* Gradient Overlay - Desktop only */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 md:opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
-                  
-                  {/* Desktop Content - on image */}
-                  <div className="absolute inset-0 hidden md:flex flex-col justify-end p-5">
-                    <div className="relative z-10">
-                      <h3 className="text-white text-xl font-bold mb-1">
-                        {category.name}
-                      </h3>
-                      <p className="text-white/60 text-sm">
-                        {categoryDescriptions[category.name] || categoryDescriptions.default}
-                      </p>
-                      
-                      {/* Arrow on hover */}
-                      <span className="inline-flex items-center gap-1 text-white/80 text-xs mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span>לצפייה</span>
-                        <span className="group-hover:-translate-x-1 transition-transform">←</span>
-                      </span>
-                    </div>
-                  </div>
                 </div>
                 
-                {/* Mobile Content - below image */}
-                <div className="md:hidden pt-2 pb-1">
+                {/* Category Name - below image */}
+                <div className="pt-3 pb-1">
                   <h3 className="text-gray-900 text-sm font-semibold text-center">
                     {category.name}
                   </h3>
@@ -329,178 +305,57 @@ async function CategoriesSection() {
   );
 }
 
-// Best Sellers Section
+// Best Sellers Section - Wrapper to fetch data
 async function BestSellersSection() {
-  const products = await getProductsWithSwatches({ per_page: 8, orderby: 'popularity' });
-
-  return (
-    <section className="py-20 md:py-28 bg-white">
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
-          <div>
-            <p className="font-english text-gray-400 text-xs tracking-[0.3em] uppercase mb-3">
-              TRENDING NOW
-            </p>
-            <h2 className="text-3xl md:text-5xl font-light">
-              הכי <span className="font-bold">נמכרים</span>
-            </h2>
-          </div>
-          <Link 
-            href="/categories" 
-            className="mt-4 md:mt-0 text-sm text-gray-600 hover:text-black transition-colors flex items-center gap-2 group"
-          >
-            <span>לכל המוצרים</span>
-            <span className="group-hover:-translate-x-1 transition-transform">←</span>
-          </Link>
-        </div>
-
-        {/* Products Horizontal Scroll on Mobile, Grid on Desktop */}
-        <div className="relative">
-          {/* Mobile Scroll Container */}
-          <div className="flex md:grid md:grid-cols-4 gap-6 overflow-x-auto pb-4 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-            {products.map((product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.slug}`}
-                className="group flex-shrink-0 w-[70vw] md:w-auto"
-              >
-                {/* Image Container - Square with one sharp corner */}
-                <div className="relative aspect-square overflow-hidden bg-[#f5f5f0] mb-4 rounded-2xl rounded-tr-none">
-                  {product.image && (
-                    <Image
-                      src={product.image.sourceUrl}
-                      alt={product.name}
-                      fill
-                      className="object-cover transition-all duration-500 group-hover:scale-105"
-                      sizes="(max-width: 768px) 70vw, 300px"
-                      quality={75}
-                    />
-                  )}
-                  {product.onSale && (
-                    <span className="absolute top-4 right-4 bg-black text-white text-[10px] font-english tracking-wider px-3 py-1.5 rounded-lg rounded-tr-none">
-                      SALE
-                    </span>
-                  )}
-                  {/* Quick View on Hover */}
-                  <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <span className="block w-full bg-white/95 backdrop-blur-sm text-center py-3 text-sm font-medium hover:bg-black hover:text-white transition-colors">
-                      צפייה מהירה
-                    </span>
-                  </div>
-                </div>
-                
-                {/* Info */}
-                <div className="space-y-1">
-                  <h3 className="font-medium text-base group-hover:text-gray-600 transition-colors line-clamp-1">
-                    {product.name}
-                  </h3>
-                  <div className="flex items-center gap-3">
-                    {product.onSale && product.regularPrice && (
-                      <span className="text-gray-400 line-through text-sm">
-                        {product.regularPrice}
-                      </span>
-                    )}
-                    <span className="font-bold text-lg">{product.price}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+  const products = await getProductsWithSwatches({ per_page: 10, orderby: 'popularity' });
+  return <BestSellersCarousel products={products} />;
 }
 
-// Custom Furniture Section
-// To change image: Replace /public/images/homepage/custom-furniture.jpg
-function CustomFurnitureSection() {
-  // Image loaded from: public/images/homepage/custom-furniture.jpg
-  // Just replace that file to change the image!
-  const customFurnitureImage = "/images/homepage/custom-furniture.jpg";
-  
+// Nalla Sale Section - Products on sale
+async function NallaSaleSection() {
+  const products = await getProductsByCategorySlugWithSwatches('nalla-sale', { per_page: 10 });
+  return <BestSellersCarousel products={products} title="NALLA SALE" />;
+}
+
+// Choose Your Color Section - Tambour painting
+function ChooseColorSection() {
   return (
-    <section className="py-20 md:py-28 bg-[#f8f7f5]">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Image Side */}
-          <div className="relative">
-            <div className="aspect-[4/3] relative overflow-hidden rounded-2xl rounded-br-none">
-              <Image
-                src={customFurnitureImage}
-                alt="התאמה אישית"
-                fill
-                className="object-cover"
-              />
-            </div>
-            {/* Floating Badge */}
-            <div className="absolute -bottom-6 -left-6 md:left-auto md:-right-6 bg-black text-white p-6 md:p-8">
-              <p className="font-english text-4xl md:text-5xl font-bold">15+</p>
-              <p className="text-sm mt-1">שנות ניסיון</p>
-            </div>
+    <section className="py-16 md:py-24 bg-white">
+      <div className="max-w-[1300px] mx-auto px-4">
+        <div className="flex flex-col md:flex-row-reverse items-center gap-8 md:gap-16">
+          {/* Left - Image */}
+          <div className="w-full md:w-1/2">
+            <Image
+              src="https://nalla.co.il/wp-content/uploads/2025/09/tanoor.png.webp"
+              alt="צביעה בתנור"
+              width={600}
+              height={500}
+              className="w-full h-auto"
+            />
           </div>
           
-          {/* Content Side */}
-          <div className="lg:pr-12">
-            <p className="font-english text-gray-400 text-xs tracking-[0.3em] uppercase mb-4">
-              CUSTOM MADE
-            </p>
-            <h2 className="text-3xl md:text-5xl font-light mb-6 leading-tight">
-              מומחים <span className="font-bold">בהתאמה אישית</span>
+          {/* Right - Content */}
+          <div className="w-full md:w-1/2 text-right">
+            <h2 className="font-english text-[40px] md:text-[50px] lg:text-[60px] font-[300] italic text-[#333] leading-tight mb-4">
+              CHOOSE<br />YOUR COLOR
             </h2>
-            <p className="text-gray-600 text-lg leading-relaxed mb-8">
-              כל לקוח הוא ייחודי, וכך גם הריהוט שלו. אנחנו מתמחים בהתאמה אישית של כל פריט - 
-              מידות, צבעים, בדים ופרטים קטנים שעושים את ההבדל. הצוות המקצועי שלנו ילווה אתכם 
-              משלב התכנון ועד להתקנה בבית.
+            <h3 className="text-2xl md:text-3xl font-bold text-[#333] mb-6">
+              צביעה בתנור - כל צבע אפשרי!
+            </h3>
+            <p className="text-gray-600 leading-relaxed mb-8">
+              מתלבטים איזה צבע מתאים לרהיטים שלכם? הצוות שלנו כאן לייעץ
+              ולהתאים עבורכם את הגוון המושלם. תוכלו להגיע לתצוגה שלנו ולהתרשם
+              ממניפת צבעי טמבור מקרוב, לבחור את הצבע המדויק ולראות איך הוא
+              משתלב במציאות!
             </p>
-            
-            {/* Features List */}
-            <div className="grid grid-cols-2 gap-6 mb-10">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
-                  <span className="text-lg">📐</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm mb-1">מידות מותאמות</h4>
-                  <p className="text-gray-500 text-xs">לכל חלל ודרישה</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
-                  <span className="text-lg">🎨</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm mb-1">מגוון צבעים</h4>
-                  <p className="text-gray-500 text-xs">מפלטת עשירה</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
-                  <span className="text-lg">🛋️</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm mb-1">בדים לבחירה</h4>
-                  <p className="text-gray-500 text-xs">איכות פרימיום</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
-                  <span className="text-lg">🚚</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm mb-1">התקנה מקצועית</h4>
-                  <p className="text-gray-500 text-xs">עד הבית</p>
-                </div>
-              </div>
-            </div>
-            
             <Link 
-              href="/contact" 
-              className="inline-flex items-center gap-3 bg-black text-white px-8 py-4 font-medium hover:bg-gray-800 transition-colors"
+              href="/tambour-color"
+              className="inline-flex items-center flex-row-reverse gap-2 text-[#333] hover:text-black transition-colors group"
             >
-              <span>דברו איתנו</span>
-              <span>←</span>
+              <span className="group-hover:translate-x-1 transition-transform">↙</span>
+              <span className="border-b border-gray-400 group-hover:border-black pb-1">
+                לצפייה במניפת צבעי טמבור
+              </span>
             </Link>
           </div>
         </div>
@@ -509,78 +364,89 @@ function CustomFurnitureSection() {
   );
 }
 
-// Features Strip
-function FeaturesStrip() {
-  const features = [
-    {
-      icon: CreditCard,
-      title: 'תנאי תשלום נוחים',
-      description: 'עד 12 תשלומים ללא ריבית',
-    },
-    {
-      icon: RotateCcw,
-      title: 'מדיניות ביטולים נוחה',
-      description: 'ביטול עסקה ללא דמי ביטול',
-    },
-    {
-      icon: Truck,
-      title: 'משלוח מהיר',
-      description: 'משלוח חינם עד הבית',
-    },
-    {
-      icon: ShieldCheck,
-      title: 'איכות גבוהה',
-      description: 'אחריות מלאה על כל המוצרים',
-    },
-  ];
-
+// Showroom Video Section
+function ShowroomSection() {
   return (
-    <section className="py-12 border-y border-gray-200">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {features.map((feature) => (
-            <div key={feature.title} className="text-center">
-              <feature.icon className="h-8 w-8 mx-auto mb-3 text-gray-700" strokeWidth={1.5} />
-              <h3 className="font-bold text-sm mb-1">{feature.title}</h3>
-              <p className="text-gray-500 text-xs">{feature.description}</p>
-            </div>
-          ))}
+    <section className="py-16 md:py-24 bg-white">
+      <div className="max-w-[1300px] mx-auto px-4">
+        {/* OUR SHOWROOM Title - Same style as WELCOME HOME */}
+        <div className="flex justify-center relative z-10">
+          <h2 className="font-english text-[60px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.2em] leading-none">
+            OUR SHOWROOM
+          </h2>
+        </div>
+        
+        {/* Video - with negative margin to overlap title */}
+        <div className="relative w-full aspect-video rounded-[30px] overflow-hidden -mt-[50px] md:-mt-[70px] lg:-mt-[50px]">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src="https://nalla.co.il/wp-content/uploads/2025/09/nalla-showroom.mp4" type="video/mp4" />
+          </video>
         </div>
       </div>
     </section>
   );
 }
 
-// Newsletter Section - Elegant Design with functional form
+// Newsletter Section - Inspired Living design
 function NewsletterSection() {
   return (
-    <section className="py-20 md:py-28 bg-[#1a1a1a] text-white relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{ 
-          backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }} />
-      </div>
-      
-      <div className="container mx-auto px-4 relative">
-        <div className="max-w-2xl mx-auto text-center">
-          <p className="font-english text-white/40 text-xs tracking-[0.3em] uppercase mb-4">
-            STAY UPDATED
-          </p>
-          <h2 className="text-3xl md:text-5xl font-light mb-4">
-            הישארו <span className="font-bold">מעודכנים</span>
+    <section className="py-16 md:py-24 bg-white">
+      <div className="max-w-[1300px] mx-auto px-4">
+        {/* INSPIRED LIVING Title */}
+        <div className="flex justify-center mb-8">
+          <h2 className="font-english text-[60px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.1em] leading-none">
+            INSPIRED LIVING
           </h2>
-          <p className="text-white/60 mb-10 text-lg">
-            קבלו עדכונים על מוצרים חדשים ומבצעים בלעדיים 
-            ישירות לוואטסאפ
-          </p>
-          
-          <WhatsAppSubscribeForm />
-          
-          <p className="text-white/30 text-xs mt-6">
-            לא נשלח ספאם. ניתן לבטל בכל עת.
-          </p>
+        </div>
+        
+        {/* Form Container with green background */}
+        <div className="bg-[#e1eadf] rounded-br-[50px] rounded-bl-[50px] rounded-tr-[50px] rounded-tl-none py-12 px-6 md:px-12 -mt-[45px] md:-mt-[55px] lg:-mt-[70px]">
+          <div className="max-w-4xl mx-auto">
+            {/* Subtitle */}
+            <p className="text-center text-lg md:text-xl text-[#333] mb-8">
+              רכישה ראשונה אצלנו? <span className="font-bold">קבלו 5% הנחה + משלוח חינם</span>
+            </p>
+            
+            {/* Form */}
+            <form className="flex flex-col md:flex-row gap-3 items-center justify-center mb-4">
+              <input
+                type="text"
+                placeholder="שם מלא (חובה)"
+                className="w-full md:w-auto px-6 py-3 rounded-full border border-gray-300 bg-white text-right text-sm focus:outline-none focus:border-gray-400"
+                required
+              />
+              <input
+                type="tel"
+                placeholder="טלפון (חובה)"
+                className="w-full md:w-auto px-6 py-3 rounded-full border border-gray-300 bg-white text-right text-sm focus:outline-none focus:border-gray-400"
+                required
+              />
+              <input
+                type="email"
+                placeholder="אימייל (חובה)"
+                className="w-full md:w-auto px-6 py-3 rounded-full border border-gray-300 bg-white text-right text-sm focus:outline-none focus:border-gray-400"
+                required
+              />
+              <button
+                type="submit"
+                className="w-full md:w-auto px-8 py-3 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+              >
+                שלח פרטים
+              </button>
+            </form>
+            
+            {/* Checkbox */}
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-sm text-[#333]">מאשר/ת קבלת חומר פרסומי</span>
+              <input type="checkbox" className="w-4 h-4" />
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -666,13 +532,13 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       <HeroSection />
-      <FeaturesStrip />
       <CategoriesSection />
-      <CustomFurnitureSection />
+      <ShopByRoom />
       <BestSellersSection />
-      <InstagramSection />
-      <GoogleReviews />
+      <ShowroomSection />
+      <ChooseColorSection />
       <NewsletterSection />
+      <NallaSaleSection />
     </div>
   );
 }

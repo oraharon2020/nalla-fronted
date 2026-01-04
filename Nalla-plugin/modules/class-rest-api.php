@@ -136,6 +136,20 @@ class Bellano_REST_API {
             'permission_callback' => '__return_true'
         ]);
         
+        // Debug term meta (temporary)
+        register_rest_route('bellano/v1', '/debug-term-meta/(?P<id>\d+)', [
+            'methods' => 'GET',
+            'callback' => [$this, 'debug_term_meta'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        // Category icons carousel
+        register_rest_route('bellano/v1', '/category-icons', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_category_icons'],
+            'permission_callback' => '__return_true'
+        ]);
+        
         // Full product data - single API call for everything
         // Support Hebrew slugs with [^/]+ pattern
         register_rest_route('bellano/v1', '/product-full/(?P<slug>[^/]+)', [
@@ -266,16 +280,20 @@ class Bellano_REST_API {
     public function get_color_swatches() {
         $swatches = [];
         
-        // Get the color attribute (pa_color-product with ID 2)
+        // Get all product attribute taxonomies
         $attribute_taxonomies = wc_get_attribute_taxonomies();
         
         foreach ($attribute_taxonomies as $attribute) {
-            // Only get image type attributes (color swatches)
-            if ($attribute->attribute_type !== 'image') {
+            $taxonomy = 'pa_' . $attribute->attribute_name;
+            
+            // Only process color-related attributes
+            $attr_name_lower = mb_strtolower($attribute->attribute_label);
+            if (strpos($attr_name_lower, 'צבע') === false && 
+                strpos($attr_name_lower, 'color') === false &&
+                strpos($attr_name_lower, 'בד') === false) {
                 continue;
             }
             
-            $taxonomy = 'pa_' . $attribute->attribute_name;
             $terms = get_terms([
                 'taxonomy' => $taxonomy,
                 'hide_empty' => false
@@ -286,25 +304,6 @@ class Bellano_REST_API {
             }
             
             foreach ($terms as $term) {
-                // Get the swatch image - try different meta keys used by various plugins
-                $image_id = get_term_meta($term->term_id, 'product_attribute_image', true);
-                if (!$image_id) {
-                    $image_id = get_term_meta($term->term_id, 'image', true);
-                }
-                if (!$image_id) {
-                    $image_id = get_term_meta($term->term_id, 'pa_color_image', true);
-                }
-                if (!$image_id) {
-                    // Try variation swatches plugin meta
-                    $image_id = get_term_meta($term->term_id, 'product_attribute_color', true);
-                }
-                
-                // Get color value (hex) if set
-                $color = get_term_meta($term->term_id, 'product_attribute_color', true);
-                if (!$color) {
-                    $color = get_term_meta($term->term_id, 'color', true);
-                }
-                
                 $swatch_data = [
                     'id' => $term->term_id,
                     'name' => $term->name,
@@ -313,27 +312,192 @@ class Bellano_REST_API {
                     'attribute_slug' => $taxonomy
                 ];
                 
-                if ($image_id && is_numeric($image_id)) {
-                    $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
-                    if ($image_url) {
-                        $swatch_data['image'] = $image_url;
+                // Try to get ts_product_color_config (from theme color attribute plugin)
+                $config_raw = get_term_meta($term->term_id, 'ts_product_color_config', true);
+                if ($config_raw) {
+                    // Handle multiple levels of serialization
+                    $config = $config_raw;
+                    
+                    // Keep unserializing until we get an array or hit a non-serialized string
+                    $max_attempts = 5;
+                    $attempts = 0;
+                    while (is_string($config) && $attempts < $max_attempts) {
+                        // Try normal unserialize
+                        $unserialized = @unserialize($config);
+                        if ($unserialized !== false) {
+                            $config = $unserialized;
+                        } else {
+                            break;
+                        }
+                        $attempts++;
                     }
-                } elseif ($image_id && filter_var($image_id, FILTER_VALIDATE_URL)) {
-                    // Some plugins store URL directly
-                    $swatch_data['image'] = $image_id;
+                    
+                    // Now $config should be an array
+                    if (is_array($config)) {
+                        // Get image if set (handle both integer and string IDs)
+                        if (!empty($config['ts_color_image'])) {
+                            $image_id = intval($config['ts_color_image']);
+                            if ($image_id > 0) {
+                                $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
+                                if ($image_url) {
+                                    $swatch_data['image'] = $image_url;
+                                }
+                            }
+                        }
+                        
+                        // Get color hex if set
+                        if (!empty($config['ts_color_color']) && $config['ts_color_color'] !== '#ffffff') {
+                            $swatch_data['color'] = $config['ts_color_color'];
+                        }
+                    }
                 }
                 
-                if ($color) {
-                    $swatch_data['color'] = $color;
+                // Fallback: try other meta keys used by various plugins
+                if (empty($swatch_data['image']) && empty($swatch_data['color'])) {
+                    // Try image type attributes
+                    $image_id = get_term_meta($term->term_id, 'product_attribute_image', true);
+                    if (!$image_id) {
+                        $image_id = get_term_meta($term->term_id, 'image', true);
+                    }
+                    
+                    if ($image_id && is_numeric($image_id)) {
+                        $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
+                        if ($image_url) {
+                            $swatch_data['image'] = $image_url;
+                        }
+                    }
+                    
+                    // Try color meta
+                    $color = get_term_meta($term->term_id, 'product_attribute_color', true);
+                    if (!$color) {
+                        $color = get_term_meta($term->term_id, 'color', true);
+                    }
+                    if ($color) {
+                        $swatch_data['color'] = $color;
+                    }
                 }
                 
-                $swatches[$term->slug] = $swatch_data;
+                // Use decoded slug as key to handle Hebrew slugs properly
+                // Also store with URL-encoded version for fallback matching
+                $decoded_slug = urldecode($term->slug);
+                $swatches[$decoded_slug] = $swatch_data;
+                
+                // If slug is different when encoded, also store under encoded version
+                if ($decoded_slug !== $term->slug) {
+                    $swatches[$term->slug] = $swatch_data;
+                }
             }
         }
         
         return new WP_REST_Response([
             'success' => true,
             'swatches' => $swatches
+        ], 200);
+    }
+    
+    /**
+     * Debug term meta (temporary endpoint)
+     */
+    public function debug_term_meta($request) {
+        $term_id = $request['id'];
+        $all_meta = get_term_meta($term_id);
+        $term = get_term($term_id);
+        
+        return new WP_REST_Response([
+            'term_id' => $term_id,
+            'term_name' => $term ? $term->name : 'Not found',
+            'taxonomy' => $term ? $term->taxonomy : null,
+            'all_meta' => $all_meta
+        ], 200);
+    }
+    
+    /**
+     * Get category icons for carousel
+     * Returns categories with icons configured in plugin settings
+     */
+    public function get_category_icons() {
+        // Get saved category icons from options
+        $saved_icons = get_option('bellano_category_icons', []);
+        
+        // If no saved icons, return default categories from WooCommerce
+        if (empty($saved_icons)) {
+            $categories = get_terms([
+                'taxonomy' => 'product_cat',
+                'hide_empty' => false,
+                'parent' => 0, // Top level only
+                'number' => 10,
+                'orderby' => 'menu_order',
+                'order' => 'ASC'
+            ]);
+            
+            if (is_wp_error($categories)) {
+                return new WP_REST_Response([
+                    'success' => true,
+                    'icons' => []
+                ], 200);
+            }
+            
+            $icons = [];
+            foreach ($categories as $cat) {
+                // Try to get category thumbnail
+                $thumbnail_id = get_term_meta($cat->term_id, 'thumbnail_id', true);
+                $icon_url = null;
+                
+                if ($thumbnail_id) {
+                    // Get full URL - for SVG files wp_get_attachment_image_url might not work
+                    $icon_url = wp_get_attachment_url($thumbnail_id);
+                    if (!$icon_url) {
+                        $icon_url = wp_get_attachment_image_url($thumbnail_id, 'full');
+                    }
+                }
+                
+                // Also check for custom icon meta
+                $custom_icon = get_term_meta($cat->term_id, 'category_icon', true);
+                if ($custom_icon) {
+                    $icon_url = $custom_icon;
+                }
+                
+                $icons[] = [
+                    'id' => $cat->term_id,
+                    'name' => $cat->name,
+                    'slug' => $cat->slug,
+                    'icon' => $icon_url,
+                    'link' => '/category/' . $cat->slug
+                ];
+            }
+            
+            return new WP_REST_Response([
+                'success' => true,
+                'icons' => $icons
+            ], 200);
+        }
+        
+        // Return saved icons configuration
+        $icons = [];
+        foreach ($saved_icons as $item) {
+            $icon_url = null;
+            if (!empty($item['icon_id'])) {
+                // Get full URL - for SVG files wp_get_attachment_image_url might not work
+                $icon_url = wp_get_attachment_url($item['icon_id']);
+                if (!$icon_url) {
+                    $icon_url = wp_get_attachment_image_url($item['icon_id'], 'full');
+                }
+            } elseif (!empty($item['icon_url'])) {
+                $icon_url = $item['icon_url'];
+            }
+            
+            $icons[] = [
+                'id' => $item['id'] ?? 0,
+                'name' => $item['name'] ?? '',
+                'slug' => $item['slug'] ?? '',
+                'icon' => $icon_url,
+                'link' => $item['link'] ?? '/category/' . ($item['slug'] ?? '')
+            ];
+        }
+        
+        return new WP_REST_Response([
+            'success' => true,
+            'icons' => $icons
         ], 200);
     }
     

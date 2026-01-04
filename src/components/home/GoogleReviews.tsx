@@ -4,50 +4,28 @@ import { useState, useEffect } from 'react';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Google Reviews Data - Real data
+// TODO: לעדכן עם ביקורות אמיתיים של נלה וקישור לגוגל!
 const GOOGLE_RATING = 5.0;
-const TOTAL_REVIEWS = 42;
-const GOOGLE_REVIEWS_URL = 'https://www.google.com/maps/place/Bellano+-+%D7%91%D7%9C%D7%90%D7%A0%D7%95%E2%80%AD/data=!4m2!3m1!1s0x0:0xcf22db8a5a7b040e?sa=X&ved=1t:2428&ictx=111';
+const TOTAL_REVIEWS = 10; // TODO: לעדכן למספר אמיתי
+const GOOGLE_REVIEWS_URL = ''; // TODO: להוסיף קישור לגוגל מפס של נלה
 
+// TODO: להחליף בביקורות אמיתיים של נלה
 const reviews = [
   {
     id: 1,
-    name: 'סימה כהן',
+    name: 'לקוח ישראלי',
     rating: 5,
     date: 'לפני שבוע',
-    text: 'תודה ענקית! זו הייתה הקנייה המושלמת של מזנון. טל המקסים! שירות לקוחות זמין ואדיב, מובילים סופר מקצועיים ואדיבים ומזנון mila שנראה כמו תכשיט יפה בסלון.',
-    avatar: 'ס',
+    text: 'שירות מעולה, מוצרים איכותיים ומשלוח מהיר. ממליצה בחום!',
+    avatar: 'ל',
   },
   {
     id: 2,
-    name: 'שמרית גדיש',
-    rating: 5,
-    date: 'לפני 3 שבועות',
-    text: 'חוויית קנייה יוצאת מגדר הרגיל! מהרגע הראשון בשיחה עם טל ועד הכיוונון לאחר ההתקנה, הכל נעשה ברוח טובה, בשירותיות מעולה, בנועם ובהגינות. ממליצה בחום! 😊',
-    avatar: 'ש',
-  },
-  {
-    id: 3,
-    name: 'מירי רבינוביץ',
+    name: 'לקוח מרוצה',
     rating: 5,
     date: 'לפני חודש',
-    text: 'פניתי אליהם וליווה אותי טל איש עם סבלנות ומקצועיות אין קץ. כשהמוצר לא התאים לי בתחושה - הם הסכימו להחליף את הספרייה. שירות יוצא מן הכלל!',
-    avatar: 'מ',
-  },
-  {
-    id: 4,
-    name: 'משה רוזן',
-    rating: 5,
-    date: 'לפני 6 חודשים',
-    text: 'החברים בבלאנו הבינו אותי מהרגע הראשון ואף הצליחו לייצר יש מאיין - ייצרו עבורי בדיוק את מה שרציתי במידות שלי. ממליץ בחום - אני עוד אחזור אליהם ❤️',
-    avatar: 'מ',
-  },
-  {
-    id: 5,
-    name: 'Shmulik Mazor',
-    rating: 5,
-    date: 'לפני 3 חודשים',
-    text: 'תודה לכם על מוצר מהמם. טל ליווה אותי בתהליך, ביצענו גם שינוי בפלטה העליונה כך שהגוון יתאים לקיר המעוצב שלנו והתוצאה לא פחות ממושלמת!',
-    avatar: 'S',
+    text: 'חוויית קנייה מושלמת. המוצרים יפים והשירות היה מעולה!',
+    avatar: 'ל',
   },
 ];
 

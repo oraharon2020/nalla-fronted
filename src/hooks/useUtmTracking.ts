@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-const UTM_STORAGE_KEY = 'bellano_utm_params';
+const UTM_STORAGE_KEY = 'nalla_utm_params';
 
 export interface UtmParams {
   utm_source?: string;

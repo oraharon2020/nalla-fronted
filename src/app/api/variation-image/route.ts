@@ -27,9 +27,12 @@ export async function GET(request: NextRequest) {
     
     // Find the variation with matching color
     const variation = variations.find(v => {
-      const colorAttr = v.attributes?.find(a => 
-        a.name === 'צבע' || a.name === 'color' || a.name === 'pa_color' || a.name === 'pa_color-product'
-      );
+      const colorAttr = v.attributes?.find(a => {
+        const name = a.name?.toLowerCase() || '';
+        return name === 'צבע' || name === 'בחרו צבע' || name === 'color' || 
+               name === 'pa_color' || name === 'pa_color-product' ||
+               name.includes('צבע') || name.includes('color');
+      });
       return colorAttr?.option?.toLowerCase().trim() === colorName.toLowerCase().trim();
     });
 

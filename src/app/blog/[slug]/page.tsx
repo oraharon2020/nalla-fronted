@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         canonical: `${SITE_URL}/blog/${slug}`,
       },
       openGraph: {
-        title: `${title} | בלאנו`,
+        title: `${title} | ${siteConfig.name}`,
         description,
         url: `${SITE_URL}/blog/${slug}`,
         type: 'article',
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
       },
       twitter: {
         card: 'summary_large_image',
-        title: `${title} | בלאנו`,
+        title: `${title} | ${siteConfig.name}`,
         description,
         images: featuredImage ? [featuredImage] : [],
       },
@@ -106,12 +106,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             dateModified: post.modified,
             author: {
               '@type': 'Organization',
-              name: 'בלאנו',
+              name: siteConfig.name,
               url: SITE_URL,
             },
             publisher: {
               '@type': 'Organization',
-              name: 'בלאנו',
+              name: siteConfig.name,
               url: SITE_URL,
             },
           }),

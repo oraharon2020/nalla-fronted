@@ -278,7 +278,9 @@ export interface FullProductData {
  */
 export const getFullProductData = cache(async (slug: string): Promise<FullProductData | null> => {
   try {
-    const response = await fetch(getApiEndpoint(`product-full/${slug}`), {
+    const url = getApiEndpoint(`product-full/${slug}`);
+    
+    const response = await fetch(url, {
       next: { revalidate: 600 } // 10 minutes cache
     });
     
@@ -445,7 +447,7 @@ export async function getColorSwatches(): Promise<Record<string, ColorSwatch>> {
   }
 
   try {
-    const response = await fetch(`${WOOCOMMERCE_URL}/wp-json/${siteConfig.prefix}/v1/color-swatches`, {
+    const response = await fetch(getApiEndpoint('color-swatches'), {
       next: { revalidate: 300 }
     });
 
@@ -481,7 +483,16 @@ export function findSwatchByName(swatches: Record<string, ColorSwatch>, name: st
   );
   if (exactMatch) return exactMatch;
   
-  // 2. Try slug match (convert Hebrew name to potential slug patterns)
+  // 2. Try direct key lookup (handles both Hebrew and English slugs)
+  if (swatches[name]) return swatches[name];
+  
+  // 3. Try decoded slug (in case the slug is URL-encoded)
+  try {
+    const decodedName = decodeURIComponent(name);
+    if (swatches[decodedName]) return swatches[decodedName];
+  } catch { /* ignore decode errors */ }
+  
+  // 4. Try slug match (convert Hebrew name to potential slug patterns)
   const possibleSlugs = [
     name.toLowerCase().replace(/\s+/g, '-'),
     name.toLowerCase().replace(/\s+/g, ''),
@@ -490,7 +501,7 @@ export function findSwatchByName(swatches: Record<string, ColorSwatch>, name: st
     if (swatches[slug]) return swatches[slug];
   }
   
-  // 3. Try partial match - swatch name contains the search term
+  // 5. Try partial match - swatch name contains the search term
   const partialMatch = Object.values(swatches).find(s => 
     normalizeForComparison(s.name).includes(normalizedName) ||
     normalizedName.includes(normalizeForComparison(s.name))
@@ -500,21 +511,35 @@ export function findSwatchByName(swatches: Record<string, ColorSwatch>, name: st
   return undefined;
 }
 
+// Helper to check if attribute is a color attribute
+function isColorAttribute(name: string): boolean {
+  const lowerName = name.toLowerCase();
+  return lowerName === 'צבע' || 
+         lowerName === 'בחרו צבע' || 
+         lowerName === 'color' || 
+         lowerName === 'pa_color' || 
+         lowerName === 'pa_color-product' ||
+         lowerName.includes('צבע') ||
+         lowerName.includes('color');
+}
+
 export function transformProduct(wooProduct: WooProduct, variations?: WooVariation[], swatches?: Record<string, ColorSwatch>) {
   // Extract color attribute only if it's used for variations
   const colorAttr = wooProduct.attributes?.find(attr => 
-    (attr.name === 'צבע' || attr.name === 'color' || attr.name === 'pa_color' || attr.name === 'pa_color-product') &&
+    isColorAttribute(attr.name) &&
     attr.variation === true // Only include if used for variations
   );
   
   // Build variations array from actual variations data (ensure it's an array)
   const variationsArray = Array.isArray(variations) ? variations : [];
   const productVariations = variationsArray.map(v => {
-    const colorAttribute = v.attributes?.find(a => 
-      a.name === 'צבע' || a.name === 'color' || a.name === 'pa_color' || a.name === 'pa_color-product'
-    );
+    const colorAttribute = v.attributes?.find(a => isColorAttribute(a.name));
     
-    const colorName = colorAttribute?.option || '';
+    // Decode URL-encoded Hebrew slugs from WooCommerce
+    let colorName = colorAttribute?.option || '';
+    try {
+      colorName = decodeURIComponent(colorName);
+    } catch { /* ignore decode errors */ }
     
     // If variation has image, use it. Otherwise try to get from swatches
     let swatchImage: { sourceUrl: string; altText: string } | undefined = undefined;

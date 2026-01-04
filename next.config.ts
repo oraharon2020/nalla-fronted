@@ -5,14 +5,15 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       // WordPress Admin - redirect to admin subdomain
+      // TODO: לאחר העברת WordPress ל-admin.nalla.co.il - לעדכן את ה-redirects
       {
         source: '/wp-admin/:path*',
-        destination: 'https://admin.bellano.co.il/wp-admin/:path*',
+        destination: 'https://nalla.co.il/wp-admin/:path*',
         permanent: false,
       },
       {
         source: '/wp-login.php',
-        destination: 'https://admin.bellano.co.il/wp-login.php',
+        destination: 'https://nalla.co.il/wp-login.php',
         permanent: false,
       },
       // Category pages: /product-category/X → /category/X
@@ -139,14 +140,15 @@ const nextConfig: NextConfig = {
   // Image optimization
   images: {
     remotePatterns: [
+      // TODO: לאחר העברת WordPress ל-admin.nalla.co.il - להוסיף את admin.nalla.co.il
       {
         protocol: 'https',
-        hostname: 'admin.bellano.co.il',
+        hostname: 'nalla.co.il',
         pathname: '/wp-content/**',
       },
       {
         protocol: 'https',
-        hostname: 'bellano.co.il',
+        hostname: 'admin.nalla.co.il',
         pathname: '/wp-content/**',
       },
       {
@@ -220,7 +222,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Link',
-            value: '<https://bellano.co.il>; rel=preconnect, <https://i0.wp.com>; rel=preconnect, <https://fonts.googleapis.com>; rel=preconnect',
+            value: '<https://nalla.co.il>; rel=preconnect, <https://i0.wp.com>; rel=preconnect, <https://fonts.googleapis.com>; rel=preconnect',
           },
         ],
       },

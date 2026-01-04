@@ -22,7 +22,7 @@ export function ProductVideo({ video, productName }: ProductVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const fullscreenVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Fix media URLs (bellano.co.il -> admin.bellano.co.il)
+  // Fix media URLs (via siteConfig)
   const videoUrl = fixMediaUrl(video.url);
   const thumbnailSrc = fixMediaUrl(video.thumbnail);
 

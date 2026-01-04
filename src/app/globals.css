@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./fonts.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -49,11 +50,7 @@
   font-display: swap;
 }
 
-/* Font utility classes */
-.font-english {
-  font-family: 'Amandine', var(--font-inter), system-ui, sans-serif;
-}
-
+/* Font weight utilities for font-english (defined in fonts.css) */
 .font-english.font-light {
   font-weight: 300 !important;
 }
@@ -70,7 +67,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: 'Ping', var(--font-rubik), system-ui, sans-serif;
-  --font-english: 'Amandine', var(--font-inter), system-ui, sans-serif;
+  --font-english: var(--font-amandine);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -341,9 +338,4 @@ h1, h2, h3, h4, h5, h6 {
 
 .wp-content details[open] summary {
   margin-bottom: 0.75rem;
-}
-
-/* Font English class */
-.font-english {
-  font-family: 'Amadine', var(--font-inter), system-ui, sans-serif;
 }

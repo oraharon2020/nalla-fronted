@@ -33,6 +33,9 @@ class Bellano_Admin_Pages {
                 <a href="?page=bellano-settings&tab=homepage" class="<?php echo $active_tab === 'homepage' ? 'active' : ''; ?>">
                     🏠 עריכת דף בית
                 </a>
+                <a href="?page=bellano-settings&tab=category-icons" class="<?php echo $active_tab === 'category-icons' ? 'active' : ''; ?>">
+                    📁 אייקוני קטגוריות
+                </a>
                 <a href="?page=bellano-settings&tab=banners" class="<?php echo $active_tab === 'banners' ? 'active' : ''; ?>">
                     🖼️ באנרים
                 </a>
@@ -54,6 +57,9 @@ class Bellano_Admin_Pages {
             switch ($active_tab) {
                 case 'homepage':
                     $this->render_homepage_tab();
+                    break;
+                case 'category-icons':
+                    $this->render_category_icons_tab();
                     break;
                 case 'banners':
                     $plugin->banners->render_tab();
@@ -306,6 +312,173 @@ class Bellano_Admin_Pages {
             .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; }
             .quick-actions button { padding: 10px 20px; }
         </style>
+        <?php
+    }
+    
+    /**
+     * Render Category Icons Tab
+     */
+    public function render_category_icons_tab() {
+        // Handle save
+        if (isset($_POST['save_category_icons']) && check_admin_referer('bellano_category_icons')) {
+            $icons = [];
+            if (isset($_POST['icon_items']) && is_array($_POST['icon_items'])) {
+                foreach ($_POST['icon_items'] as $item) {
+                    if (!empty($item['name'])) {
+                        $icons[] = [
+                            'id' => intval($item['id'] ?? 0),
+                            'name' => sanitize_text_field($item['name']),
+                            'slug' => sanitize_title($item['slug']),
+                            'icon_id' => intval($item['icon_id'] ?? 0),
+                            'icon_url' => esc_url_raw($item['icon_url'] ?? ''),
+                            'link' => sanitize_text_field($item['link'])
+                        ];
+                    }
+                }
+            }
+            update_option('bellano_category_icons', $icons);
+            echo '<div class="notice notice-success"><p>✅ האייקונים נשמרו בהצלחה!</p></div>';
+        }
+        
+        $saved_icons = get_option('bellano_category_icons', []);
+        if (empty($saved_icons)) {
+            // Default items
+            $saved_icons = [
+                ['id' => 1, 'name' => 'פינות אוכל', 'slug' => 'dining-tables', 'icon_id' => 0, 'link' => '/category/dining-tables'],
+                ['id' => 2, 'name' => 'קונסולות', 'slug' => 'consoles', 'icon_id' => 0, 'link' => '/category/consoles'],
+                ['id' => 3, 'name' => 'ספריות', 'slug' => 'bookcases', 'icon_id' => 0, 'link' => '/category/bookcases'],
+                ['id' => 4, 'name' => 'קומודות', 'slug' => 'dressers', 'icon_id' => 0, 'link' => '/category/dressers'],
+                ['id' => 5, 'name' => 'NALLA SALE', 'slug' => 'sale', 'icon_id' => 0, 'link' => '/category/sale'],
+                ['id' => 6, 'name' => 'שולחנות סלון', 'slug' => 'coffee-tables', 'icon_id' => 0, 'link' => '/category/coffee-tables'],
+                ['id' => 7, 'name' => 'מזנונים', 'slug' => 'tv-stands', 'icon_id' => 0, 'link' => '/category/tv-stands'],
+                ['id' => 8, 'name' => 'שולחנות משרד', 'slug' => 'office-desks', 'icon_id' => 0, 'link' => '/category/office-desks'],
+            ];
+        }
+        ?>
+        <div class="bellano-card">
+            <h2>📁 אייקוני קטגוריות - קרוסלת הקטגוריות בהדר</h2>
+            <p class="description">הגדר את האייקונים שיוצגו בקרוסלת הקטגוריות מתחת להדר</p>
+            
+            <form method="post">
+                <?php wp_nonce_field('bellano_category_icons'); ?>
+                
+                <div id="category-icons-list" style="margin-top: 20px;">
+                    <?php foreach ($saved_icons as $index => $item): ?>
+                    <div class="icon-item" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px;">
+                        <span class="handle" style="cursor: grab; color: #999;">☰</span>
+                        
+                        <input type="hidden" name="icon_items[<?php echo $index; ?>][id]" value="<?php echo esc_attr($item['id']); ?>">
+                        
+                        <!-- Icon Preview & Upload -->
+                        <div class="icon-preview" style="width: 60px; height: 60px; background: #e8f0e6; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;" onclick="selectIcon(this, <?php echo $index; ?>)">
+                            <?php 
+                            $icon_url = '';
+                            if (!empty($item['icon_id'])) {
+                                $icon_url = wp_get_attachment_image_url($item['icon_id'], 'thumbnail');
+                            } elseif (!empty($item['icon_url'])) {
+                                $icon_url = $item['icon_url'];
+                            }
+                            if ($icon_url): ?>
+                                <img src="<?php echo esc_url($icon_url); ?>" style="width: 100%; height: 100%; object-fit: contain;">
+                            <?php else: ?>
+                                <span style="color: #999; font-size: 24px;">📷</span>
+                            <?php endif; ?>
+                        </div>
+                        <input type="hidden" name="icon_items[<?php echo $index; ?>][icon_id]" class="icon-id-input" value="<?php echo esc_attr($item['icon_id'] ?? ''); ?>">
+                        <input type="hidden" name="icon_items[<?php echo $index; ?>][icon_url]" class="icon-url-input" value="<?php echo esc_attr($item['icon_url'] ?? ''); ?>">
+                        
+                        <!-- Name -->
+                        <div style="flex: 1;">
+                            <label style="font-size: 11px; color: #666;">שם</label>
+                            <input type="text" name="icon_items[<?php echo $index; ?>][name]" value="<?php echo esc_attr($item['name']); ?>" style="width: 100%;" placeholder="שם הקטגוריה">
+                        </div>
+                        
+                        <!-- Slug -->
+                        <div style="width: 150px;">
+                            <label style="font-size: 11px; color: #666;">סלאג</label>
+                            <input type="text" name="icon_items[<?php echo $index; ?>][slug]" value="<?php echo esc_attr($item['slug']); ?>" style="width: 100%;" placeholder="slug">
+                        </div>
+                        
+                        <!-- Link -->
+                        <div style="flex: 1;">
+                            <label style="font-size: 11px; color: #666;">קישור</label>
+                            <input type="text" name="icon_items[<?php echo $index; ?>][link]" value="<?php echo esc_attr($item['link']); ?>" style="width: 100%;" placeholder="/category/slug">
+                        </div>
+                        
+                        <!-- Remove Button -->
+                        <button type="button" onclick="removeIconItem(this)" class="button" style="color: red;">✕</button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <button type="button" onclick="addIconItem()" class="button">➕ הוסף פריט</button>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button type="submit" name="save_category_icons" class="button button-primary">💾 שמור אייקונים</button>
+                </div>
+            </form>
+        </div>
+        
+        <script>
+        var iconItemIndex = <?php echo count($saved_icons); ?>;
+        
+        function selectIcon(previewEl, index) {
+            var frame = wp.media({
+                title: 'בחר אייקון',
+                button: { text: 'בחר' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+            
+            frame.on('select', function() {
+                var attachment = frame.state().get('selection').first().toJSON();
+                var container = previewEl.closest('.icon-item');
+                container.querySelector('.icon-id-input').value = attachment.id;
+                container.querySelector('.icon-url-input').value = attachment.url;
+                previewEl.innerHTML = '<img src="' + attachment.url + '" style="width: 100%; height: 100%; object-fit: contain;">';
+            });
+            
+            frame.open();
+        }
+        
+        function addIconItem() {
+            var container = document.getElementById('category-icons-list');
+            var html = `
+                <div class="icon-item" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px;">
+                    <span class="handle" style="cursor: grab; color: #999;">☰</span>
+                    <input type="hidden" name="icon_items[${iconItemIndex}][id]" value="${iconItemIndex + 1}">
+                    <div class="icon-preview" style="width: 60px; height: 60px; background: #e8f0e6; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;" onclick="selectIcon(this, ${iconItemIndex})">
+                        <span style="color: #999; font-size: 24px;">📷</span>
+                    </div>
+                    <input type="hidden" name="icon_items[${iconItemIndex}][icon_id]" class="icon-id-input" value="">
+                    <input type="hidden" name="icon_items[${iconItemIndex}][icon_url]" class="icon-url-input" value="">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: #666;">שם</label>
+                        <input type="text" name="icon_items[${iconItemIndex}][name]" value="" style="width: 100%;" placeholder="שם הקטגוריה">
+                    </div>
+                    <div style="width: 150px;">
+                        <label style="font-size: 11px; color: #666;">סלאג</label>
+                        <input type="text" name="icon_items[${iconItemIndex}][slug]" value="" style="width: 100%;" placeholder="slug">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: #666;">קישור</label>
+                        <input type="text" name="icon_items[${iconItemIndex}][link]" value="" style="width: 100%;" placeholder="/category/slug">
+                    </div>
+                    <button type="button" onclick="removeIconItem(this)" class="button" style="color: red;">✕</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            iconItemIndex++;
+        }
+        
+        function removeIconItem(btn) {
+            if (confirm('האם אתה בטוח?')) {
+                btn.closest('.icon-item').remove();
+            }
+        }
+        </script>
         <?php
     }
 }

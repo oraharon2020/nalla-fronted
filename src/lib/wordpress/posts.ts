@@ -110,7 +110,7 @@ export function getFeaturedImage(post: WPPost): string | null {
  * Get author name from post
  */
 export function getAuthorName(post: WPPost): string {
-  return post._embedded?.author?.[0]?.name || 'בלאנו';
+  return post._embedded?.author?.[0]?.name || 'נלה';
 }
 
 /**

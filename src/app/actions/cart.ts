@@ -39,5 +39,5 @@ export async function getWooCommerceCheckoutUrl(items: CartItem[]): Promise<stri
     qty: i.quantity
   }))));
   
-  return `${WOO_URL}/?bellano_cart=${itemsParam}`;
+  return `${WOO_URL}/?nalla_cart=${itemsParam}`;
 }

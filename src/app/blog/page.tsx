@@ -15,7 +15,7 @@ export const metadata = {
     canonical: `${SITE_URL}/blog`,
   },
   openGraph: {
-    title: 'בלוג | בלאנו',
+    title: `בלוג | ${siteConfig.name}`,
     description: 'טיפים, השראה ומדריכים לעיצוב הבית עם רהיטי מעצבים',
     url: `${SITE_URL}/blog`,
     type: 'website',

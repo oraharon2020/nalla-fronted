@@ -95,7 +95,7 @@ export function WhatsAppSubscribeForm() {
             disabled={status === 'loading'}
           />
           <span className="text-white/70 text-sm leading-relaxed">
-            אני מסכים/ה לקבל עדכונים על מבצעים ומוצרים חדשים בוואטסאפ מבלאנו. 
+            אני מסכים/ה לקבל עדכונים על מבצעים ומוצרים חדשים בוואטסאפ מנלה. 
             ניתן לבטל בכל עת.
           </span>
         </label>

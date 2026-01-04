@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: Bellano Settings
- * Description: הגדרות מרכזיות לאתר בלאנו - באנרים, קאש, שאלות נפוצות, סרטונים ועוד
+ * Plugin Name: Nalla Settings
+ * Description: הגדרות מרכזיות לאתר נלה - באנרים, קאש, שאלות נפוצות, סרטונים ועוד
  * Version: 2.0.0
- * Author: Bellano
- * Text Domain: bellano-settings
+ * Author: Nalla
+ * Text Domain: nalla-settings
  */
 
 if (!defined('ABSPATH')) exit;

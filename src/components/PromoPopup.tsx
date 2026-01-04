@@ -16,14 +16,14 @@ export default function PromoPopup() {
     if (!enabled) return;
 
     if (showOncePerSession) {
-      const hasSeenPopup = sessionStorage.getItem('bellano_promo_popup_seen');
+      const hasSeenPopup = sessionStorage.getItem('nalla_promo_popup_seen');
       if (hasSeenPopup) return;
     }
 
     const timer = setTimeout(() => {
       setIsOpen(true);
       if (showOncePerSession) {
-        sessionStorage.setItem('bellano_promo_popup_seen', 'true');
+        sessionStorage.setItem('nalla_promo_popup_seen', 'true');
       }
     }, delay);
 

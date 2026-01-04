@@ -275,7 +275,7 @@ export function FabricDesignBoard({
     try {
       // Fix the media URL and use proxy to avoid CORS
       const fixedSrc = fixMediaUrl(src);
-      // Only use proxy for admin.bellano.co.il images, not for data URLs (pasted images)
+      // Only use proxy for WordPress admin images, not for data URLs (pasted images)
       const imageUrl = fixedSrc.startsWith('data:') 
         ? fixedSrc 
         : `/api/proxy-image?url=${encodeURIComponent(fixedSrc)}`;
@@ -801,7 +801,7 @@ export function FabricDesignBoard({
 
     // Download only - don't save to cart/admin fields
     const link = document.createElement('a');
-    link.download = `design-${productName || 'bellano'}-${Date.now()}.png`;
+    link.download = `design-${productName || 'nalla'}-${Date.now()}.png`;
     link.href = dataUrl;
     link.click();
   };
@@ -839,7 +839,7 @@ export function FabricDesignBoard({
     
     // Download image first for user to attach manually
     const link = document.createElement('a');
-    link.download = `design-${productName || 'bellano'}-${Date.now()}.png`;
+    link.download = `design-${productName || 'nalla'}-${Date.now()}.png`;
     link.href = dataUrl;
     link.click();
     

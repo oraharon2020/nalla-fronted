@@ -237,7 +237,11 @@ export function ProductCard({ product }: ProductCardProps) {
   
   // Fallback to color options from attributes if no variations
   const colorAttribute = product.attributes?.nodes?.find(
-    attr => attr.name === 'צבע' || attr.name === 'color' || attr.name.toLowerCase().includes('color')
+    attr => {
+      const name = attr.name.toLowerCase();
+      return name === 'צבע' || name === 'בחרו צבע' || name === 'color' || 
+             name.includes('צבע') || name.includes('color');
+    }
   );
   const colorOptions = colorAttribute?.options || [];
   
@@ -376,8 +380,8 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center justify-center gap-2 pt-3 flex-wrap">
             {/* Show 4 on mobile, 6 on desktop */}
             {uniqueColors.slice(0, 6).map((variation, index) => {
-              // Use swatchImage for the circle
-              const swatchImageUrl = variation.swatchImage || variation.image?.sourceUrl;
+              // Only use swatchImage for the circle (NOT the variation product image)
+              const swatchImageUrl = variation.swatchImage;
               const hasSwatchImage = !!swatchImageUrl;
               const isSelected = selectedColor === variation.colorName;
               

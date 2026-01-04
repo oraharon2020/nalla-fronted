@@ -7,16 +7,17 @@
 
 export const siteConfig = {
   // Basic Info
-  name: 'בלאנו',
-  tagline: 'רהיטי מעצבים',
-  fullName: 'בלאנו - רהיטי מעצבים',
-  description: 'מבחר רחב של רהיטים איכותיים: מזנונים, שולחנות סלון, קומודות, כורסאות, מיטות ועוד. משלוח חינם עד הבית!',
-  shortDescription: 'מבחר רחב של רהיטים איכותיים. משלוח חינם עד הבית!',
+  name: 'נלה',
+  tagline: 'מעצבים את הבית',
+  fullName: 'נלה - Nalla',
+  description: 'מעצבים את הבית עם נלה | מזנונים | שולחנות סלון | תמונות קיר | קונסולות. משלוח חינם עד הבית!',
+  shortDescription: 'מעצבים את הבית עם נלה. משלוח חינם עד הבית!',
   
   // URLs
-  url: 'https://www.bellano.co.il',
-  wordpressUrl: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://admin.bellano.co.il',
-  vercelUrl: 'https://bellano.vercel.app',
+  // TODO: לאחר ההעברה - לשנות url ל-https://www.nalla.co.il ו-wordpressUrl ל-https://admin.nalla.co.il
+  url: 'http://localhost:3000', // בפיתוח - לשנות ל-https://www.nalla.co.il בפרודקשן
+  wordpressUrl: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://nalla.co.il',
+  vercelUrl: 'https://nalla.vercel.app',
   
   // ============================================================
   // NAVIGATION - תפריט הניווט
@@ -25,55 +26,54 @@ export const siteConfig = {
     // תפריט ראשי - מחשב (מוצג ב-Header)
     main: [
       { name: 'דף הבית', href: '/' },
-      { name: 'SALE', slug: 'sale', highlight: true },
+      { name: 'SALE', slug: 'nalla-sale', highlight: true },
       {
         name: 'סלון',
         href: '/categories',
         children: [
-          { name: 'מזנונים לסלון', slug: 'living-room-sideboards' },
-          { name: 'שולחנות סלון', slug: 'living-room-tables' },
-          { name: 'כורסאות לסלון', slug: 'designed-armchairs' },
-          { name: 'ספריות', slug: 'libraries' },
+          { name: 'מזנונים', slug: 'מזנונים-לסלון' },
+          { name: 'שולחנות סלון', slug: 'שולחנות-סלון' },
+          { name: 'ספריות', slug: 'ספריות' },
+          { name: 'ספות', slug: 'ספות' },
         ],
       },
       {
         name: 'חדר שינה',
         href: '/categories',
         children: [
-          { name: 'מיטות', slug: 'beds' },
-          { name: 'קומודות', slug: 'dresser' },
-          { name: 'שידות לילה', slug: 'bedside-tables' },
-          { name: 'שולחנות איפור', slug: 'makeup-tables' },
+          { name: 'מיטות', slug: 'מיטות-לחדר-שינה' },
+          { name: 'קומודות', slug: 'קומודות' },
+          { name: 'שידות לילה', slug: 'שידות-לצד-המיטה' },
         ],
       },
       {
         name: 'פינת אוכל',
         href: '/categories',
         children: [
-          { name: 'פינות אוכל', slug: 'dining' },
-          { name: 'כיסאות לפינת אוכל', slug: 'dining-room-chairs' },
-          { name: 'שולחנות בר', slug: 'bar-tables' },
+          { name: 'פינות אוכל', slug: 'פינות-אוכל' },
+          { name: 'שולחנות בר', slug: 'שולחנות-בר' },
         ],
       },
       {
         name: 'כניסה ומסדרון',
         href: '/categories',
         children: [
-          { name: 'קונסולות', slug: 'consoles' },
-          { name: 'מראות', slug: 'mirrors' },
+          { name: 'קונסולות', slug: 'קונסולות' },
+          { name: 'מראות', slug: 'מראות' },
+          { name: 'ארונות שירות', slug: 'shirot' },
         ],
       },
     ],
     
     // קישורים מהירים (ללא dropdown)
     quickLinks: [
-      { name: 'מזנונים', slug: 'living-room-sideboards' },
-      { name: 'שולחנות סלון', slug: 'living-room-tables' },
-      { name: 'קומודות', slug: 'dresser' },
-      { name: 'קונסולות', slug: 'consoles' },
-      { name: 'שידות לילה', slug: 'bedside-tables' },
-      { name: 'מיטות', slug: 'beds' },
-      { name: 'כורסאות', slug: 'designed-armchairs' },
+      { name: 'מזנונים', slug: 'מזנונים-לסלון' },
+      { name: 'שולחנות סלון', slug: 'שולחנות-סלון' },
+      { name: 'קומודות', slug: 'קומודות' },
+      { name: 'קונסולות', slug: 'קונסולות' },
+      { name: 'שידות לילה', slug: 'שידות-לצד-המיטה' },
+      { name: 'מיטות', slug: 'מיטות-לחדר-שינה' },
+      { name: 'ספריות', slug: 'ספריות' },
     ],
     
     // דפי מידע
@@ -87,17 +87,17 @@ export const siteConfig = {
   },
 
   // Contact
-  email: 'info@bellano.co.il',
-  phone: '03-5566696',
-  phoneClean: '035566696', // Without dashes for tel: links
-  whatsapp: '97235566696', // International format for WhatsApp
+  email: 'info@nalla.co.il',
+  phone: '03-3732350',
+  phoneClean: '033732350', // Without dashes for tel: links
+  whatsapp: '972559871850', // International format for WhatsApp
   
   // Social Media
   social: {
-    instagram: 'https://www.instagram.com/bellano.decor/',
-    instagramHandle: 'bellano.decor',
-    facebook: 'https://www.facebook.com/bellano.decor',
-    facebookHandle: 'bellano.decor',
+    instagram: 'https://www.instagram.com/nalla_decor/',
+    instagramHandle: 'nalla_decor',
+    facebook: 'https://www.facebook.com/nollaisrael',
+    facebookHandle: 'nollaisrael',
   },
   
   // SEO Keywords
@@ -106,38 +106,42 @@ export const siteConfig = {
     'מזנונים',
     'שולחנות סלון',
     'קומודות',
-    'כורסאות',
+    'קונסולות',
     'מיטות',
-    'רהיטי מעצבים',
-    'בלאנו',
+    'תמונות קיר',
+    'נלה',
+    'nalla',
     'ריהוט לבית',
     'ריהוט מעוצב',
     'רהיטים אונליין',
   ],
   
   // Images/Logos
+  // TODO: להעלות לוגו של נלה לתיקיית public/images
   logo: {
-    dark: '/images/bellano logo.avif', // Black logo on transparent
-    light: '/images/bellano-logo-white.png', // White logo for dark backgrounds
-    square: '/images/bellano-logo-square.webp',
-    wordpressUrl: 'https://bellano.co.il/wp-content/uploads/2024/06/Bellano-שחור-על-רקע-שקוף.png',
+    dark: '/images/nalla-logo.png', // Black logo on transparent
+    light: '/images/nalla-logo-white.png', // White logo for dark backgrounds
+    square: '/images/nalla-logo-square.png',
+    wordpressUrl: 'https://nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
   },
   favicon: {
-    ico32: 'https://i0.wp.com/bellano.co.il/wp-content/uploads/2024/06/cropped-Bellano-%D7%A9%D7%97%D7%95%D7%A8-%D7%A2%D7%9C-%D7%A8%D7%A7%D7%A2-%D7%A9%D7%A7%D7%95%D7%A3-1.png?fit=32%2C32&ssl=1',
-    ico192: 'https://i0.wp.com/bellano.co.il/wp-content/uploads/2024/06/cropped-Bellano-%D7%A9%D7%97%D7%95%D7%A8-%D7%A2%D7%9C-%D7%A8%D7%A7%D7%A2-%D7%A9%D7%A7%D7%95%D7%A3-1.png?fit=192%2C192&ssl=1',
-    appleTouchIcon: 'https://i0.wp.com/bellano.co.il/wp-content/uploads/2024/06/cropped-Bellano-%D7%A9%D7%97%D7%95%D7%A8-%D7%A2%D7%9C-%D7%A8%D7%A7%D7%A2-%D7%A9%D7%A7%D7%95%D7%A3-1.png?fit=180%2C180&ssl=1',
+    // TODO: לעדכן עם favicon של נלה
+    ico32: 'https://nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
+    ico192: 'https://nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
+    appleTouchIcon: 'https://nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
   },
-  ogImage: '/images/bellano%20logo.avif',
+  ogImage: '/images/nalla-logo.png',
   
   // Analytics & Tracking
+  // TODO: לעדכן עם קודי Analytics של נלה!
   analytics: {
-    googleTagManager: 'GT-WBL97X64',
-    googleAds: 'AW-16598610854',
-    googleAdsConversionLabel: '8F3sCJ7tmrwZEKbn6uo9', // Purchase conversion
-    googleAdsAddToCartLabel: 'KtOHCIW4mdQbEKbn6uo9', // Add to cart conversion
-    googleVerification: 'MFPhXQELpvk-2gH-jHTP0R4LTOxhJxrH-DVa8l6Hqis',
-    facebookPixel: '421335350861171',
-    facebookDomainVerification: 'v0s7x4i0ko65qjr2nczfx0yoshknu0',
+    googleTagManager: '', // TODO: להוסיף GTM של נלה
+    googleAds: '', // TODO: להוסיף Google Ads של נלה
+    googleAdsConversionLabel: '', // TODO: Purchase conversion
+    googleAdsAddToCartLabel: '', // TODO: Add to cart conversion
+    googleVerification: '', // TODO: Google Search Console verification
+    facebookPixel: '', // TODO: להוסיף Facebook Pixel של נלה
+    facebookDomainVerification: '', // TODO: Facebook domain verification
   },
   
   // Business Info (for JSON-LD)
@@ -145,19 +149,19 @@ export const siteConfig = {
     type: 'FurnitureStore',
     priceRange: '₪₪₪',
     address: {
-      street: '',
-      city: 'ישראל',
-      region: '',
+      street: 'אברהם בומא שביט 1, מחסן F-101',
+      city: 'ראשון לציון',
+      region: 'מרכז',
       postalCode: '',
       country: 'IL',
     },
     geo: {
-      latitude: 32.0853,
-      longitude: 34.7818,
+      latitude: 31.9697,
+      longitude: 34.7722,
     },
     openingHours: [
-      'Su-Th 09:00-18:00',
-      'Fr 09:00-14:00',
+      'Su-Th 10:00-20:00',
+      'Fr 10:00-14:00',
     ],
   },
   
@@ -168,26 +172,30 @@ export const siteConfig = {
   },
   
   // Payment Gateway - Meshulam
+  // TODO: לעדכן עם פרטי משולם של נלה!
   // Note: Page codes are fetched from WordPress, these are fallbacks
   meshulam: {
-    userId: process.env.MESHULAM_USER_ID || '6f6cab2bd0c86083',
-    apiKey: process.env.MESHULAM_API_KEY || 'ae67b1668109',
-    sandboxApiKey: process.env.MESHULAM_SANDBOX_API_KEY || '305a9a777e42',
+    userId: process.env.MESHULAM_USER_ID || '', // TODO: להוסיף userId של נלה
+    apiKey: process.env.MESHULAM_API_KEY || '', // TODO: להוסיף apiKey של נלה
+    sandboxApiKey: process.env.MESHULAM_SANDBOX_API_KEY || '',
     isSandbox: process.env.MESHULAM_SANDBOX === 'true',
     // Default page codes (will be overridden by WordPress settings)
     pageCodes: {
-      creditCard: process.env.MESHULAM_PAGECODE_CREDIT || '81e04dc34850',
-      bit: process.env.MESHULAM_PAGECODE_BIT || 'e10278843d0e',
-      applePay: process.env.MESHULAM_PAGECODE_APPLE || 'fc0ec4b9957e',
-      googlePay: process.env.MESHULAM_PAGECODE_GOOGLE || 'd189717e5d4c',
+      creditCard: process.env.MESHULAM_PAGECODE_CREDIT || '', // TODO
+      bit: process.env.MESHULAM_PAGECODE_BIT || '', // TODO
+      applePay: process.env.MESHULAM_PAGECODE_APPLE || '', // TODO
+      googlePay: process.env.MESHULAM_PAGECODE_GOOGLE || '', // TODO
     },
   },
   
   // Prefix for localStorage, cookies, etc.
-  prefix: 'bellano',
+  prefix: 'nalla',
+  
+  // API namespace - keep as 'bellano' because the WordPress plugin uses this namespace
+  apiNamespace: 'bellano',
   
   // Default banner image
-  defaultBannerImage: 'https://bellano.co.il/wp-content/uploads/2024/06/banner-main.jpg',
+  defaultBannerImage: 'https://nalla.co.il/wp-content/uploads/2025/09/banner-main.jpg',
   
   // Currency
   currency: {
@@ -212,19 +220,22 @@ export const getWpUrl = (path: string = '') => {
   return `${siteConfig.wordpressUrl}${path}`;
 };
 
-// Helper function to fix media URLs - convert bellano.co.il to admin.bellano.co.il
+// Helper function to fix media URLs - convert nalla.co.il to admin.nalla.co.il
+// TODO: לאחר העברת WordPress ל-admin.nalla.co.il - להפעיל את הפונקציה
 export const fixMediaUrl = (url: string | undefined | null): string => {
   if (!url) return '';
-  // Replace any bellano.co.il/wp-content URL with admin.bellano.co.il
-  return url.replace(
-    /https?:\/\/(www\.)?bellano\.co\.il\/wp-content/g,
-    'https://admin.bellano.co.il/wp-content'
-  );
+  // כרגע WordPress יושב על nalla.co.il אז לא צריך להמיר
+  // לאחר ההעברה: Replace any nalla.co.il/wp-content URL with admin.nalla.co.il
+  // return url.replace(
+  //   /https?:\/\/(www\.)?nalla\.co\.il\/wp-content/g,
+  //   'https://admin.nalla.co.il/wp-content'
+  // );
+  return url;
 };
 
 // Helper function to get API endpoint
 export const getApiEndpoint = (endpoint: string) => {
-  return `${siteConfig.wordpressUrl}/wp-json/${siteConfig.prefix}/v1/${endpoint}`;
+  return `${siteConfig.wordpressUrl}/wp-json/${siteConfig.apiNamespace}/v1/${endpoint}`;
 };
 
 // Helper function to format phone for tel: link

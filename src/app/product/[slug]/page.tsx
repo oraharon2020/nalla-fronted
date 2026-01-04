@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
     const data = await getFullProductData(slug);
     
     if (!data) {
-      return { title: 'מוצר לא נמצא | בלאנו' };
+      return { title: `מוצר לא נמצא | ${siteConfig.name}` };
     }
     
     const { product: wooProduct, seo } = data;
@@ -76,13 +76,13 @@ export async function generateMetadata({ params }: ProductPageProps) {
     // If Yoast SEO data exists from WordPress
     if (seo?.title) {
       return {
-        title: seo.title || `${product.name} | בלאנו`,
+        title: seo.title || `${product.name} | ${siteConfig.name}`,
         description: seo.description || fallbackDescription,
         alternates: {
           canonical: seo.canonical || `${SITE_URL}/product/${slug}`,
         },
         openGraph: {
-          title: seo.og_title || `${product.name} | בלאנו`,
+          title: seo.og_title || `${product.name} | ${siteConfig.name}`,
           description: seo.og_description || fallbackDescription,
           url: `${SITE_URL}/product/${slug}`,
           type: seo.og_type || 'website',
@@ -100,7 +100,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
         },
         twitter: {
           card: 'summary_large_image',
-          title: seo.twitter_title || `${product.name} | בלאנו`,
+          title: seo.twitter_title || `${product.name} | ${siteConfig.name}`,
           description: seo.twitter_description || fallbackDescription,
           images: seo.twitter_image ? [seo.twitter_image] : fallbackImage ? [fallbackImage] : [],
         },
@@ -115,7 +115,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
         canonical: `${SITE_URL}/product/${slug}`,
       },
       openGraph: {
-        title: `${product.name} | בלאנו`,
+        title: `${product.name} | ${siteConfig.name}`,
         description: fallbackDescription,
         url: `${SITE_URL}/product/${slug}`,
         type: 'website',
@@ -128,14 +128,14 @@ export async function generateMetadata({ params }: ProductPageProps) {
       },
       twitter: {
         card: 'summary_large_image',
-        title: `${product.name} | בלאנו`,
+        title: `${product.name} | ${siteConfig.name}`,
         description: fallbackDescription,
         images: fallbackImage ? [fallbackImage] : [],
       },
     };
   } catch (error) {
     console.error('Error fetching product metadata:', error);
-    return { title: 'בלאנו - רהיטי מעצבים' };
+    return { title: siteConfig.fullName };
   }
 }
 

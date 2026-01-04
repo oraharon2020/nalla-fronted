@@ -39,7 +39,7 @@ export const useAdminStore = create<AdminStore>()(
         set({ showLoginModal: false }),
     }),
     {
-      name: 'bellano-admin',
+      name: 'nalla-admin',
       partialize: (state) => ({
         isAdmin: state.isAdmin,
         adminName: state.adminName,
