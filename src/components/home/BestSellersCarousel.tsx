@@ -12,7 +12,8 @@ interface ProductSwatch {
 }
 
 interface Product {
-  id: number;
+  id: number | string;
+  databaseId?: number;
   name: string;
   slug: string;
   price: string;
@@ -161,9 +162,10 @@ export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: Be
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      const productId = product.databaseId || (typeof product.id === 'number' ? product.id : parseInt(String(product.id)));
                       toggleItem({
                         id: String(product.id),
-                        databaseId: product.id,
+                        databaseId: productId,
                         name: product.name,
                         slug: product.slug,
                         price: product.price,
