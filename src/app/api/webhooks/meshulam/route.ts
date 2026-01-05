@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const WC_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://admin.bellano.co.il';
+const WC_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://nalla.co.il';
 const WC_KEY = process.env.WC_CONSUMER_KEY || process.env.WOOCOMMERCE_CONSUMER_KEY;
 const WC_SECRET = process.env.WC_CONSUMER_SECRET || process.env.WOOCOMMERCE_CONSUMER_SECRET;
 

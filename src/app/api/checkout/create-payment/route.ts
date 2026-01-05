@@ -13,7 +13,7 @@ const PAGE_CODES = {
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || siteConfig.url;
 const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
 // Use Vercel URL for Meshulam callbacks (bypasses Cloudflare blocking)
-const VERCEL_URL = siteConfig.vercelUrl || 'https://bellano.vercel.app';
+const VERCEL_URL = siteConfig.vercelUrl || 'https://nalla.vercel.app';
 
 interface CustomerData {
   firstName: string;
@@ -89,9 +89,9 @@ export async function POST(request: NextRequest) {
     // Use WordPress proxy to bypass Imperva blocking on Vercel
     const proxyUrl = getApiEndpoint('meshulam-proxy');
     
-    // Use bellano.co.il for callbacks - this is what's registered with Meshulam
+    // Use nalla.co.il for callbacks - this needs to be registered with Meshulam
     // The Next.js callback endpoint has X-Frame-Options: ALLOWALL set in next.config.ts
-    const CALLBACK_URL = 'https://bellano.co.il';
+    const CALLBACK_URL = SITE_URL;
     
     // Next.js callback handles the success redirect
     const successUrl = `${CALLBACK_URL}/api/checkout/meshulam-callback`;
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       payments,
       orderId: order_id.toString(),
       description: `הזמנה #${order_id} - ${siteConfig.name}`,
-      // Success callback goes to Next.js (bellano.co.il is registered with Meshulam)
+      // Success callback goes to Next.js
       successUrl: successUrl,
       cancelUrl: `${SITE_URL}/checkout?cancelled=true`,
       // Notify goes to Next.js too, which forwards to WordPress

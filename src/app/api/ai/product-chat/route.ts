@@ -119,7 +119,7 @@ const SYSTEM_PROMPT = `אתה יועץ וירטואלי של בלאנו - חנו
 
 פרטי התקשרות:
 - טלפון/וואטסאפ: 0559871850
-- אתר: www.bellano.co.il
+- אתר: www.nalla.co.il
 `;
 
 export async function POST(request: NextRequest) {

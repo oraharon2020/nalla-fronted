@@ -83,7 +83,7 @@ const CATEGORY_MAP: { [key: string]: string[] } = {
 
 // Fetch products from WooCommerce
 async function fetchProducts(categoryFilter?: string): Promise<FormattedProduct[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL || 'https://admin.bellano.co.il';
+  const baseUrl = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL || 'https://nalla.co.il';
   const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY;
   const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET;
 

@@ -8,8 +8,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Only allow images from our admin domain
-    if (!url.includes('admin.bellano.co.il')) {
+    // Only allow images from our WordPress domain
+    if (!url.includes('nalla.co.il')) {
       return NextResponse.json({ error: 'Invalid domain' }, { status: 403 });
     }
 
