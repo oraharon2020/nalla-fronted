@@ -996,8 +996,8 @@ class Bellano_Admin_Pages {
         
         $saved_footer = get_option('bellano_footer', []);
         $contact = $saved_footer['contact'] ?? [
-            'phone' => '03-3732350',
-            'address' => 'אברהם בומה שביט 1 ראשון לציון, מחסן F-101',
+            'phone' => ' 03-3732350',
+            'address' => 'אברהם בומה שביט 1 ראשון לציון, אולם F-101',
             'facebook' => 'https://facebook.com/nalla',
             'instagram' => 'https://instagram.com/nalla',
         ];

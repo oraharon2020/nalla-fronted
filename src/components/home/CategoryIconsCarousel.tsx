@@ -140,24 +140,24 @@ export function CategoryIconsCarousel({ categories: propCategories }: CategoryIc
               <Link
                 key={category.id}
                 href={category.link}
-                className="flex flex-col items-center gap-1 md:gap-2 min-w-[60px] md:min-w-[80px] group"
+                className="flex flex-col items-center gap-1.5 md:gap-2 min-w-[70px] md:min-w-[90px] group"
               >
                 {/* Icon Container */}
-                <div className="relative w-10 h-10 md:w-16 md:h-16 flex items-center justify-center transition-transform group-hover:scale-105">
+                <div className="relative w-14 h-14 md:w-16 md:h-16 flex items-center justify-center transition-transform group-hover:scale-105">
                   {category.icon ? (
                     // Use img tag for better SVG support
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={category.icon}
                       alt={category.name}
-                      className="w-9 h-9 md:w-14 md:h-14 object-contain"
+                      className="w-12 h-12 md:w-14 md:h-14 object-contain"
                     />
                   ) : (
                     <PlaceholderIcon />
                   )}
                 </div>
                 {/* Category Name */}
-                <span className="text-[10px] md:text-xs text-gray-600 text-center whitespace-nowrap group-hover:text-gray-900 transition-colors">
+                <span className="text-[11px] md:text-xs text-gray-600 text-center whitespace-nowrap group-hover:text-gray-900 transition-colors">
                   {category.name}
                 </span>
               </Link>

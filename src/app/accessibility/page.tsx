@@ -74,8 +74,8 @@ export default function AccessibilityPage() {
               נשמח לשמוע מכם:
             </p>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-700"><strong>טלפון:</strong> 03-5566696</p>
-              <p className="text-gray-700"><strong>וואטסאפ:</strong> 03-5566696</p>
+              <p className="text-gray-700"><strong>טלפון:</strong> 03-3732350</p>
+              <p className="text-gray-700"><strong>וואטסאפ:</strong> 055-9871850</p>
               <p className="text-gray-700"><strong>אימייל:</strong> {siteConfig.email}</p>
             </div>
           </section>

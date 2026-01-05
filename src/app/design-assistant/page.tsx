@@ -88,13 +88,13 @@ export default function DesignAssistantPage() {
       } else {
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: 'סליחה, משהו השתבש. נסו שוב או פנו אלינו 03-5566696',
+          content: 'סליחה, משהו השתבש. נסו שוב או פנו אלינו 03-3732350',
         }]);
       }
     } catch {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'בעיה בחיבור. פנו אלינו 03-5566696',
+        content: 'בעיה בחיבור. פנו אלינו 03-3732350',
       }]);
     } finally {
       setIsLoading(false);
@@ -120,7 +120,7 @@ export default function DesignAssistantPage() {
               <Sparkles className="w-4 h-4 text-amber-500" />
               <span className="text-sm font-medium">עוזר העיצוב</span>
             </div>
-            <a href="tel:035566696" className="text-amber-500 text-xs">03-5566696</a>
+            <a href="tel:035566696" className="text-amber-500 text-xs">  03-3732350</a>
           </div>
         </div>
 

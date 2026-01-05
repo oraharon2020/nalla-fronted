@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, MessageCircle, X, Accessibility, MessageSquare } from 'lucide-react';
+import { Phone, MessageCircle, X, Accessibility, MessageSquare, Navigation } from 'lucide-react';
 
 export function FloatingButtons() {
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -83,7 +83,7 @@ export function FloatingButtons() {
             
             {/* WhatsApp */}
             <a
-              href="https://wa.me/97235566696"
+              href="https://wa.me/972559871850"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
@@ -99,15 +99,31 @@ export function FloatingButtons() {
 
             {/* Phone */}
             <a
-              href="tel:03-5566696"
+              href="tel:  03-3732350"
               className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group mt-1"
             >
               <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Phone className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">03-5566696</p>
-                <p className="text-xs text-gray-500">א-ה 10:00-17:00</p>
+                <p className="font-medium text-gray-900">  03-3732350</p>
+                <p className="text-xs text-gray-500">א-ה 10:00-20:00</p>
+              </div>
+            </a>
+
+            {/* Waze Navigation */}
+            <a
+              href="https://ul.waze.com/ul?place=ChIJNQOQFe2zAhURg1s0b70T82o&ll=31.94958890%2C34.76781590&navigate=yes"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group mt-1"
+            >
+              <div className="w-10 h-10 bg-[#33ccff] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Navigation className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">נווטו אלינו</p>
+                <p className="text-xs text-gray-500">אולם תצוגה - ראשל״צ</p>
               </div>
             </a>
           </div>

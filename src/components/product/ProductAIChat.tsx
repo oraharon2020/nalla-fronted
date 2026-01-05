@@ -322,11 +322,11 @@ export default function ProductAIChat({ product }: ProductAIChatProps) {
               וואטסאפ
             </a>
             <a
-              href="tel:03-5566696"
+              href="tel:  03-3732350"
               className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-md text-xs font-medium transition-colors"
             >
               <Phone className="w-3.5 h-3.5" />
-              03-5566696
+              03-3732350
             </a>
           </div>
         </div>

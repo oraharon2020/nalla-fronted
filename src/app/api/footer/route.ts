@@ -17,8 +17,8 @@ export async function GET() {
     // Return default footer on error
     return NextResponse.json({
       contact: {
-        phone: '03-3732350',
-        address: 'אברהם בומה שביט 1 ראשון לציון, מחסן F-101',
+        phone: ' 03-3732350',
+        address: 'אברהם בומה שביט 1 ראשון לציון, אולם F-101',
         facebook: 'https://facebook.com/nalla',
         instagram: 'https://instagram.com/nalla',
       },

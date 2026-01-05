@@ -40,7 +40,7 @@ const defaultNavItems: NavItem[] = [
   { name: 'בית', link: '/', highlight: false, has_mega_menu: false },
   { name: 'NALLA SALE', link: '/product-category/nalla-sale', highlight: true, has_mega_menu: false },
   { name: 'חללי מגורים', link: '#', highlight: false, has_mega_menu: true },
-  { name: 'SHOWROOM', link: '/showroom-page', highlight: false, has_mega_menu: false },
+  { name: 'SHOWROOM', link: '/showroom', highlight: false, has_mega_menu: false },
   { name: 'בלוג', link: '/blog', highlight: false, has_mega_menu: false },
   { name: 'יצירת קשר', link: '/contact-us', highlight: false, has_mega_menu: false },
   { name: 'צביעה בתנור', link: '/tambour', highlight: false, has_mega_menu: false },

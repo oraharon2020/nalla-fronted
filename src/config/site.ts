@@ -88,7 +88,7 @@ export const siteConfig = {
 
   // Contact
   email: 'info@nalla.co.il',
-  phone: '03-3732350',
+  phone: ' 03-3732350',
   phoneClean: '033732350', // Without dashes for tel: links
   whatsapp: '972559871850', // International format for WhatsApp
   
@@ -125,21 +125,20 @@ export const siteConfig = {
     wordpressUrl: 'https://nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
   },
   favicon: {
-    // TODO: לעדכן עם favicon של נלה
-    ico32: 'https://nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
-    ico192: 'https://nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
-    appleTouchIcon: 'https://nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
+    ico32: '/favicon.png',
+    ico192: '/favicon.png',
+    appleTouchIcon: '/favicon.png',
   },
   ogImage: '/images/nalla-logo.png',
   
   // Analytics & Tracking
   analytics: {
-    googleTagManager: '', // אין GTM, משתמשים ב-gtag ישירות
+    googleTagManager: 'GTM-TD9968FJ', // Server-side GTM via sst.nalla.co.il
     googleAds: 'AW-11152128573', // Google Ads conversion tracking
     googleAdsConversionLabel: '', // TODO: Purchase conversion label
     googleAdsAddToCartLabel: '', // TODO: Add to cart conversion label
     googleVerification: '', // TODO: Google Search Console verification
-    facebookPixel: '', // אין פיקסל פייסבוק פעיל כרגע
+    facebookPixel: '935703514313525', // Facebook Pixel
     facebookDomainVerification: '', // TODO: Facebook domain verification
     upixelKey: '3l2j8016q1r00000000000000gepgp', // Upixel tracking
   },
@@ -149,7 +148,7 @@ export const siteConfig = {
     type: 'FurnitureStore',
     priceRange: '₪₪₪',
     address: {
-      street: 'אברהם בומא שביט 1, מחסן F-101',
+      street: 'אברהם בומא שביט 1, אולם F-101',
       city: 'ראשון לציון',
       region: 'מרכז',
       postalCode: '',

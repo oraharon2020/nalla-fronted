@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Phone, Mail, MessageCircle, Clock, Send, AlertCircle, ChevronDown } from 'lucide-react';
+import { Phone, Mail, MessageCircle, Clock, Send, AlertCircle, ChevronDown, MapPin, Navigation } from 'lucide-react';
 import { siteConfig, getApiEndpoint } from '@/config/site';
 
 const subjectOptions = [
@@ -53,6 +53,9 @@ export default function ContactPage() {
     }
   };
 
+  // Waze link with coordinates
+  const wazeLink = 'https://ul.waze.com/ul?place=ChIJNQOQFe2zAhURg1s0b70T82o&ll=31.94958890%2C34.76781590&navigate=yes';
+
   return (
     <div className="bg-white min-h-screen">
       {/* Breadcrumb */}
@@ -73,55 +76,95 @@ export default function ContactPage() {
             
             {/* Left Side - Contact Info */}
             <div className="lg:order-1">
-              <div className="space-y-6">
-                {/* Contact Details */}
+              <div className="space-y-8">
+                {/* Greeting */}
                 <div>
-                  <h2 className="text-lg font-bold mb-3">לקוחות יקרים,</h2>
-                  <p className="text-gray-700 leading-relaxed mb-5">
-                    נשמח לעמוד לשירותכם ולספק מענה לכל שאלה, בקשה או בעיה.
-                    <br />
-                    ניתן ליצור איתנו קשר באחת מהדרכים הבאות:
+                  <h2 className="text-2xl font-bold text-gray-900 mb-3">נשמח לעמוד לשירותכם</h2>
+                  <p className="text-gray-600 leading-relaxed">
+                    יש לכם שאלה? רוצים לברר פרטים על הזמנה? אנחנו כאן בשבילכם.
                   </p>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">טלפון:</span>
-                      <a href={`tel:${siteConfig.phoneClean}`} className="text-black hover:underline">
-                        {siteConfig.phone}
-                      </a>
+                </div>
+                
+                {/* Contact Cards */}
+                <div className="space-y-4">
+                  {/* Phone */}
+                  <a 
+                    href={`tel:${siteConfig.phoneClean}`}
+                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-[#e8f0e6] transition-colors group"
+                  >
+                    <div className="w-12 h-12 bg-[#4a7c59] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Phone className="w-5 h-5 text-white" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">WhatsApp:</span>
-                      <a 
-                        href={`https://wa.me/${siteConfig.whatsapp}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-black hover:underline"
-                      >
-                        [לחצו כאן]
-                      </a>
+                    <div>
+                      <p className="text-sm text-gray-500">טלפון</p>
+                      <p className="font-semibold text-gray-900">{siteConfig.phone}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">דוא״ל:</span>
-                      <a href={`mailto:${siteConfig.email}`} className="text-black hover:underline">
-                        {siteConfig.email}
-                      </a>
+                  </a>
+
+                  {/* WhatsApp */}
+                  <a 
+                    href={`https://wa.me/${siteConfig.whatsapp}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-[#dcf8c6] transition-colors group"
+                  >
+                    <div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <MessageCircle className="w-5 h-5 text-white" />
                     </div>
+                    <div>
+                      <p className="text-sm text-gray-500">וואטסאפ</p>
+                      <p className="font-semibold text-gray-900">שלחו לנו הודעה</p>
+                    </div>
+                  </a>
+
+                  {/* Email */}
+                  <a 
+                    href={`mailto:${siteConfig.email}`}
+                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors group"
+                  >
+                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Mail className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">אימייל</p>
+                      <p className="font-semibold text-gray-900">{siteConfig.email}</p>
+                    </div>
+                  </a>
+
+                  {/* Address with Waze */}
+                  <a 
+                    href={wazeLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-[#33ccff]/10 transition-colors group"
+                  >
+                    <div className="w-12 h-12 bg-[#33ccff] rounded-full flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Navigation className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">אולם תצוגה - נווטו אלינו</p>
+                      <p className="font-semibold text-gray-900">אברהם בומא שביט 1, אולם F-101</p>
+                      <p className="text-sm text-gray-500">ראשון לציון</p>
+                    </div>
+                  </a>
+                </div>
+
+                {/* Hours */}
+                <div className="bg-[#f8f7f4] rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Clock className="w-5 h-5 text-[#4a7c59]" />
+                    <h3 className="font-bold text-gray-900">שעות פעילות</h3>
                   </div>
-                </div>
-
-                {/* Customer Service Hours */}
-                <div>
-                  <h3 className="font-bold mb-1">שעות פעילות שירות הלקוחות:</h3>
-                  <p className="text-gray-700">ימים א׳-ה׳: 10:00-16:00</p>
-                </div>
-
-                {/* Showroom Hours */}
-                <div>
-                  <h3 className="font-bold mb-1">שעות פעילות אולם התצוגה:</h3>
-                  <div className="text-gray-700 space-y-0.5">
-                    <p>ימים א׳-ה׳: 10:00-20:00</p>
-                    <p>ימי שישי: 10:00-14:00</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">אולם תצוגה</p>
+                      <p className="text-sm text-gray-700">א׳-ה׳: 10:00-20:00</p>
+                      <p className="text-sm text-gray-700">שישי: 10:00-14:00</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">שירות לקוחות</p>
+                      <p className="text-sm text-gray-700">א׳-ה׳: 10:00-16:00</p>
+                    </div>
                   </div>
                 </div>
               </div>

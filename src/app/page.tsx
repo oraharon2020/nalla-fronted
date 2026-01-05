@@ -118,7 +118,6 @@ async function HeroSection() {
           <video
             autoPlay
             muted
-            loop
             playsInline
             poster={getOptimizedImageUrl(videoPoster || imageUrl, 1200)}
             className="w-full h-auto hidden md:block"
@@ -138,7 +137,6 @@ async function HeroSection() {
           <video
             autoPlay
             muted
-            loop
             playsInline
             poster={getOptimizedImageUrl(videoPoster || mobileImageUrl, 750)}
             className="w-full h-auto md:hidden"

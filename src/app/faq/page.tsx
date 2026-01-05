@@ -102,11 +102,11 @@ export default function FAQPage() {
             <p className="text-gray-500 text-sm mb-4">צוות שירות הלקוחות שלנו ישמח לעזור</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a 
-                href="tel:03-5566696"
+                href="tel:  03-3732350"
                 className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
               >
                 <Phone className="w-4 h-4" />
-                03-5566696
+                03-3732350
               </a>
               <a 
                 href="https://wa.me/97235566696"
