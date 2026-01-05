@@ -403,9 +403,9 @@ export default function CheckoutPage() {
                 <CheckCircle className="w-10 h-10 text-green-600" />
               )}
             </div>
-            <h1 className="text-2xl font-bold mb-4">
+            <h2 className="text-2xl font-bold mb-4">
               {isPhoneOrder ? 'ההזמנה נשלחה בהצלחה!' : 'ההזמנה התקבלה בהצלחה!'}
-            </h1>
+            </h2>
             <p className="text-gray-600 mb-2">תודה על הרכישה שלך</p>
             {orderId && (
               <p className="text-gray-600 mb-4">מספר הזמנה: <strong>{orderId}</strong></p>
@@ -440,7 +440,7 @@ export default function CheckoutPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-bold">תשלום מאובטח</h1>
+              <h2 className="text-2xl font-bold">תשלום מאובטח</h2>
               <div className="flex items-center gap-2 text-green-600">
                 <ShieldCheck className="w-5 h-5" />
                 <span className="text-sm">חיבור מאובטח SSL</span>
@@ -479,7 +479,7 @@ export default function CheckoutPage() {
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="w-10 h-10 text-gray-400" />
             </div>
-            <h1 className="text-2xl font-bold mb-4">הסל שלך ריק</h1>
+            <h2 className="text-2xl font-bold mb-4">הסל שלך ריק</h2>
             <p className="text-gray-600 mb-8">הוסף מוצרים לסל כדי להמשיך לתשלום</p>
             <Link 
               href="/"
