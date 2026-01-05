@@ -3,6 +3,35 @@ import { siteConfig } from '@/config/site';
 
 const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
 
+interface WPMenuItem {
+  title: string;
+  url: string;
+  icon?: string;
+  children?: WPMenuItem[];
+  submenu?: WPMenuItem[];
+}
+
+interface MenuItem {
+  title: string;
+  url: string;
+  icon?: string;
+  children?: MenuItem[];
+}
+
+// Normalize menu items to always use 'children' instead of 'submenu'
+function normalizeMenuItems(items: WPMenuItem[]): MenuItem[] {
+  return items.map(item => ({
+    title: item.title,
+    url: item.url,
+    icon: item.icon,
+    children: item.children?.length 
+      ? normalizeMenuItems(item.children)
+      : item.submenu?.length 
+        ? normalizeMenuItems(item.submenu)
+        : undefined
+  }));
+}
+
 export async function GET() {
   try {
     const response = await fetch(`${WP_URL}/wp-json/bellano/v1/mobile-menu`, {
@@ -15,7 +44,14 @@ export async function GET() {
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    
+    // Normalize the data to use 'children' consistently
+    const normalizedData = {
+      ...data,
+      items: data.items ? normalizeMenuItems(data.items) : []
+    };
+    
+    return NextResponse.json(normalizedData);
   } catch (error) {
     console.error('Error fetching mobile menu:', error);
     return NextResponse.json(getDefaultMenu());
@@ -29,8 +65,7 @@ function getDefaultMenu() {
         title: 'סלון',
         url: '/product-category/living-room',
         icon: '🛋️',
-        has_submenu: true,
-        submenu: [
+        children: [
           { title: 'מזנונים', url: '/product-category/tv-units', icon: '📺' },
           { title: 'שולחנות סלון', url: '/product-category/coffee-tables', icon: '☕' },
           { title: 'ספריות', url: '/product-category/bookcases', icon: '📚' },
@@ -41,8 +76,7 @@ function getDefaultMenu() {
         title: 'חדר שינה',
         url: '/product-category/bedroom',
         icon: '🛏️',
-        has_submenu: true,
-        submenu: [
+        children: [
           { title: 'קומודות', url: '/product-category/dressers', icon: '🗄️' },
           { title: 'שידות', url: '/product-category/nightstands', icon: '🛏️' },
         ]
@@ -51,15 +85,11 @@ function getDefaultMenu() {
         title: 'פינת אוכל',
         url: '/product-category/dining-room',
         icon: '🍽️',
-        has_submenu: false,
-        submenu: []
       },
       {
         title: 'NALLA SALE',
         url: '/product-category/sale',
         icon: '🏷️',
-        has_submenu: false,
-        submenu: []
       },
     ],
     phone: siteConfig.phone,

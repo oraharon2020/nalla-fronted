@@ -9,10 +9,14 @@ if (!defined('ABSPATH')) exit;
 class Bellano_Admin_Pages {
     
     public function __construct() {
-        add_action('rest_api_init', [$this, 'register_mobile_menu_api']);
+        // Register REST API for mobile menu
+        add_action('rest_api_init', [$this, 'register_mobile_menu_rest_routes']);
     }
     
-    public function register_mobile_menu_api() {
+    /**
+     * Register REST API routes for mobile menu
+     */
+    public function register_mobile_menu_rest_routes() {
         register_rest_route('bellano/v1', '/mobile-menu', [
             'methods' => 'GET',
             'callback' => [$this, 'get_mobile_menu_api'],
@@ -20,6 +24,9 @@ class Bellano_Admin_Pages {
         ]);
     }
     
+    /**
+     * API endpoint to get mobile menu
+     */
     public function get_mobile_menu_api() {
         $settings = get_option('bellano_mobile_menu', array());
         return rest_ensure_response([
@@ -1304,20 +1311,20 @@ class Bellano_Admin_Pages {
                 foreach ($_POST['menu_items'] as $item) {
                     if (!empty($item['title'])) {
                         $menu_item = array(
+                            'type' => sanitize_text_field($item['type'] ?? 'custom'),
                             'title' => sanitize_text_field($item['title']),
-                            'url' => sanitize_text_field($item['url']),
-                            'icon' => sanitize_text_field($item['icon'] ?? ''),
+                            'url' => isset($item['url']) ? trim(wp_unslash($item['url'])) : '',
+                            'icon' => $item['icon'] ?? '🔗',
                             'children' => array()
                         );
                         
-                        // Handle sub-items
                         if (!empty($item['children']) && is_array($item['children'])) {
                             foreach ($item['children'] as $child) {
                                 if (!empty($child['title'])) {
                                     $menu_item['children'][] = array(
                                         'title' => sanitize_text_field($child['title']),
-                                        'url' => sanitize_text_field($child['url']),
-                                        'icon' => sanitize_text_field($child['icon'] ?? '')
+                                        'url' => isset($child['url']) ? trim(wp_unslash($child['url'])) : '',
+                                        'icon' => $child['icon'] ?? '📌'
                                     );
                                 }
                             }
@@ -1337,192 +1344,291 @@ class Bellano_Admin_Pages {
         $phone = $settings['phone'] ?? '';
         $whatsapp = $settings['whatsapp'] ?? '';
         
-        if (empty($items)) {
-            $items = array(array('title' => '', 'url' => '', 'icon' => '', 'children' => array()));
+        // Get categories for picker
+        $categories = array();
+        if (taxonomy_exists('product_cat')) {
+            $terms = get_terms(array('taxonomy' => 'product_cat', 'hide_empty' => false, 'orderby' => 'name'));
+            if (!is_wp_error($terms)) $categories = $terms;
         }
+        
+        $product_tags = array();
+        if (taxonomy_exists('product_tag')) {
+            $terms = get_terms(array('taxonomy' => 'product_tag', 'hide_empty' => false, 'orderby' => 'name'));
+            if (!is_wp_error($terms)) $product_tags = $terms;
+        }
+        
+        $pages = get_pages(array('sort_column' => 'post_title', 'post_status' => 'publish'));
         ?>
         <div class="bellano-card">
             <h2>📱 תפריט מובייל</h2>
-            <p class="description">הגדר את התפריט שיוצג במובייל באתר Next.js. גרור פריטים לשינוי הסדר.</p>
+            <p class="description">בחר קטגוריות, תגיות או דפים להוספה לתפריט המובייל. גרור לשינוי הסדר.</p>
             
-            <form method="post">
-                <?php wp_nonce_field('bellano_mobile_menu_nonce'); ?>
-                
-                <h3 style="margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">📞 פרטי קשר</h3>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
-                    <div>
-                        <label style="font-size: 12px; color: #666;">טלפון</label>
-                        <input type="text" name="phone" value="<?php echo esc_attr($phone); ?>" style="width: 100%;" dir="ltr" placeholder="03-1234567">
-                    </div>
-                    <div>
-                        <label style="font-size: 12px; color: #666;">וואטסאפ</label>
-                        <input type="text" name="whatsapp" value="<?php echo esc_attr($whatsapp); ?>" style="width: 100%;" dir="ltr" placeholder="972501234567">
-                    </div>
-                </div>
-                
-                <h3 style="margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">📋 פריטי תפריט</h3>
-                <div id="mobile-menu-items" style="margin-top: 15px;">
-                    <?php foreach ($items as $index => $item): ?>
-                    <div class="menu-item-wrapper" data-index="<?php echo $index; ?>">
-                        <div class="menu-item" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd;">
-                            <span class="drag-handle" style="cursor: grab; color: #999; font-size: 18px;">☰</span>
-                            <div style="width: 50px;">
-                                <label style="font-size: 10px; color: #666;">אייקון</label>
-                                <input type="text" name="menu_items[<?php echo $index; ?>][icon]" value="<?php echo esc_attr($item['icon'] ?? ''); ?>" style="width: 100%; text-align: center; font-size: 18px;" placeholder="🏠">
+            <div style="display: flex; gap: 20px; margin-top: 20px;">
+                <div style="width: 300px; flex-shrink: 0;">
+                    <div class="bellano-card" style="margin: 0; padding: 15px;">
+                        <h4 style="margin: 0 0 15px 0;">📁 קטגוריות מוצרים</h4>
+                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+                            <?php foreach ($categories as $cat): ?>
+                            <div class="available-item" draggable="true" data-type="category" data-title="<?php echo esc_attr($cat->name); ?>" data-url="/product-category/<?php echo esc_attr($cat->slug); ?>" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: grab;">
+                                📁 <?php echo esc_html($cat->name); ?>
                             </div>
-                            <div style="flex: 1;">
-                                <label style="font-size: 10px; color: #666;">שם</label>
-                                <input type="text" name="menu_items[<?php echo $index; ?>][title]" value="<?php echo esc_attr($item['title']); ?>" style="width: 100%;" placeholder="שם הפריט">
-                            </div>
-                            <div style="flex: 1;">
-                                <label style="font-size: 10px; color: #666;">קישור</label>
-                                <input type="text" name="menu_items[<?php echo $index; ?>][url]" value="<?php echo esc_attr($item['url']); ?>" style="width: 100%;" dir="ltr" placeholder="/category/living-room">
-                            </div>
-                            <button type="button" onclick="toggleSubMenu(this)" class="button" title="תת-תפריט">📂</button>
-                            <button type="button" onclick="this.closest('.menu-item-wrapper').remove(); reindexItems();" class="button" style="color: red;">✕</button>
+                            <?php endforeach; ?>
                         </div>
                         
-                        <!-- Sub-menu items -->
-                        <div class="sub-menu-container" style="margin-right: 30px; margin-top: 5px; margin-bottom: 10px; padding: 10px; background: #fff; border-radius: 6px; border: 1px dashed #ccc; <?php echo empty($item['children']) ? 'display: none;' : ''; ?>">
-                            <div class="sub-menu-items">
-                                <?php 
-                                $children = $item['children'] ?? array();
-                                foreach ($children as $childIndex => $child): 
-                                ?>
-                                <div class="sub-menu-item" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px; margin-bottom: 5px;">
-                                    <span style="color: #ccc;">↳</span>
-                                    <input type="text" name="menu_items[<?php echo $index; ?>][children][<?php echo $childIndex; ?>][icon]" value="<?php echo esc_attr($child['icon'] ?? ''); ?>" style="width: 40px; text-align: center;" placeholder="📌">
-                                    <input type="text" name="menu_items[<?php echo $index; ?>][children][<?php echo $childIndex; ?>][title]" value="<?php echo esc_attr($child['title']); ?>" style="flex: 1;" placeholder="שם תת-פריט">
-                                    <input type="text" name="menu_items[<?php echo $index; ?>][children][<?php echo $childIndex; ?>][url]" value="<?php echo esc_attr($child['url']); ?>" style="flex: 1;" dir="ltr" placeholder="/category/sub">
-                                    <button type="button" onclick="this.closest('.sub-menu-item').remove()" class="button button-small" style="color: red;">✕</button>
-                                </div>
-                                <?php endforeach; ?>
+                        <h4 style="margin: 20px 0 15px 0;">🏷️ תגיות</h4>
+                        <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+                            <?php foreach ($product_tags as $tag): ?>
+                            <div class="available-item" draggable="true" data-type="tag" data-title="<?php echo esc_attr($tag->name); ?>" data-url="/product-tag/<?php echo esc_attr($tag->slug); ?>" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: grab;">
+                                🏷️ <?php echo esc_html($tag->name); ?>
                             </div>
-                            <button type="button" onclick="addSubMenuItem(this, <?php echo $index; ?>)" class="button button-small" style="margin-top: 5px;">➕ הוסף תת-פריט</button>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <h4 style="margin: 20px 0 15px 0;">📄 דפים</h4>
+                        <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+                            <?php foreach ($pages as $page): ?>
+                            <div class="available-item" draggable="true" data-type="page" data-title="<?php echo esc_attr($page->post_title); ?>" data-url="/<?php echo esc_attr($page->post_name); ?>" style="padding: 8px 12px; border-bottom: 1px solid #eee; cursor: grab;">
+                                📄 <?php echo esc_html($page->post_title); ?>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <h4 style="margin: 20px 0 15px 0;">🔗 קישור מותאם</h4>
+                        <div style="padding: 10px; background: #f5f5f5; border-radius: 4px;">
+                            <input type="text" id="custom-link-title" placeholder="שם" style="width: 100%; margin-bottom: 8px;">
+                            <input type="text" id="custom-link-url" placeholder="/url" dir="ltr" style="width: 100%; margin-bottom: 8px;">
+                            <button type="button" onclick="addCustomLink()" class="button button-small">➕ הוסף</button>
                         </div>
                     </div>
-                    <?php endforeach; ?>
                 </div>
                 
-                <button type="button" onclick="addMobileMenuItem()" class="button" style="margin-top: 15px;">➕ הוסף פריט ראשי</button>
-                
-                <div style="margin-top: 25px; padding-top: 15px; border-top: 2px solid #ddd;">
-                    <button type="submit" name="save_mobile_menu" class="button button-primary button-large">💾 שמור תפריט מובייל</button>
+                <div style="flex: 1;">
+                    <form method="post">
+                        <?php wp_nonce_field('bellano_mobile_menu_nonce'); ?>
+                        
+                        <div class="bellano-card" style="margin: 0; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="margin: 0 0 10px 0;">📞 פרטי קשר</h4>
+                            <div style="display: flex; gap: 15px;">
+                                <div style="flex: 1;"><label style="font-size: 11px;">טלפון</label><input type="text" name="phone" value="<?php echo esc_attr($phone); ?>" style="width: 100%;" dir="ltr"></div>
+                                <div style="flex: 1;"><label style="font-size: 11px;">וואטסאפ</label><input type="text" name="whatsapp" value="<?php echo esc_attr($whatsapp); ?>" style="width: 100%;" dir="ltr"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="bellano-card" style="margin: 0; padding: 15px;">
+                            <h4 style="margin: 0 0 15px 0;">📋 מבנה התפריט</h4>
+                            <div id="menu-drop-zone" style="min-height: 200px; border: 2px dashed #ccc; border-radius: 8px; padding: 15px; background: #fafafa;">
+                                <?php if (empty($items)): ?>
+                                <p class="empty-message" style="text-align: center; color: #999; margin: 50px 0;">גרור פריטים לכאן</p>
+                                <?php else: ?>
+                                <?php foreach ($items as $index => $item): ?>
+                                <div class="menu-item-wrapper" data-index="<?php echo $index; ?>">
+                                    <div class="menu-item" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #fff; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 8px;">
+                                        <span class="drag-handle" style="cursor: grab; color: #999;">☰</span>
+                                        <input type="hidden" name="menu_items[<?php echo $index; ?>][type]" value="<?php echo esc_attr($item['type'] ?? 'custom'); ?>">
+                                        <input type="text" name="menu_items[<?php echo $index; ?>][icon]" value="<?php echo esc_attr($item['icon'] ?? '🔗'); ?>" style="width: 45px; text-align: center;">
+                                        <input type="text" name="menu_items[<?php echo $index; ?>][title]" value="<?php echo esc_attr($item['title']); ?>" style="flex: 1;">
+                                        <input type="text" name="menu_items[<?php echo $index; ?>][url]" value="<?php echo esc_attr($item['url']); ?>" style="flex: 1;" dir="ltr">
+                                        <button type="button" onclick="toggleSubMenu(this)" class="button button-small">📂</button>
+                                        <button type="button" onclick="removeMenuItem(this)" class="button button-small" style="color: red;">✕</button>
+                                    </div>
+                                    <div class="sub-menu-container" style="margin-right: 25px; margin-bottom: 8px; padding: 10px; background: #f9f9f9; border-radius: 6px; border: 2px dashed transparent; <?php echo empty($item['children']) ? 'display: none;' : ''; ?>">
+                                        <div class="sub-menu-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                            <p style="font-size: 11px; color: #666; margin: 0;">תת-פריטים (<?php echo count($item['children'] ?? []); ?>)</p>
+                                            <button type="button" onclick="toggleSubMenuCollapse(this)" class="button button-small sub-collapse-btn" style="font-size: 10px;">▼ כווץ</button>
+                                        </div>
+                                        <div class="sub-menu-items-wrapper">
+                                            <div class="sub-menu-items" data-parent="<?php echo $index; ?>">
+                                                <?php foreach (($item['children'] ?? array()) as $ci => $child): ?>
+                                                <div class="sub-menu-item" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #fff; border-radius: 4px; margin-bottom: 5px; border: 1px solid #e5e5e5;">
+                                                    <span class="sub-drag-handle" style="cursor: grab; color: #ccc;">☰</span>
+                                                    <input type="text" name="menu_items[<?php echo $index; ?>][children][<?php echo $ci; ?>][icon]" value="<?php echo esc_attr($child['icon'] ?? '📌'); ?>" style="width: 35px;">
+                                                    <input type="text" name="menu_items[<?php echo $index; ?>][children][<?php echo $ci; ?>][title]" value="<?php echo esc_attr($child['title']); ?>" style="flex: 1;">
+                                                    <input type="text" name="menu_items[<?php echo $index; ?>][children][<?php echo $ci; ?>][url]" value="<?php echo esc_attr($child['url']); ?>" style="flex: 1;" dir="ltr">
+                                                    <button type="button" onclick="this.closest('.sub-menu-item').remove(); reindexSubItems(this)" class="button button-small" style="color: red;">✕</button>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            <button type="button" onclick="addSubMenuItem(this, <?php echo $index; ?>)" class="button button-small">➕ תת-פריט ידני</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px;"><button type="submit" name="save_mobile_menu" class="button button-primary button-large">💾 שמור תפריט</button></div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
         <script>
-        var mobileMenuIndex = <?php echo count($items); ?>;
+        var menuItemIndex = <?php echo count($items); ?>;
         var subMenuIndexes = {};
-        <?php foreach ($items as $index => $item): ?>
-        subMenuIndexes[<?php echo $index; ?>] = <?php echo count($item['children'] ?? array()); ?>;
-        <?php endforeach; ?>
+        <?php foreach ($items as $i => $it): ?>subMenuIndexes[<?php echo $i; ?>] = <?php echo count($it['children'] ?? array()); ?>;<?php endforeach; ?>
         
-        // Initialize drag & drop
         document.addEventListener('DOMContentLoaded', function() {
-            new Sortable(document.getElementById('mobile-menu-items'), {
-                animation: 150,
-                handle: '.drag-handle',
-                ghostClass: 'sortable-ghost',
-                onEnd: function() {
-                    reindexItems();
-                }
+            // Drag from available items
+            document.querySelectorAll('.available-item').forEach(function(item) {
+                item.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', JSON.stringify({type: this.dataset.type, title: this.dataset.title, url: this.dataset.url}));
+                    this.style.opacity = '0.5';
+                });
+                item.addEventListener('dragend', function() { this.style.opacity = '1'; });
             });
+            
+            // Main drop zone
+            var dropZone = document.getElementById('menu-drop-zone');
+            dropZone.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = '#0073aa'; });
+            dropZone.addEventListener('dragleave', function() { this.style.borderColor = '#ccc'; });
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault(); this.style.borderColor = '#ccc';
+                try {
+                    var data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    addMenuItem(data.title, data.url, data.type);
+                    var emptyMsg = this.querySelector('.empty-message'); if (emptyMsg) emptyMsg.remove();
+                } catch(err) {}
+            });
+            
+            // Sortable for main menu
+            new Sortable(dropZone, { animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost', filter: '.empty-message', onEnd: reindexItems });
+            
+            // Initialize sub-menu drop zones and sortables
+            initSubMenuDropZones();
         });
         
-        function reindexItems() {
-            var items = document.querySelectorAll('#mobile-menu-items .menu-item-wrapper');
-            items.forEach(function(item, newIndex) {
-                // Update main item inputs
-                item.querySelectorAll('.menu-item input').forEach(function(input) {
-                    var name = input.getAttribute('name');
-                    if (name) {
-                        input.setAttribute('name', name.replace(/menu_items\[\d+\]/, 'menu_items[' + newIndex + ']'));
-                    }
+        function initSubMenuDropZones() {
+            // Add drop handlers to all sub-menu containers
+            document.querySelectorAll('.sub-menu-container').forEach(function(container) {
+                container.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.style.borderColor = '#0073aa';
+                    this.style.background = '#e8f4fc';
                 });
-                // Update sub-menu inputs
-                item.querySelectorAll('.sub-menu-item input').forEach(function(input) {
-                    var name = input.getAttribute('name');
-                    if (name) {
-                        input.setAttribute('name', name.replace(/menu_items\[\d+\]/, 'menu_items[' + newIndex + ']'));
-                    }
+                container.addEventListener('dragleave', function(e) {
+                    this.style.borderColor = 'transparent';
+                    this.style.background = '#f9f9f9';
                 });
-                // Update button onclick
-                var addSubBtn = item.querySelector('.sub-menu-container > button');
-                if (addSubBtn) {
-                    addSubBtn.setAttribute('onclick', 'addSubMenuItem(this, ' + newIndex + ')');
-                }
-                item.setAttribute('data-index', newIndex);
+                container.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.style.borderColor = 'transparent';
+                    this.style.background = '#f9f9f9';
+                    try {
+                        var data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                        var parentWrapper = this.closest('.menu-item-wrapper');
+                        var parentIndex = parseInt(parentWrapper.getAttribute('data-index'));
+                        addSubMenuItemFromDrag(data.title, data.url, data.type, parentIndex, this.querySelector('.sub-menu-items'));
+                    } catch(err) { console.log('Drop error:', err); }
+                });
             });
-            mobileMenuIndex = items.length;
+            
+            // Initialize sortables for sub-menu items
+            document.querySelectorAll('.sub-menu-items').forEach(function(subContainer) {
+                new Sortable(subContainer, {
+                    animation: 150,
+                    handle: '.sub-drag-handle',
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function() { reindexSubItemsInContainer(subContainer); }
+                });
+            });
         }
         
-        function toggleSubMenu(btn) {
-            var wrapper = btn.closest('.menu-item-wrapper');
-            var subContainer = wrapper.querySelector('.sub-menu-container');
-            if (subContainer.style.display === 'none') {
-                subContainer.style.display = 'block';
+        function addSubMenuItemFromDrag(title, url, type, parentIndex, container) {
+            var icon = type === 'category' ? '📁' : (type === 'tag' ? '🏷️' : (type === 'page' ? '📄' : '📌'));
+            var subIndex = subMenuIndexes[parentIndex] || 0;
+            var html = '<div class="sub-menu-item" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #fff; border-radius: 4px; margin-bottom: 5px; border: 1px solid #e5e5e5;"><span class="sub-drag-handle" style="cursor: grab; color: #ccc;">☰</span><input type="text" name="menu_items['+parentIndex+'][children]['+subIndex+'][icon]" value="'+icon+'" style="width: 35px;"><input type="text" name="menu_items['+parentIndex+'][children]['+subIndex+'][title]" value="'+title+'" style="flex: 1;"><input type="text" name="menu_items['+parentIndex+'][children]['+subIndex+'][url]" value="'+url+'" style="flex: 1;" dir="ltr"><button type="button" onclick="this.closest(\'.sub-menu-item\').remove(); reindexSubItems(this)" class="button button-small" style="color: red;">✕</button></div>';
+            container.insertAdjacentHTML('beforeend', html);
+            subMenuIndexes[parentIndex] = subIndex + 1;
+            updateSubMenuCount(container);
+        }
+        
+        function addMenuItem(title, url, type) {
+            var icon = type === 'category' ? '📁' : (type === 'tag' ? '🏷️' : (type === 'page' ? '📄' : '🔗'));
+            var container = document.getElementById('menu-drop-zone');
+            var html = '<div class="menu-item-wrapper" data-index="'+menuItemIndex+'"><div class="menu-item" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #fff; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 8px;"><span class="drag-handle" style="cursor: grab; color: #999;">☰</span><input type="hidden" name="menu_items['+menuItemIndex+'][type]" value="'+type+'"><input type="text" name="menu_items['+menuItemIndex+'][icon]" value="'+icon+'" style="width: 45px; text-align: center;"><input type="text" name="menu_items['+menuItemIndex+'][title]" value="'+title+'" style="flex: 1;"><input type="text" name="menu_items['+menuItemIndex+'][url]" value="'+url+'" style="flex: 1;" dir="ltr"><button type="button" onclick="toggleSubMenu(this)" class="button button-small">📂</button><button type="button" onclick="removeMenuItem(this)" class="button button-small" style="color: red;">✕</button></div><div class="sub-menu-container" style="margin-right: 25px; margin-bottom: 8px; padding: 10px; background: #f9f9f9; border-radius: 6px; border: 2px dashed transparent; display: none;"><div class="sub-menu-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;"><p style="font-size: 11px; color: #666; margin: 0;">תת-פריטים (0)</p><button type="button" onclick="toggleSubMenuCollapse(this)" class="button button-small sub-collapse-btn" style="font-size: 10px;">▼ כווץ</button></div><div class="sub-menu-items-wrapper"><div class="sub-menu-items" data-parent="'+menuItemIndex+'"></div><button type="button" onclick="addSubMenuItem(this, '+menuItemIndex+')" class="button button-small">➕ תת-פריט ידני</button></div></div></div>';
+            container.insertAdjacentHTML('beforeend', html);
+            subMenuIndexes[menuItemIndex] = 0;
+            menuItemIndex++;
+            // Re-init drop zones for new item
+            setTimeout(initSubMenuDropZones, 50);
+        }
+        
+        function addCustomLink() {
+            var title = document.getElementById('custom-link-title').value;
+            var url = document.getElementById('custom-link-url').value;
+            if (title && url) { addMenuItem(title, url, 'custom'); document.getElementById('custom-link-title').value = ''; document.getElementById('custom-link-url').value = ''; var emptyMsg = document.querySelector('#menu-drop-zone .empty-message'); if (emptyMsg) emptyMsg.remove(); }
+        }
+        
+        function removeMenuItem(btn) { btn.closest('.menu-item-wrapper').remove(); reindexItems(); var dropZone = document.getElementById('menu-drop-zone'); if (!dropZone.querySelector('.menu-item-wrapper')) { dropZone.innerHTML = '<p class="empty-message" style="text-align: center; color: #999; margin: 50px 0;">גרור פריטים לכאן</p>'; } }
+        function toggleSubMenu(btn) { var sub = btn.closest('.menu-item-wrapper').querySelector('.sub-menu-container'); sub.style.display = sub.style.display === 'none' ? 'block' : 'none'; }
+        function toggleSubMenuCollapse(btn) {
+            var wrapper = btn.closest('.sub-menu-container').querySelector('.sub-menu-items-wrapper');
+            if (wrapper.style.display === 'none') {
+                wrapper.style.display = 'block';
+                btn.textContent = '▼ כווץ';
             } else {
-                subContainer.style.display = 'none';
+                wrapper.style.display = 'none';
+                btn.textContent = '▶ הרחב';
+            }
+        }
+        function addSubMenuItem(btn, parentIndex) { var container = btn.previousElementSibling; var subIndex = subMenuIndexes[parentIndex] || 0; container.insertAdjacentHTML('beforeend', '<div class="sub-menu-item" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #fff; border-radius: 4px; margin-bottom: 5px; border: 1px solid #e5e5e5;"><span class="sub-drag-handle" style="cursor: grab; color: #ccc;">☰</span><input type="text" name="menu_items['+parentIndex+'][children]['+subIndex+'][icon]" value="📌" style="width: 35px;"><input type="text" name="menu_items['+parentIndex+'][children]['+subIndex+'][title]" placeholder="שם" style="flex: 1;"><input type="text" name="menu_items['+parentIndex+'][children]['+subIndex+'][url]" placeholder="/url" style="flex: 1;" dir="ltr"><button type="button" onclick="this.closest(\'.sub-menu-item\').remove(); reindexSubItems(this)" class="button button-small" style="color: red;">✕</button></div>'); subMenuIndexes[parentIndex] = subIndex + 1; updateSubMenuCount(container); setTimeout(initSubMenuDropZones, 50); }
+        
+        function updateSubMenuCount(container) {
+            var wrapper = container.closest('.sub-menu-container');
+            var count = container.querySelectorAll('.sub-menu-item').length;
+            var header = wrapper.querySelector('.sub-menu-header p');
+            if (header) header.textContent = 'תת-פריטים (' + count + ')';
+        }
+        
+        function reindexSubItems(btn) {
+            var wrapper = btn.closest('.menu-item-wrapper');
+            if (wrapper) {
+                var container = wrapper.querySelector('.sub-menu-items');
+                if (container) reindexSubItemsInContainer(container);
             }
         }
         
-        function addSubMenuItem(btn, parentIndex) {
-            var container = btn.previousElementSibling;
-            var subIndex = subMenuIndexes[parentIndex] || 0;
-            var html = `
-                <div class="sub-menu-item" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px; margin-bottom: 5px;">
-                    <span style="color: #ccc;">↳</span>
-                    <input type="text" name="menu_items[${parentIndex}][children][${subIndex}][icon]" value="" style="width: 40px; text-align: center;" placeholder="📌">
-                    <input type="text" name="menu_items[${parentIndex}][children][${subIndex}][title]" value="" style="flex: 1;" placeholder="שם תת-פריט">
-                    <input type="text" name="menu_items[${parentIndex}][children][${subIndex}][url]" value="" style="flex: 1;" dir="ltr" placeholder="/category/sub">
-                    <button type="button" onclick="this.closest('.sub-menu-item').remove()" class="button button-small" style="color: red;">✕</button>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', html);
-            subMenuIndexes[parentIndex] = subIndex + 1;
+        function reindexSubItemsInContainer(container) {
+            var parentIndex = container.closest('.menu-item-wrapper').getAttribute('data-index');
+            var items = container.querySelectorAll('.sub-menu-item');
+            items.forEach(function(item, newSubIndex) {
+                item.querySelectorAll('input[name]').forEach(function(input) {
+                    var name = input.getAttribute('name');
+                    if (name) {
+                        var newName = name.replace(/menu_items\[\d+\]\[children\]\[\d+\]/, 'menu_items['+parentIndex+'][children]['+newSubIndex+']');
+                        input.setAttribute('name', newName);
+                    }
+                });
+            });
+            subMenuIndexes[parseInt(parentIndex)] = items.length;
         }
         
-        function addMobileMenuItem() {
-            var container = document.getElementById('mobile-menu-items');
-            var html = `
-                <div class="menu-item-wrapper" data-index="${mobileMenuIndex}">
-                    <div class="menu-item" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd;">
-                        <span class="drag-handle" style="cursor: grab; color: #999; font-size: 18px;">☰</span>
-                        <div style="width: 50px;">
-                            <label style="font-size: 10px; color: #666;">אייקון</label>
-                            <input type="text" name="menu_items[${mobileMenuIndex}][icon]" value="" style="width: 100%; text-align: center; font-size: 18px;" placeholder="🏠">
-                        </div>
-                        <div style="flex: 1;">
-                            <label style="font-size: 10px; color: #666;">שם</label>
-                            <input type="text" name="menu_items[${mobileMenuIndex}][title]" value="" style="width: 100%;" placeholder="שם הפריט">
-                        </div>
-                        <div style="flex: 1;">
-                            <label style="font-size: 10px; color: #666;">קישור</label>
-                            <input type="text" name="menu_items[${mobileMenuIndex}][url]" value="" style="width: 100%;" dir="ltr" placeholder="/category/living-room">
-                        </div>
-                        <button type="button" onclick="toggleSubMenu(this)" class="button" title="תת-תפריט">📂</button>
-                        <button type="button" onclick="this.closest('.menu-item-wrapper').remove(); reindexItems();" class="button" style="color: red;">✕</button>
-                    </div>
-                    <div class="sub-menu-container" style="margin-right: 30px; margin-top: 5px; margin-bottom: 10px; padding: 10px; background: #fff; border-radius: 6px; border: 1px dashed #ccc; display: none;">
-                        <div class="sub-menu-items"></div>
-                        <button type="button" onclick="addSubMenuItem(this, ${mobileMenuIndex})" class="button button-small" style="margin-top: 5px;">➕ הוסף תת-פריט</button>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', html);
-            subMenuIndexes[mobileMenuIndex] = 0;
-            mobileMenuIndex++;
+        function reindexItems() {
+            var items = document.querySelectorAll('#menu-drop-zone .menu-item-wrapper');
+            items.forEach(function(item, newIndex) {
+                var oldIndex = item.getAttribute('data-index');
+                item.querySelectorAll('input[name]').forEach(function(input) {
+                    var name = input.getAttribute('name');
+                    if (name) input.setAttribute('name', name.replace(/menu_items\[\d+\]/, 'menu_items[' + newIndex + ']'));
+                });
+                var addSubBtn = item.querySelector('.sub-menu-container > button:last-child');
+                if (addSubBtn) addSubBtn.setAttribute('onclick', 'addSubMenuItem(this, ' + newIndex + ')');
+                var subContainer = item.querySelector('.sub-menu-items');
+                if (subContainer) subContainer.setAttribute('data-parent', newIndex);
+                // Transfer subMenuIndexes
+                if (oldIndex !== null && subMenuIndexes[oldIndex] !== undefined) {
+                    subMenuIndexes[newIndex] = subMenuIndexes[oldIndex];
+                }
+                item.setAttribute('data-index', newIndex);
+            });
+            menuItemIndex = items.length;
         }
         </script>
-        
-        <style>
-            .sortable-ghost { opacity: 0.4; background: #e3f2fd !important; }
-            .menu-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-            .drag-handle:active { cursor: grabbing; }
-        </style>
+        <style>.sortable-ghost { opacity: 0.4; } .menu-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); } .available-item:hover { background: #f0f7fc; } .sub-menu-container.drag-over { border-color: #0073aa !important; background: #e8f4fc !important; }</style>
         <?php
     }
 }

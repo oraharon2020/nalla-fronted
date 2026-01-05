@@ -101,13 +101,28 @@ export function Header() {
     fetchMobileMenu();
   }, []);
 
+  // Sticky header on scroll
+  const [isScrolled, setIsScrolled] = useState(false);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      // Get announcement bar height (approximately 40px)
+      setIsScrolled(window.scrollY > 40);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <>
       {/* Top Bar - Announcements */}
       <AnnouncementBar />
 
-      {/* Main Header */}
-      <header className="sticky top-0 z-40 bg-white">
+      {/* Main Header - becomes fixed after scrolling past announcement bar */}
+      <header className={`bg-white shadow-sm transition-all duration-200 ${
+        isScrolled ? 'fixed top-0 left-0 right-0 z-40' : ''
+      }`}>
         <div className="max-w-[1300px] mx-auto px-4">
           {/* Top Row - Icons and Logo */}
           <div className="flex items-center justify-between py-4">
@@ -233,6 +248,9 @@ export function Header() {
           </nav>
         </div>
       </header>
+
+      {/* Spacer when header is fixed - prevents content jump */}
+      {isScrolled && <div className="h-[72px] lg:h-[104px]" />}
 
       {/* Category Icons Carousel */}
       <CategoryIconsCarousel />

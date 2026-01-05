@@ -43,127 +43,7 @@ require_once BELLANO_PLUGIN_DIR . 'modules/class-tambour-color.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-glass-option.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-product-assembly.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-mega-menu.php';
-
-// Mobile Menu class - defined inline to avoid file loading issues
-if (!class_exists('Nalla_Mobile_Menu')) {
-    class Nalla_Mobile_Menu {
-        private $option_name = 'bellano_mobile_menu';
-        
-        public function __construct() {
-            add_action('admin_init', [$this, 'register_settings']);
-            add_action('rest_api_init', [$this, 'register_rest_routes']);
-        }
-        
-        public function register_settings() {
-            register_setting($this->option_name, $this->option_name);
-        }
-        
-        public function register_rest_routes() {
-            register_rest_route('bellano/v1', '/mobile-menu', [
-                'methods' => 'GET',
-                'callback' => [$this, 'get_mobile_menu'],
-                'permission_callback' => '__return_true',
-            ]);
-        }
-        
-        public function get_mobile_menu() {
-            $settings = get_option($this->option_name, []);
-            return rest_ensure_response([
-                'items' => $settings['items'] ?? [],
-                'phone' => $settings['phone'] ?? '',
-                'whatsapp' => $settings['whatsapp'] ?? '',
-            ]);
-        }
-        
-        public function render_tab() {
-            $settings = get_option($this->option_name, []);
-            $items = $settings['items'] ?? [];
-            ?>
-            <h2>📱 תפריט מובייל</h2>
-            <p class="description">הגדר את התפריט שיוצג במובייל באתר Next.js</p>
-            
-            <form method="post" action="options.php">
-                <?php settings_fields($this->option_name); ?>
-                
-                <div style="background:#fff;padding:20px;border:1px solid #ccc;border-radius:8px;margin-top:20px;">
-                    <h3 style="margin-top:0;">פריטי תפריט</h3>
-                    <div id="menu-items-container">
-                        <?php if (empty($items)): ?>
-                            <?php $this->render_menu_item(0); ?>
-                        <?php else: ?>
-                            <?php foreach ($items as $index => $item): ?>
-                                <?php $this->render_menu_item($index, $item); ?>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                    <button type="button" id="add-menu-item" class="button" style="margin-top:15px;">➕ הוסף פריט</button>
-                </div>
-                
-                <div style="background:#fff;padding:20px;border:1px solid #ccc;border-radius:8px;margin-top:20px;">
-                    <h3 style="margin-top:0;">פרטי קשר</h3>
-                    <table class="form-table">
-                        <tr>
-                            <th>טלפון</th>
-                            <td><input type="text" name="<?php echo $this->option_name; ?>[phone]" value="<?php echo esc_attr($settings['phone'] ?? ''); ?>" class="regular-text" dir="ltr"></td>
-                        </tr>
-                        <tr>
-                            <th>וואטסאפ</th>
-                            <td><input type="text" name="<?php echo $this->option_name; ?>[whatsapp]" value="<?php echo esc_attr($settings['whatsapp'] ?? ''); ?>" class="regular-text" dir="ltr"></td>
-                        </tr>
-                    </table>
-                </div>
-                <?php submit_button('שמור תפריט'); ?>
-            </form>
-            
-            <script type="text/template" id="menu-item-template"><?php $this->render_menu_item('{{INDEX}}'); ?></script>
-            
-            <style>
-                .menu-item-box { background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-bottom: 15px; position: relative; }
-                .menu-item-box .remove-item { position: absolute; top: 10px; left: 10px; color: #dc3545; cursor: pointer; }
-                .mobile-field-row { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
-                .mobile-field { flex: 1; min-width: 200px; }
-                .mobile-field.small { flex: 0 0 80px; min-width: 80px; }
-                .mobile-field label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 12px; }
-                .mobile-field input { width: 100%; }
-            </style>
-            
-            <script>
-            jQuery(document).ready(function($) {
-                var itemCount = <?php echo count($items) ?: 1; ?>;
-                $('#add-menu-item').on('click', function() {
-                    var template = $('#menu-item-template').html().replace(/\{\{INDEX\}\}/g, itemCount);
-                    $('#menu-items-container').append(template);
-                    itemCount++;
-                });
-                $(document).on('click', '.remove-item', function() { $(this).closest('.menu-item-box').remove(); });
-            });
-            </script>
-            <?php
-        }
-        
-        private function render_menu_item($index, $item = []) {
-            ?>
-            <div class="menu-item-box">
-                <span class="remove-item">✕</span>
-                <div class="mobile-field-row">
-                    <div class="mobile-field">
-                        <label>שם הפריט</label>
-                        <input type="text" name="<?php echo $this->option_name; ?>[items][<?php echo $index; ?>][title]" value="<?php echo esc_attr($item['title'] ?? ''); ?>" placeholder="סלון">
-                    </div>
-                    <div class="mobile-field">
-                        <label>קישור</label>
-                        <input type="text" name="<?php echo $this->option_name; ?>[items][<?php echo $index; ?>][url]" value="<?php echo esc_attr($item['url'] ?? ''); ?>" placeholder="/product-category/living-room" dir="ltr">
-                    </div>
-                    <div class="mobile-field small">
-                        <label>אייקון</label>
-                        <input type="text" name="<?php echo $this->option_name; ?>[items][<?php echo $index; ?>][icon]" value="<?php echo esc_attr($item['icon'] ?? ''); ?>" placeholder="🛋️">
-                    </div>
-                </div>
-            </div>
-            <?php
-        }
-    }
-}
+require_once BELLANO_PLUGIN_DIR . 'modules/class-mobile-menu.php';
 
 /**
  * Main plugin class
@@ -210,7 +90,7 @@ class Bellano_Settings {
         $this->tambour_color = new Bellano_Tambour_Color();
         $this->glass_option = new Bellano_Glass_Option();
         $this->mega_menu = new Bellano_Mega_Menu();
-        $this->mobile_menu = new Nalla_Mobile_Menu();
+        $this->mobile_menu = new Bellano_Mobile_Menu();
         
         // Register hooks
         add_action('admin_menu', [$this->admin_pages, 'add_admin_menu']);
