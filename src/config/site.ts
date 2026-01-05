@@ -14,8 +14,8 @@ export const siteConfig = {
   shortDescription: 'מעצבים את הבית עם נלה. משלוח חינם עד הבית!',
   
   // URLs
-  // TODO: לאחר ההעברה - לשנות url ל-https://www.nalla.co.il ו-wordpressUrl ל-https://admin.nalla.co.il
-  url: 'http://localhost:3000', // בפיתוח - לשנות ל-https://www.nalla.co.il בפרודקשן
+  // Production URL - used for sitemap, canonical URLs, and SEO
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://nalla.co.il',
   wordpressUrl: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://nalla.co.il',
   vercelUrl: 'https://nalla.vercel.app',
   
