@@ -74,6 +74,31 @@ interface CreateOrderRequest {
   utm_data?: UtmData | null;
 }
 
+// Verify admin token and get user ID for sales rep commission tracking
+async function verifyAdminToken(token: string): Promise<{ valid: boolean; userId?: number; userName?: string }> {
+  try {
+    const response = await fetch(`${WC_URL}/wp-json/bellano/v1/verify-admin-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    
+    if (!response.ok) {
+      return { valid: false };
+    }
+    
+    const data = await response.json();
+    return {
+      valid: data.valid === true,
+      userId: data.userId,
+      userName: data.userName,
+    };
+  } catch (error) {
+    console.error('Error verifying admin token:', error);
+    return { valid: false };
+  }
+}
+
 // Helper to determine traffic source label
 function getTrafficSourceLabel(utm: UtmData | null | undefined): string {
   if (!utm) return 'ישיר';
@@ -110,6 +135,20 @@ export async function POST(request: NextRequest) {
         { success: false, message: 'WooCommerce credentials not configured' },
         { status: 500 }
       );
+    }
+
+    // Check for admin token (sales rep) to attribute order for commission tracking
+    let salesRepUserId: number | undefined;
+    let salesRepUserName: string | undefined;
+    const adminToken = request.headers.get('x-admin-token');
+    
+    if (adminToken) {
+      const tokenVerification = await verifyAdminToken(adminToken);
+      if (tokenVerification.valid && tokenVerification.userId) {
+        salesRepUserId = tokenVerification.userId;
+        salesRepUserName = tokenVerification.userName;
+        console.log(`Sales rep order: User ID ${salesRepUserId} (${salesRepUserName})`);
+      }
     }
 
     // Determine payment method settings
@@ -231,11 +270,14 @@ export async function POST(request: NextRequest) {
     });
     
     // Create the order in WooCommerce
-    const orderData = {
+    const orderData: Record<string, any> = {
       payment_method: isPhoneOrder ? 'cod' : 'meshulam',
       payment_method_title: isPhoneOrder ? 'תשלום דרך נציג' : 'כרטיס אשראי',
       set_paid: false,
       status: isPhoneOrder ? 'on-hold' : 'pending',
+      // Assign to sales rep for commission tracking (month-sale system)
+      // This sets _customer_user meta which the commission system uses
+      ...(salesRepUserId ? { customer_id: salesRepUserId } : {}),
       billing: {
         first_name: customer.firstName,
         last_name: customer.lastName,
@@ -275,6 +317,9 @@ export async function POST(request: NextRequest) {
           value: 'yes',
         },
         ...(hasAdminFields ? [{ key: 'bellano_sales_rep_order', value: 'yes' }] : []),
+        // Sales rep attribution for commission tracking
+        ...(salesRepUserId ? [{ key: '_sales_rep_id', value: salesRepUserId.toString() }] : []),
+        ...(salesRepUserName ? [{ key: 'נציג מכירות', value: salesRepUserName }] : []),
         // Traffic source tracking
         {
           key: 'מקור הגעה',

@@ -24,25 +24,24 @@ export default async function CategoriesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4 py-8 md:py-12">
+    <div className="min-h-screen bg-[#fafaf8]">
+      <div className="max-w-[1300px] mx-auto px-4 py-8 md:py-12">
         {/* Breadcrumb */}
-        <nav className="text-sm text-muted-foreground mb-8">
-          <Link href="/" className="hover:text-primary transition-colors">דף הבית</Link>
+        <nav className="text-sm text-gray-500 mb-8">
+          <Link href="/" className="hover:text-[#333] transition-colors">דף הבית</Link>
           <span className="mx-2">/</span>
-          <span className="text-foreground">כל הקטגוריות</span>
+          <span className="text-[#333]">כל הקטגוריות</span>
         </nav>
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">כל הקטגוריות</h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            גלו את מגוון הקטגוריות שלנו ומצאו את הרהיט המושלם לביתכם
-          </p>
+          <h1 className="text-3xl md:text-5xl font-light">
+            הקולקציות <span className="font-bold">שלנו</span>
+          </h1>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
+        {/* Categories Grid - 2 cols mobile, 4 cols desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
           {mainCategories.map((category) => (
             <Link 
               key={category.id} 
@@ -51,51 +50,40 @@ export default async function CategoriesPage() {
             >
               {/* Card Container */}
               <div className="flex flex-col">
-                {/* Image Container */}
-                <div className="relative aspect-square rounded-2xl rounded-tl-none overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
+                {/* Image Container - Square 1:1 */}
+                <div className="relative aspect-square rounded-2xl rounded-tl-none overflow-hidden bg-[#f5f5f0] shadow-sm group-hover:shadow-lg transition-all duration-500">
                   {/* Image */}
                   {category.image?.src ? (
                     <Image
                       src={category.image.src}
                       alt={category.image.alt || category.name}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 768px) 50vw, 320px"
+                      quality={75}
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 flex items-center justify-center">
-                      <span className="text-primary/40 text-7xl font-bold">
+                    <div className="w-full h-full bg-[#e1eadf] flex items-center justify-center">
+                      <span className="text-[#4a7c59]/40 text-6xl font-bold">
                         {category.name.charAt(0)}
                       </span>
                     </div>
                   )}
-                  
-                  {/* Overlay - Desktop only */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:from-black/70 transition-all duration-500 hidden md:block" />
-                  
-                  {/* Content - Desktop only (overlay) */}
-                  <div className="absolute inset-0 flex-col justify-end p-6 hidden md:flex">
-                    <h2 className="text-white text-xl md:text-2xl font-bold mb-2 transform group-hover:translate-y-[-4px] transition-transform duration-300">
-                      {category.name}
-                    </h2>
-                    {category.count > 0 && (
-                      <p className="text-white/80 text-sm">
-                        {category.count} מוצרים
-                      </p>
-                    )}
-                    <div className="mt-4 flex items-center text-white/90 text-sm font-medium opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                      <span>צפה בקטגוריה</span>
-                      <svg className="w-4 h-4 mr-2 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                    </div>
-                  </div>
+                  {/* Subtle overlay on hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
                 </div>
                 
-                {/* Title - Mobile only (below image) */}
-                <h2 className="md:hidden text-center text-sm font-semibold mt-2 text-foreground group-hover:text-primary transition-colors">
-                  {category.name}
-                </h2>
+                {/* Category Name - below image */}
+                <div className="pt-4 pb-2">
+                  <h2 className="text-[#333] text-base md:text-lg font-medium text-center">
+                    {category.name}
+                  </h2>
+                  {category.count > 0 && (
+                    <p className="text-gray-400 text-xs text-center mt-1">
+                      {category.count} מוצרים
+                    </p>
+                  )}
+                </div>
               </div>
             </Link>
           ))}
@@ -103,15 +91,15 @@ export default async function CategoriesPage() {
 
         {/* Bottom CTA */}
         <div className="mt-16 text-center">
-          <p className="text-muted-foreground mb-4">לא מצאתם מה שחיפשתם?</p>
+          <p className="text-gray-500 mb-4">לא מצאתם מה שחיפשתם?</p>
           <Link 
             href="/contact" 
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors font-medium"
+            className="inline-flex items-center gap-2 text-[#333] hover:text-black transition-colors group"
           >
-            צרו איתנו קשר
-            <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+            <span className="border-b border-gray-400 group-hover:border-black pb-1">
+              צרו איתנו קשר
+            </span>
+            <span className="group-hover:-translate-x-1 transition-transform">←</span>
           </Link>
         </div>
       </div>

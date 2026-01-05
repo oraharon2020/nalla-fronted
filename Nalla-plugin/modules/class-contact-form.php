@@ -70,7 +70,7 @@ class Bellano_Contact_Form {
         
         $email_body = "
 <div dir='rtl' style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-    <h2 style='color: #333; border-bottom: 2px solid #000; padding-bottom: 10px;'>פנייה חדשה מאתר בלאנו</h2>
+    <h2 style='color: #333; border-bottom: 2px solid #4a7c59; padding-bottom: 10px;'>פנייה חדשה מאתר נלה</h2>
     
     <table style='width: 100%; border-collapse: collapse; margin-top: 20px;'>
         <tr>
@@ -80,13 +80,13 @@ class Bellano_Contact_Form {
         <tr>
             <td style='padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;'>טלפון:</td>
             <td style='padding: 10px; border-bottom: 1px solid #eee;'>
-                <a href='tel:{$phone}' style='color: #000;'>{$phone}</a>
+                <a href='tel:{$phone}' style='color: #4a7c59;'>{$phone}</a>
             </td>
         </tr>
         <tr>
             <td style='padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;'>אימייל:</td>
             <td style='padding: 10px; border-bottom: 1px solid #eee;'>
-                <a href='mailto:{$email}' style='color: #000;'>{$email}</a>
+                <a href='mailto:{$email}' style='color: #4a7c59;'>{$email}</a>
             </td>
         </tr>
         <tr>
@@ -101,7 +101,7 @@ class Bellano_Contact_Form {
     </div>
     
     <p style='margin-top: 30px; color: #666; font-size: 12px;'>
-        הודעה זו נשלחה מטופס יצירת הקשר באתר bellano.co.il
+        הודעה זו נשלחה מטופס יצירת הקשר באתר nalla.co.il
     </p>
 </div>
 ";
@@ -109,7 +109,7 @@ class Bellano_Contact_Form {
         // Email headers
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
-            'From: אתר בלאנו <noreply@bellano.co.il>',
+            'From: אתר נלה <noreply@nalla.co.il>',
         ];
         
         // Add reply-to if email provided
@@ -124,6 +124,9 @@ class Bellano_Contact_Form {
             // Log the submission (optional)
             $this->log_submission($name, $phone, $email, $subject, $message);
             
+            // Create a task in Task Calendar
+            $this->create_task_from_contact($name, $phone, $email, $subject, $message);
+            
             return new WP_REST_Response([
                 'success' => true,
                 'message' => 'ההודעה נשלחה בהצלחה',
@@ -134,6 +137,53 @@ class Bellano_Contact_Form {
                 'message' => 'שגיאה בשליחת ההודעה',
             ], 500);
         }
+    }
+    
+    /**
+     * Create a task in Task Calendar from contact form submission
+     */
+    private function create_task_from_contact($name, $phone, $email, $subject, $message) {
+        // Build task title
+        $task_title = "פנייה מהאתר: {$name}";
+        if ($subject && $subject !== 'לא צוין') {
+            $task_title .= " - {$subject}";
+        }
+        
+        // Build task description
+        $task_description = "📞 טלפון: {$phone}\n";
+        if ($email && $email !== 'לא צוין') {
+            $task_description .= "📧 אימייל: {$email}\n";
+        }
+        $task_description .= "\n📝 הודעה:\n{$message}";
+        
+        // Get current date and time (Israel timezone)
+        $israel_tz = new \DateTimeZone('Asia/Jerusalem');
+        $now = new \DateTime('now', $israel_tz);
+        $task_date = $now->format('Y-m-d');
+        $task_time = $now->format('H:i');
+        
+        // Create the task post (post_type is 'task' - singular, used by task-calendar.php)
+        $post_id = wp_insert_post([
+            'post_title' => $task_title,
+            'post_type' => 'task',
+            'post_status' => 'publish',
+        ]);
+        
+        if ($post_id && !is_wp_error($post_id)) {
+            // Use the correct meta keys for task calendar
+            update_post_meta($post_id, 'task_date', $task_date);
+            update_post_meta($post_id, 'task_time', $task_time);
+            update_post_meta($post_id, 'task_description', $task_description);
+            update_post_meta($post_id, 'task_duration', '00:30');
+            update_post_meta($post_id, 'task_completed', '0');
+            update_post_meta($post_id, 'task_assignees_all', '1');
+            update_post_meta($post_id, 'task_employee_id', 0);
+            update_post_meta($post_id, 'task_employee', '');
+            
+            return $post_id;
+        }
+        
+        return false;
     }
     
     /**

@@ -247,8 +247,8 @@ async function CategoriesSection() {
         </div>
 
         {/* Categories Grid - 2 cols mobile, 4 cols desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-          {categories.map((category, index) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+          {categories.map((category) => (
             <Link
               key={category.id}
               href={`/product-category/${category.slug}`}
@@ -256,24 +256,26 @@ async function CategoriesSection() {
             >
               {/* Card Container */}
               <div className="flex flex-col">
-                {/* Image Container - Square with rounded corners except top-left */}
-                <div className="relative aspect-square overflow-hidden rounded-2xl rounded-tl-none bg-white shadow-sm hover:shadow-xl transition-all duration-500">
+                {/* Image Container - Square 1:1 with rounded corners except top-left */}
+                <div className="relative aspect-square overflow-hidden rounded-2xl rounded-tl-none bg-[#f5f5f0] shadow-sm group-hover:shadow-lg transition-all duration-500">
                   {/* Background Image */}
                   {category.image?.sourceUrl && (
                     <Image
                       src={category.image.sourceUrl}
                       alt={category.name}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      sizes="(max-width: 768px) 50vw, 250px"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 768px) 50vw, 420px"
                       quality={75}
                     />
                   )}
+                  {/* Subtle overlay on hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
                 </div>
                 
                 {/* Category Name - below image */}
-                <div className="pt-3 pb-1">
-                  <h3 className="text-gray-900 text-sm font-semibold text-center">
+                <div className="pt-4 pb-2">
+                  <h3 className="text-[#333] text-base md:text-lg font-medium text-center">
                     {category.name}
                   </h3>
                 </div>
@@ -283,15 +285,15 @@ async function CategoriesSection() {
         </div>
 
         {/* View All Link */}
-        <div className="text-center mt-10">
+        <div className="text-center mt-12">
           <Link 
             href="/categories" 
-            className="inline-flex items-center gap-3 text-gray-600 hover:text-black transition-colors group"
+            className="inline-flex items-center gap-3 text-[#333] hover:text-black transition-colors group"
           >
-            <span className="text-sm border-b border-gray-300 group-hover:border-black pb-1">
+            <span className="text-base border-b border-gray-400 group-hover:border-black pb-1">
               לכל הקטגוריות
             </span>
-            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+            <span className="group-hover:-translate-x-1 transition-transform text-lg">←</span>
           </Link>
         </div>
       </div>

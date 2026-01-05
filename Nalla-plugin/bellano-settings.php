@@ -157,5 +157,63 @@ add_action('template_redirect', function() {
     }
 });
 
+/**
+ * Add CORS headers to REST API responses
+ */
+add_action('rest_api_init', function() {
+    remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
+    add_filter('rest_pre_serve_request', function($value) {
+        $origin = get_http_origin();
+        $allowed_origins = [
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'http://localhost:3002',
+            'http://localhost:3003',
+            'https://nalla.co.il',
+            'https://www.nalla.co.il',
+            'https://nalla-next.vercel.app',
+            'https://nalla-fronted.vercel.app',
+        ];
+        
+        // Allow any localhost port for development
+        if (preg_match('/^http:\/\/localhost:\d+$/', $origin)) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+        } elseif (in_array($origin, $allowed_origins)) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+        }
+        
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE');
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Headers: Authorization, Content-Type, X-Requested-With, X-WP-Nonce');
+        
+        return $value;
+    });
+}, 15);
+
+// Handle OPTIONS preflight requests
+add_action('init', function() {
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        $origin = get_http_origin();
+        
+        // Allow any localhost port for development
+        if (preg_match('/^http:\/\/localhost:\d+$/', $origin)) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+        } elseif (in_array($origin, [
+            'https://nalla.co.il',
+            'https://www.nalla.co.il',
+            'https://nalla-next.vercel.app',
+            'https://nalla-fronted.vercel.app',
+        ])) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+        }
+        
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE');
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Headers: Authorization, Content-Type, X-Requested-With, X-WP-Nonce');
+        header('Access-Control-Max-Age: 86400');
+        exit(0);
+    }
+});
+
 // Initialize
 Bellano_Settings::get_instance();

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Loader2, ShoppingBag, CreditCard, Truck, ShieldCheck, CheckCircle, Phone, Smartphone, Wallet, Trash2, Pencil, Minus, Plus, Tag, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
+import { useAdminStore } from '@/lib/store/admin';
 import { getStoredUtmParams, getTrafficSourceLabel } from '@/hooks/useUtmTracking';
 
 interface ShippingMethod {
@@ -38,6 +39,7 @@ export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { items, getTotal, clearCart, isHydrated, updateQuantity, removeItem } = useCartStore();
+  const { isAdmin, adminToken } = useAdminStore();
   const [step, setStep] = useState<'details' | 'payment' | 'success'>('details');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -225,7 +227,11 @@ export default function CheckoutPage() {
       // Step 1: Create order in WooCommerce
       const orderResponse = await fetch('/api/checkout/create-order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          // Send admin token if sales rep is logged in (for commission tracking)
+          ...(isAdmin && adminToken ? { 'x-admin-token': adminToken } : {}),
+        },
         body: JSON.stringify({
           customer: customerData,
           items: items.map(item => ({
