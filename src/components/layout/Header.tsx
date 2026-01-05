@@ -23,6 +23,19 @@ interface NavItem {
   has_mega_menu?: boolean;
 }
 
+interface MobileMenuItem {
+  title: string;
+  url: string;
+  icon?: string;
+  children?: MobileMenuItem[];
+}
+
+interface MobileMenuData {
+  items: MobileMenuItem[];
+  phone: string;
+  whatsapp: string;
+}
+
 const defaultNavItems: NavItem[] = [
   { name: 'בית', link: '/', highlight: false, has_mega_menu: false },
   { name: 'NALLA SALE', link: '/product-category/nalla-sale', highlight: true, has_mega_menu: false },
@@ -37,6 +50,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navItems, setNavItems] = useState<NavItem[]>(defaultNavItems);
+  const [mobileMenuData, setMobileMenuData] = useState<MobileMenuData | null>(null);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const { getItemCount, toggleCart, isHydrated } = useCartStore();
   
@@ -67,6 +81,24 @@ export function Header() {
       }
     };
     fetchNavigation();
+  }, []);
+
+  // Fetch mobile menu from API
+  useEffect(() => {
+    const fetchMobileMenu = async () => {
+      try {
+        const res = await fetch('/api/mobile-menu');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.items && data.items.length > 0) {
+            setMobileMenuData(data);
+          }
+        }
+      } catch (error) {
+        console.log('Error fetching mobile menu:', error);
+      }
+    };
+    fetchMobileMenu();
   }, []);
 
   return (
@@ -238,69 +270,134 @@ export function Header() {
 
             {/* Menu Content */}
             <div className="flex-1 overflow-auto py-2">
-              {/* Main Navigation with Accordion */}
-              {navigation.main.map((section) => (
-                'children' in section && section.children ? (
-                  <div key={section.name}>
-                    {/* Accordion Header */}
-                    <button
-                      onClick={() => toggleSection(section.name)}
-                      className="w-full flex items-center justify-between py-4 px-5 hover:bg-white transition-colors"
-                    >
-                      <span className="text-[15px] font-medium text-gray-800">{section.name}</span>
-                      <div className={`w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-300 ${
-                        expandedSections.includes(section.name) ? 'bg-black border-black rotate-180' : ''
-                      }`}>
-                        <ChevronDown className={`w-3.5 h-3.5 transition-colors ${
-                          expandedSections.includes(section.name) ? 'text-white' : 'text-gray-500'
-                        }`} />
+              {/* Dynamic Menu from WordPress */}
+              {mobileMenuData && mobileMenuData.items.length > 0 ? (
+                <>
+                  {mobileMenuData.items.map((item, idx) => (
+                    item.children && item.children.length > 0 ? (
+                      /* Item with sub-menu */
+                      <div key={idx}>
+                        <button
+                          onClick={() => toggleSection(`wp-${idx}`)}
+                          className="w-full flex items-center gap-3 py-4 px-5 hover:bg-white transition-colors"
+                        >
+                          {item.icon && <span className="text-xl">{item.icon}</span>}
+                          <span className="text-[15px] font-medium text-gray-800">{item.title}</span>
+                          <div className={`w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-300 mr-auto ${
+                            expandedSections.includes(`wp-${idx}`) ? 'bg-black border-black rotate-180' : ''
+                          }`}>
+                            <ChevronDown className={`w-3.5 h-3.5 transition-colors ${
+                              expandedSections.includes(`wp-${idx}`) ? 'text-white' : 'text-gray-500'
+                            }`} />
+                          </div>
+                        </button>
+                        
+                        {/* Sub-menu */}
+                        <div 
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedSections.includes(`wp-${idx}`) 
+                              ? 'max-h-[500px] opacity-100' 
+                              : 'max-h-0 opacity-0'
+                          }`}
+                        >
+                          <nav className="bg-white mx-3 mb-3 rounded-xl overflow-hidden shadow-sm">
+                            {item.children.map((child, childIdx) => (
+                              <Link
+                                key={childIdx}
+                                href={child.url}
+                                className={`flex items-center gap-2 py-3.5 px-4 hover:bg-gray-50 transition-colors ${
+                                  childIdx !== item.children!.length - 1 ? 'border-b border-gray-100' : ''
+                                }`}
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                {child.icon && <span className="text-base">{child.icon}</span>}
+                                <span className="text-[14px] text-gray-600">{child.title}</span>
+                                <ChevronLeft className="w-4 h-4 text-gray-300 mr-auto" />
+                              </Link>
+                            ))}
+                          </nav>
+                        </div>
                       </div>
-                    </button>
-                    
-                    {/* Accordion Content */}
-                    <div 
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        expandedSections.includes(section.name) 
-                          ? 'max-h-[500px] opacity-100' 
-                          : 'max-h-0 opacity-0'
-                      }`}
-                    >
-                      <nav className="bg-white mx-3 mb-3 rounded-xl overflow-hidden shadow-sm">
-                        {section.children.map((item, idx) => (
-                          <Link
-                            key={item.slug}
-                            href={`/product-category/${item.slug}`}
-                            className={`flex items-center justify-between py-3.5 px-4 hover:bg-gray-50 transition-colors ${
-                              idx !== section.children!.length - 1 ? 'border-b border-gray-100' : ''
-                            }`}
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            <span className="text-[14px] text-gray-600">{item.name}</span>
-                            <ChevronLeft className="w-4 h-4 text-gray-300" />
-                          </Link>
-                        ))}
-                      </nav>
+                    ) : (
+                      /* Simple item without sub-menu */
+                      <Link
+                        key={idx}
+                        href={item.url}
+                        className="flex items-center gap-3 py-4 px-5 hover:bg-white transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {item.icon && <span className="text-xl">{item.icon}</span>}
+                        <span className="text-[15px] font-medium text-gray-800">{item.title}</span>
+                        <ChevronLeft className="w-4 h-4 text-gray-400 mr-auto" />
+                      </Link>
+                    )
+                  ))}
+                  
+                  {/* Divider */}
+                  <div className="h-px bg-gray-200 mx-5 my-3" />
+                </>
+              ) : (
+                /* Fallback: Main Navigation with Accordion */
+                navigation.main.map((section) => (
+                  'children' in section && section.children ? (
+                    <div key={section.name}>
+                      {/* Accordion Header */}
+                      <button
+                        onClick={() => toggleSection(section.name)}
+                        className="w-full flex items-center justify-between py-4 px-5 hover:bg-white transition-colors"
+                      >
+                        <span className="text-[15px] font-medium text-gray-800">{section.name}</span>
+                        <div className={`w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-300 ${
+                          expandedSections.includes(section.name) ? 'bg-black border-black rotate-180' : ''
+                        }`}>
+                          <ChevronDown className={`w-3.5 h-3.5 transition-colors ${
+                            expandedSections.includes(section.name) ? 'text-white' : 'text-gray-500'
+                          }`} />
+                        </div>
+                      </button>
+                      
+                      {/* Accordion Content */}
+                      <div 
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                          expandedSections.includes(section.name) 
+                            ? 'max-h-[500px] opacity-100' 
+                            : 'max-h-0 opacity-0'
+                        }`}
+                      >
+                        <nav className="bg-white mx-3 mb-3 rounded-xl overflow-hidden shadow-sm">
+                          {section.children.map((item, idx) => (
+                            <Link
+                              key={item.slug}
+                              href={`/product-category/${item.slug}`}
+                              className={`flex items-center justify-between py-3.5 px-4 hover:bg-gray-50 transition-colors ${
+                                idx !== section.children!.length - 1 ? 'border-b border-gray-100' : ''
+                              }`}
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              <span className="text-[14px] text-gray-600">{item.name}</span>
+                              <ChevronLeft className="w-4 h-4 text-gray-300" />
+                            </Link>
+                          ))}
+                        </nav>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <Link
-                    key={section.name}
-                    href={'slug' in section && section.slug ? `/product-category/${section.slug}` : ('href' in section ? section.href : '/')}
-                    className={`flex items-center justify-between py-4 px-5 transition-colors ${
-                      'highlight' in section && section.highlight 
-                        ? 'text-red-500 font-semibold' 
-                        : 'hover:bg-white text-gray-800'
-                    }`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <span className="text-[15px] font-medium">{section.name}</span>
-                    <ChevronLeft className="w-4 h-4 text-gray-400" />
-                  </Link>
-                )
-              ))}
-              
-              {/* Divider */}
-              <div className="h-px bg-gray-200 mx-5 my-3" />
+                  ) : (
+                    <Link
+                      key={section.name}
+                      href={'slug' in section && section.slug ? `/product-category/${section.slug}` : ('href' in section ? section.href : '/')}
+                      className={`flex items-center justify-between py-4 px-5 transition-colors ${
+                        'highlight' in section && section.highlight 
+                          ? 'text-red-500 font-semibold' 
+                          : 'hover:bg-white text-gray-800'
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <span className="text-[15px] font-medium">{section.name}</span>
+                      <ChevronLeft className="w-4 h-4 text-gray-400" />
+                    </Link>
+                  )
+                ))
+              )}
               
               {/* All Categories */}
               <Link
@@ -356,14 +453,14 @@ export function Header() {
             {/* Footer - Clean */}
             <div className="p-5 bg-white border-t border-gray-100 space-y-3">
               <a 
-                href={`tel:${siteConfig.phoneClean}`}
+                href={`tel:${mobileMenuData?.phone || siteConfig.phoneClean}`}
                 className="flex items-center justify-center gap-2 py-3.5 bg-black text-white text-[14px] font-medium tracking-wide"
               >
                 <Phone className="w-4 h-4" />
-                {siteConfig.phone}
+                {mobileMenuData?.phone || siteConfig.phone}
               </a>
               <a 
-                href={`https://wa.me/${siteConfig.whatsapp}`}
+                href={`https://wa.me/${mobileMenuData?.whatsapp || siteConfig.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 py-3.5 border border-gray-200 text-[14px] font-medium hover:bg-gray-50 transition-colors"

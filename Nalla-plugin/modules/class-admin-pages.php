@@ -8,6 +8,27 @@ if (!defined('ABSPATH')) exit;
 
 class Bellano_Admin_Pages {
     
+    public function __construct() {
+        add_action('rest_api_init', [$this, 'register_mobile_menu_api']);
+    }
+    
+    public function register_mobile_menu_api() {
+        register_rest_route('bellano/v1', '/mobile-menu', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_mobile_menu_api'],
+            'permission_callback' => '__return_true',
+        ]);
+    }
+    
+    public function get_mobile_menu_api() {
+        $settings = get_option('bellano_mobile_menu', array());
+        return rest_ensure_response([
+            'items' => $settings['items'] ?? [],
+            'phone' => $settings['phone'] ?? '',
+            'whatsapp' => $settings['whatsapp'] ?? '',
+        ]);
+    }
+    
     public function add_admin_menu() {
         add_menu_page(
             'הגדרות בלאנו',
@@ -63,6 +84,9 @@ class Bellano_Admin_Pages {
                 <a href="?page=bellano-settings&tab=announcements" class="<?php echo $active_tab === 'announcements' ? 'active' : ''; ?>">
                     📢 הודעות עליונות
                 </a>
+                <a href="?page=bellano-settings&tab=mobile-menu" class="<?php echo $active_tab === 'mobile-menu' ? 'active' : ''; ?>">
+                    📱 תפריט מובייל
+                </a>
             </nav>
             
             <?php
@@ -99,6 +123,9 @@ class Bellano_Admin_Pages {
                     break;
                 case 'announcements':
                     $this->render_announcements_tab();
+                    break;
+                case 'mobile-menu':
+                    $this->render_mobile_menu_tab();
                     break;
                 default:
                     $this->render_homepage_tab();
@@ -1256,6 +1283,246 @@ class Bellano_Admin_Pages {
             announcementIndex++;
         }
         </script>
+        <?php
+    }
+
+    /**
+     * Render Mobile Menu Tab
+     */
+    public function render_mobile_menu_tab() {
+        $option_name = 'bellano_mobile_menu';
+        
+        // Handle save
+        if (isset($_POST['save_mobile_menu']) && check_admin_referer('bellano_mobile_menu_nonce')) {
+            $settings = array(
+                'phone' => sanitize_text_field($_POST['phone'] ?? ''),
+                'whatsapp' => sanitize_text_field($_POST['whatsapp'] ?? ''),
+                'items' => array()
+            );
+            
+            if (isset($_POST['menu_items']) && is_array($_POST['menu_items'])) {
+                foreach ($_POST['menu_items'] as $item) {
+                    if (!empty($item['title'])) {
+                        $menu_item = array(
+                            'title' => sanitize_text_field($item['title']),
+                            'url' => sanitize_text_field($item['url']),
+                            'icon' => sanitize_text_field($item['icon'] ?? ''),
+                            'children' => array()
+                        );
+                        
+                        // Handle sub-items
+                        if (!empty($item['children']) && is_array($item['children'])) {
+                            foreach ($item['children'] as $child) {
+                                if (!empty($child['title'])) {
+                                    $menu_item['children'][] = array(
+                                        'title' => sanitize_text_field($child['title']),
+                                        'url' => sanitize_text_field($child['url']),
+                                        'icon' => sanitize_text_field($child['icon'] ?? '')
+                                    );
+                                }
+                            }
+                        }
+                        
+                        $settings['items'][] = $menu_item;
+                    }
+                }
+            }
+            
+            update_option($option_name, $settings);
+            echo '<div class="notice notice-success"><p>✅ התפריט נשמר בהצלחה!</p></div>';
+        }
+        
+        $settings = get_option($option_name, array());
+        $items = $settings['items'] ?? array();
+        $phone = $settings['phone'] ?? '';
+        $whatsapp = $settings['whatsapp'] ?? '';
+        
+        if (empty($items)) {
+            $items = array(array('title' => '', 'url' => '', 'icon' => '', 'children' => array()));
+        }
+        ?>
+        <div class="bellano-card">
+            <h2>📱 תפריט מובייל</h2>
+            <p class="description">הגדר את התפריט שיוצג במובייל באתר Next.js. גרור פריטים לשינוי הסדר.</p>
+            
+            <form method="post">
+                <?php wp_nonce_field('bellano_mobile_menu_nonce'); ?>
+                
+                <h3 style="margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">📞 פרטי קשר</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                    <div>
+                        <label style="font-size: 12px; color: #666;">טלפון</label>
+                        <input type="text" name="phone" value="<?php echo esc_attr($phone); ?>" style="width: 100%;" dir="ltr" placeholder="03-1234567">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">וואטסאפ</label>
+                        <input type="text" name="whatsapp" value="<?php echo esc_attr($whatsapp); ?>" style="width: 100%;" dir="ltr" placeholder="972501234567">
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">📋 פריטי תפריט</h3>
+                <div id="mobile-menu-items" style="margin-top: 15px;">
+                    <?php foreach ($items as $index => $item): ?>
+                    <div class="menu-item-wrapper" data-index="<?php echo $index; ?>">
+                        <div class="menu-item" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd;">
+                            <span class="drag-handle" style="cursor: grab; color: #999; font-size: 18px;">☰</span>
+                            <div style="width: 50px;">
+                                <label style="font-size: 10px; color: #666;">אייקון</label>
+                                <input type="text" name="menu_items[<?php echo $index; ?>][icon]" value="<?php echo esc_attr($item['icon'] ?? ''); ?>" style="width: 100%; text-align: center; font-size: 18px;" placeholder="🏠">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 10px; color: #666;">שם</label>
+                                <input type="text" name="menu_items[<?php echo $index; ?>][title]" value="<?php echo esc_attr($item['title']); ?>" style="width: 100%;" placeholder="שם הפריט">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 10px; color: #666;">קישור</label>
+                                <input type="text" name="menu_items[<?php echo $index; ?>][url]" value="<?php echo esc_attr($item['url']); ?>" style="width: 100%;" dir="ltr" placeholder="/category/living-room">
+                            </div>
+                            <button type="button" onclick="toggleSubMenu(this)" class="button" title="תת-תפריט">📂</button>
+                            <button type="button" onclick="this.closest('.menu-item-wrapper').remove(); reindexItems();" class="button" style="color: red;">✕</button>
+                        </div>
+                        
+                        <!-- Sub-menu items -->
+                        <div class="sub-menu-container" style="margin-right: 30px; margin-top: 5px; margin-bottom: 10px; padding: 10px; background: #fff; border-radius: 6px; border: 1px dashed #ccc; <?php echo empty($item['children']) ? 'display: none;' : ''; ?>">
+                            <div class="sub-menu-items">
+                                <?php 
+                                $children = $item['children'] ?? array();
+                                foreach ($children as $childIndex => $child): 
+                                ?>
+                                <div class="sub-menu-item" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px; margin-bottom: 5px;">
+                                    <span style="color: #ccc;">↳</span>
+                                    <input type="text" name="menu_items[<?php echo $index; ?>][children][<?php echo $childIndex; ?>][icon]" value="<?php echo esc_attr($child['icon'] ?? ''); ?>" style="width: 40px; text-align: center;" placeholder="📌">
+                                    <input type="text" name="menu_items[<?php echo $index; ?>][children][<?php echo $childIndex; ?>][title]" value="<?php echo esc_attr($child['title']); ?>" style="flex: 1;" placeholder="שם תת-פריט">
+                                    <input type="text" name="menu_items[<?php echo $index; ?>][children][<?php echo $childIndex; ?>][url]" value="<?php echo esc_attr($child['url']); ?>" style="flex: 1;" dir="ltr" placeholder="/category/sub">
+                                    <button type="button" onclick="this.closest('.sub-menu-item').remove()" class="button button-small" style="color: red;">✕</button>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <button type="button" onclick="addSubMenuItem(this, <?php echo $index; ?>)" class="button button-small" style="margin-top: 5px;">➕ הוסף תת-פריט</button>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <button type="button" onclick="addMobileMenuItem()" class="button" style="margin-top: 15px;">➕ הוסף פריט ראשי</button>
+                
+                <div style="margin-top: 25px; padding-top: 15px; border-top: 2px solid #ddd;">
+                    <button type="submit" name="save_mobile_menu" class="button button-primary button-large">💾 שמור תפריט מובייל</button>
+                </div>
+            </form>
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+        <script>
+        var mobileMenuIndex = <?php echo count($items); ?>;
+        var subMenuIndexes = {};
+        <?php foreach ($items as $index => $item): ?>
+        subMenuIndexes[<?php echo $index; ?>] = <?php echo count($item['children'] ?? array()); ?>;
+        <?php endforeach; ?>
+        
+        // Initialize drag & drop
+        document.addEventListener('DOMContentLoaded', function() {
+            new Sortable(document.getElementById('mobile-menu-items'), {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'sortable-ghost',
+                onEnd: function() {
+                    reindexItems();
+                }
+            });
+        });
+        
+        function reindexItems() {
+            var items = document.querySelectorAll('#mobile-menu-items .menu-item-wrapper');
+            items.forEach(function(item, newIndex) {
+                // Update main item inputs
+                item.querySelectorAll('.menu-item input').forEach(function(input) {
+                    var name = input.getAttribute('name');
+                    if (name) {
+                        input.setAttribute('name', name.replace(/menu_items\[\d+\]/, 'menu_items[' + newIndex + ']'));
+                    }
+                });
+                // Update sub-menu inputs
+                item.querySelectorAll('.sub-menu-item input').forEach(function(input) {
+                    var name = input.getAttribute('name');
+                    if (name) {
+                        input.setAttribute('name', name.replace(/menu_items\[\d+\]/, 'menu_items[' + newIndex + ']'));
+                    }
+                });
+                // Update button onclick
+                var addSubBtn = item.querySelector('.sub-menu-container > button');
+                if (addSubBtn) {
+                    addSubBtn.setAttribute('onclick', 'addSubMenuItem(this, ' + newIndex + ')');
+                }
+                item.setAttribute('data-index', newIndex);
+            });
+            mobileMenuIndex = items.length;
+        }
+        
+        function toggleSubMenu(btn) {
+            var wrapper = btn.closest('.menu-item-wrapper');
+            var subContainer = wrapper.querySelector('.sub-menu-container');
+            if (subContainer.style.display === 'none') {
+                subContainer.style.display = 'block';
+            } else {
+                subContainer.style.display = 'none';
+            }
+        }
+        
+        function addSubMenuItem(btn, parentIndex) {
+            var container = btn.previousElementSibling;
+            var subIndex = subMenuIndexes[parentIndex] || 0;
+            var html = `
+                <div class="sub-menu-item" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px; margin-bottom: 5px;">
+                    <span style="color: #ccc;">↳</span>
+                    <input type="text" name="menu_items[${parentIndex}][children][${subIndex}][icon]" value="" style="width: 40px; text-align: center;" placeholder="📌">
+                    <input type="text" name="menu_items[${parentIndex}][children][${subIndex}][title]" value="" style="flex: 1;" placeholder="שם תת-פריט">
+                    <input type="text" name="menu_items[${parentIndex}][children][${subIndex}][url]" value="" style="flex: 1;" dir="ltr" placeholder="/category/sub">
+                    <button type="button" onclick="this.closest('.sub-menu-item').remove()" class="button button-small" style="color: red;">✕</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            subMenuIndexes[parentIndex] = subIndex + 1;
+        }
+        
+        function addMobileMenuItem() {
+            var container = document.getElementById('mobile-menu-items');
+            var html = `
+                <div class="menu-item-wrapper" data-index="${mobileMenuIndex}">
+                    <div class="menu-item" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd;">
+                        <span class="drag-handle" style="cursor: grab; color: #999; font-size: 18px;">☰</span>
+                        <div style="width: 50px;">
+                            <label style="font-size: 10px; color: #666;">אייקון</label>
+                            <input type="text" name="menu_items[${mobileMenuIndex}][icon]" value="" style="width: 100%; text-align: center; font-size: 18px;" placeholder="🏠">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 10px; color: #666;">שם</label>
+                            <input type="text" name="menu_items[${mobileMenuIndex}][title]" value="" style="width: 100%;" placeholder="שם הפריט">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 10px; color: #666;">קישור</label>
+                            <input type="text" name="menu_items[${mobileMenuIndex}][url]" value="" style="width: 100%;" dir="ltr" placeholder="/category/living-room">
+                        </div>
+                        <button type="button" onclick="toggleSubMenu(this)" class="button" title="תת-תפריט">📂</button>
+                        <button type="button" onclick="this.closest('.menu-item-wrapper').remove(); reindexItems();" class="button" style="color: red;">✕</button>
+                    </div>
+                    <div class="sub-menu-container" style="margin-right: 30px; margin-top: 5px; margin-bottom: 10px; padding: 10px; background: #fff; border-radius: 6px; border: 1px dashed #ccc; display: none;">
+                        <div class="sub-menu-items"></div>
+                        <button type="button" onclick="addSubMenuItem(this, ${mobileMenuIndex})" class="button button-small" style="margin-top: 5px;">➕ הוסף תת-פריט</button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            subMenuIndexes[mobileMenuIndex] = 0;
+            mobileMenuIndex++;
+        }
+        </script>
+        
+        <style>
+            .sortable-ghost { opacity: 0.4; background: #e3f2fd !important; }
+            .menu-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+            .drag-handle:active { cursor: grabbing; }
+        </style>
         <?php
     }
 }

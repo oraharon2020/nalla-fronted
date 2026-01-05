@@ -65,6 +65,36 @@ const isColorAttribute = (attrName: string): boolean => {
   return colorKeywords.some(keyword => attrName.toLowerCase().includes(keyword.toLowerCase()));
 };
 
+// Parse WordPress video shortcodes to HTML5 video elements
+const parseVideoShortcodes = (html: string): string => {
+  // Match [video ... mp4="url" ...][/video] or [video ... mp4="url" ... /]
+  const videoRegex = /\[video([^\]]*)\]\[\/video\]|\[video([^\]]*?)\/?\]/gi;
+  
+  return html.replace(videoRegex, (match, attrs1, attrs2) => {
+    const attrs = attrs1 || attrs2 || '';
+    
+    // Extract attributes
+    const mp4Match = attrs.match(/mp4=["']([^"']+)["']/i);
+    const widthMatch = attrs.match(/width=["']?(\d+)["']?/i);
+    const heightMatch = attrs.match(/height=["']?(\d+)["']?/i);
+    
+    if (!mp4Match) return match; // Return original if no mp4 found
+    
+    const mp4Url = mp4Match[1];
+    const width = widthMatch ? widthMatch[1] : '100%';
+    const height = heightMatch ? heightMatch[1] : 'auto';
+    
+    return `<video 
+      controls 
+      playsinline 
+      style="max-width: 100%; width: ${width}px; height: ${height === 'auto' ? 'auto' : height + 'px'}; border-radius: 8px; margin: 16px 0;"
+    >
+      <source src="${mp4Url}" type="video/mp4" />
+      הדפדפן שלך לא תומך בוידאו
+    </video>`;
+  });
+};
+
 // Component for safely rendering HTML content (client-only)
 function HtmlContent({ html, className }: { html: string; className?: string }) {
   const [mounted, setMounted] = useState(false);
@@ -72,6 +102,9 @@ function HtmlContent({ html, className }: { html: string; className?: string }) 
   useEffect(() => {
     setMounted(true);
   }, []);
+  
+  // Parse video shortcodes
+  const parsedHtml = parseVideoShortcodes(html);
   
   if (!mounted) {
     // Return plain text version during SSR
@@ -82,7 +115,7 @@ function HtmlContent({ html, className }: { html: string; className?: string }) 
   return (
     <div 
       className={className}
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: parsedHtml }}
     />
   );
 }
@@ -93,6 +126,9 @@ function ExpandableShortDescription({ html, className, maxLines = 4 }: { html: s
   const [needsTruncation, setNeedsTruncation] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  
+  // Parse video shortcodes
+  const parsedHtml = parseVideoShortcodes(html);
   
   useEffect(() => {
     setMounted(true);
@@ -122,7 +158,7 @@ function ExpandableShortDescription({ html, className, maxLines = 4 }: { html: s
           style={{ 
             maxHeight: isExpanded ? '500px' : `${maxLines * 1.5}em`,
           }}
-          dangerouslySetInnerHTML={{ __html: html }}
+          dangerouslySetInnerHTML={{ __html: parsedHtml }}
         />
         {needsTruncation && !isExpanded && (
           <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none" />
@@ -1210,9 +1246,9 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
 
       </div>
       
-      {/* Floating Add to Cart Button */}
+      {/* Floating Add to Cart Button - Desktop only */}
       {mounted && showFloatingButton && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-50 animate-in slide-in-from-bottom duration-300">
+        <div className="hidden md:block fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-50 animate-in slide-in-from-bottom duration-300">
           <div className="container mx-auto flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm truncate">{product.name}</p>
