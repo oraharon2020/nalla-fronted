@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, Minus, Plus, Truck, ShieldCheck, CreditCard, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
+import { Heart, Minus, Plus, Truck, ShieldCheck, CreditCard, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, HelpCircle, Play } from 'lucide-react';
 import { ShareButtons } from '@/components/product/ShareButtons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -87,60 +87,65 @@ function HtmlContent({ html, className }: { html: string; className?: string }) 
   );
 }
 
-// Expandable short description for mobile
-function ExpandableShortDescription({ html, className }: { html: string; className?: string }) {
+// Expandable short description
+function ExpandableShortDescription({ html, className, maxLines = 4 }: { html: string; className?: string; maxLines?: number }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [needsTruncation, setNeedsTruncation] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Check if content needs truncation based on actual height
+  useEffect(() => {
+    if (contentRef.current && mounted) {
+      const lineHeight = 24; // approx line height for text-sm leading-relaxed
+      const maxHeight = lineHeight * maxLines;
+      setNeedsTruncation(contentRef.current.scrollHeight > maxHeight + 10);
+    }
+  }, [html, maxLines, mounted]);
   
   const plainText = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-  const needsTruncation = plainText.length > 100;
   
   if (!mounted) {
-    return <p className={`text-sm text-gray-600 ${className}`}>{plainText.slice(0, 100)}...</p>;
-  }
-  
-  if (!needsTruncation) {
-    return (
-      <div 
-        className={`text-sm text-gray-600 leading-relaxed ${className}`}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
-    );
+    return <p className={`text-sm text-gray-600 ${className}`}>{plainText.slice(0, 200)}...</p>;
   }
   
   return (
     <div className={className}>
       <div className="relative">
         <div 
-          className={`text-sm text-gray-600 leading-relaxed overflow-hidden transition-all duration-300 ${
-            isExpanded ? 'max-h-[500px]' : 'max-h-[4.5em]'
-          }`}
+          ref={contentRef}
+          className="text-sm text-gray-600 leading-relaxed overflow-hidden transition-all duration-300"
+          style={{ 
+            maxHeight: isExpanded ? '500px' : `${maxLines * 1.5}em`,
+          }}
           dangerouslySetInnerHTML={{ __html: html }}
         />
-        {!isExpanded && (
-          <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+        {needsTruncation && !isExpanded && (
+          <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none" />
         )}
       </div>
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 mt-1 transition-colors"
-      >
-        {isExpanded ? (
-          <>
-            <span>הצג פחות</span>
-            <ChevronUp className="w-3 h-3" />
-          </>
-        ) : (
-          <>
-            <span>קרא עוד</span>
-            <ChevronDown className="w-3 h-3" />
-          </>
-        )}
-      </button>
+      {needsTruncation && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 mt-2 transition-colors"
+        >
+          {isExpanded ? (
+            <>
+              <span>הצג פחות</span>
+              <ChevronUp className="w-3 h-3" />
+            </>
+          ) : (
+            <>
+              <span>קרא עוד</span>
+              <ChevronDown className="w-3 h-3" />
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
@@ -227,6 +232,55 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
   const thumbnailsRef = useRef<HTMLDivElement>(null);
+  const addToCartRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [showFloatingButton, setShowFloatingButton] = useState(false);
+  
+  // Hydration fix - wait for client mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  // Show floating button when original add-to-cart is out of view AND user scrolled down
+  useEffect(() => {
+    if (!mounted) return;
+    
+    let isAddToCartVisible = true;
+    let hasScrolledDown = false;
+    
+    const updateFloatingButton = () => {
+      setShowFloatingButton(!isAddToCartVisible && hasScrolledDown);
+    };
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isAddToCartVisible = entry.isIntersecting;
+        updateFloatingButton();
+      },
+      { threshold: 0 }
+    );
+    
+    const handleScroll = () => {
+      hasScrolledDown = window.scrollY > 400;
+      updateFloatingButton();
+    };
+    
+    if (addToCartRef.current) {
+      observer.observe(addToCartRef.current);
+    }
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [mounted]);
+  
+  // Scroll to purchase section
+  const scrollToPurchase = () => {
+    addToCartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
   
   // Admin fields state
   const [adminPrice, setAdminPrice] = useState<number | null>(null);
@@ -254,39 +308,58 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
     image: product.image,
   };
 
-  // Extract unique attributes - merge from product attributes AND variations
+  // Helper to decode URL-encoded strings
+  const decodeAttrName = (name: string): string => {
+    try {
+      return decodeURIComponent(name);
+    } catch {
+      return name;
+    }
+  };
+
+  // Extract unique attributes - prefer product.attributes.nodes which has clean names
   const attributes = useMemo(() => {
     const attrMap = new Map<string, Set<string>>();
     
-    // First, add attributes from product definition (this includes ALL attribute options)
+    // Helper to check if a value looks like an ID (pure number) rather than a real option
+    const isLikelyId = (value: string): boolean => {
+      return /^\d+$/.test(value);
+    };
+    
+    // Use product attributes as the source of truth for names and options
     if (product.attributes?.nodes) {
       product.attributes.nodes.forEach(attr => {
-        if (!attrMap.has(attr.name)) {
-          attrMap.set(attr.name, new Set());
+        // Clean the name - remove pa_ prefix if exists and decode
+        let cleanName = attr.name.replace(/^pa_/, '');
+        cleanName = decodeAttrName(cleanName);
+        
+        if (!attrMap.has(cleanName)) {
+          attrMap.set(cleanName, new Set());
         }
-        attr.options.forEach(opt => attrMap.get(attr.name)!.add(opt));
+        attr.options.forEach(opt => {
+          const decoded = decodeAttrName(opt);
+          if (!isLikelyId(decoded)) {
+            attrMap.get(cleanName)!.add(decoded);
+          }
+        });
       });
     }
     
-    // Then supplement/override with attributes from actual variations
-    if (variations.length > 0) {
+    // If no product attributes, fall back to variations
+    if (attrMap.size === 0 && variations.length > 0) {
       variations.forEach(variation => {
         variation.attributes.forEach(attr => {
-          // Normalize attribute name (remove "pa_" prefix if exists)
-          const normalizedName = attr.name.replace(/^pa_/, '');
+          let cleanName = attr.name.replace(/^pa_/, '');
+          cleanName = decodeAttrName(cleanName);
           
-          // Find matching attribute in our map (case-insensitive)
-          let matchedKey = Array.from(attrMap.keys()).find(
-            key => key.toLowerCase() === normalizedName.toLowerCase() || 
-                   key.toLowerCase() === attr.name.toLowerCase()
-          );
-          
-          if (!matchedKey) {
-            matchedKey = attr.name;
-            attrMap.set(matchedKey, new Set());
+          if (!attrMap.has(cleanName)) {
+            attrMap.set(cleanName, new Set());
           }
           
-          attrMap.get(matchedKey)!.add(attr.option);
+          const decodedOption = decodeAttrName(attr.option);
+          if (!isLikelyId(decodedOption)) {
+            attrMap.get(cleanName)!.add(decodedOption);
+          }
         });
       });
     }
@@ -319,15 +392,16 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
       const relevantAttrs = variation.attributes.filter(attr => attr.option && attr.option.trim() !== '');
       
       return relevantAttrs.every(attr => {
-        // Try to match with normalized names
-        const normalizedName = attr.name.replace(/^pa_/, '');
-        const matchedValue = selectedAttributes[attr.name] || 
+        // Try to match with normalized names and decode URL encoding
+        const normalizedName = decodeAttrName(attr.name.replace(/^pa_/, ''));
+        const decodedOption = decodeAttrName(attr.option);
+        const matchedValue = selectedAttributes[decodeAttrName(attr.name)] || 
                             selectedAttributes[normalizedName] ||
                             Object.entries(selectedAttributes).find(
                               ([key]) => key.toLowerCase() === normalizedName.toLowerCase() ||
-                                         key.toLowerCase() === attr.name.toLowerCase()
+                                         key.toLowerCase() === decodeAttrName(attr.name).toLowerCase()
                             )?.[1];
-        return matchedValue === attr.option;
+        return matchedValue === decodedOption;
       });
     });
   }, [variations, selectedAttributes]);
@@ -527,7 +601,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
             <Link href="/" className="hover:text-black">דף הבית</Link>
             <span>/</span>
             {category?.slug ? (
-              <Link href={`/category/${category.slug}`} className="hover:text-black">{category.name}</Link>
+              <Link href={`/product-category/${category.slug}`} className="hover:text-black">{category.name}</Link>
             ) : (
               <Link href="/categories" className="hover:text-black">מוצרים</Link>
             )}
@@ -539,100 +613,166 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
 
       {/* Main Product Section */}
       <div className="container mx-auto px-4 py-4 md:py-6 lg:py-10">
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-16">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-16" dir="ltr">
           
-          {/* Image Gallery */}
-          <div>
-            {/* Main Image - Square, no background, rounded corners */}
-            <div className="relative aspect-square rounded-2xl overflow-hidden mb-3 md:mb-4">
-              {allImages[selectedImage]?.sourceUrl && (
-                <Image
-                  src={allImages[selectedImage].sourceUrl}
-                  alt={allImages[selectedImage].altText || product.name}
-                  fill
-                  className="object-contain"
-                  priority
-                  fetchPriority="high"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  quality={75}
-                />
-              )}
-              {hasDiscount && discountPercentage > 0 && (
-                <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                  -{discountPercentage}%
-                </span>
-              )}
-            </div>
-
-            {/* Thumbnails Slider */}
-            {allImages.length > 1 && (
-              <div className="relative group">
-                {/* Right Arrow - scrolls right (shows more from right side) */}
-                <button
-                  onClick={() => {
-                    if (thumbnailsRef.current) {
-                      thumbnailsRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+          {/* Image Gallery - Left side on desktop */}
+          <div dir="rtl">
+            {/* Mobile: Slider with swipe support */}
+            <div className="md:hidden">
+              <div 
+                className="relative aspect-square rounded-2xl overflow-hidden touch-pan-y"
+                onTouchStart={(e) => {
+                  const touch = e.touches[0];
+                  (e.currentTarget as any).touchStartX = touch.clientX;
+                }}
+                onTouchEnd={(e) => {
+                  const touchStartX = (e.currentTarget as any).touchStartX;
+                  const touch = e.changedTouches[0];
+                  const diff = touchStartX - touch.clientX;
+                  
+                  // Swipe threshold of 50px
+                  if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                      // Swiped left - next image (in RTL this means go forward)
+                      setSelectedImage(prev => prev < allImages.length - 1 ? prev + 1 : 0);
+                    } else {
+                      // Swiped right - previous image
+                      setSelectedImage(prev => prev > 0 ? prev - 1 : allImages.length - 1);
                     }
-                  }}
-                  className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-gray-100 rounded-full shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+                  }
+                }}
+              >
+                {allImages[selectedImage]?.sourceUrl && (
+                  <Image
+                    src={allImages[selectedImage].sourceUrl}
+                    alt={allImages[selectedImage].altText || product.name}
+                    fill
+                    className="object-contain"
+                    priority
+                    fetchPriority="high"
+                    sizes="100vw"
+                    quality={75}
+                  />
+                )}
+                {hasDiscount && discountPercentage > 0 && (
+                  <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                    -{discountPercentage}%
+                  </span>
+                )}
                 
-                {/* Left Arrow - scrolls left (shows more from left side) */}
-                <button
-                  onClick={() => {
-                    if (thumbnailsRef.current) {
-                      thumbnailsRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-                    }
-                  }}
-                  className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white hover:bg-gray-100 rounded-full shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-
-                {/* Thumbnails Container - touch friendly */}
-                <div 
-                  ref={thumbnailsRef}
-                  className="flex flex-row-reverse gap-2 overflow-x-auto scrollbar-hide px-2 py-2 scroll-smooth touch-pan-x"
-                  style={{ 
-                    scrollbarWidth: 'none', 
-                    msOverflowStyle: 'none',
-                    WebkitOverflowScrolling: 'touch'
-                  }}
-                >
-                  {allImages.map((img, index) => (
+                {/* Navigation Arrows */}
+                {allImages.length > 1 && (
+                  <>
                     <button
-                      key={`thumb-${index}-${img.sourceUrl}`}
-                      type="button"
-                      onClick={() => handleThumbnailClick(index)}
-                      className={`relative aspect-square w-16 md:w-20 flex-shrink-0 rounded-xl overflow-hidden transition-all cursor-pointer ${
-                        selectedImage === index 
-                          ? 'ring-2 ring-black ring-offset-1' 
-                          : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-1'
-                      }`}
+                      onClick={() => setSelectedImage(prev => prev > 0 ? prev - 1 : allImages.length - 1)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md flex items-center justify-center"
+                      aria-label="תמונה קודמת"
                     >
-                      {img.sourceUrl && (
-                        <Image
-                          src={img.sourceUrl}
-                          alt={img.altText || `תמונה ${index + 1}`}
-                          fill
-                          className="object-contain pointer-events-none"
-                          sizes="80px"
-                          loading="lazy"
-                          quality={70}
-                          draggable={false}
-                        />
-                      )}
+                      <ChevronRight className="w-4 h-4" />
                     </button>
+                    <button
+                      onClick={() => setSelectedImage(prev => prev < allImages.length - 1 ? prev + 1 : 0)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md flex items-center justify-center"
+                      aria-label="תמונה הבאה"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
+              
+              {/* Dots indicator */}
+              {allImages.length > 1 && (
+                <div className="flex justify-center gap-2 mt-5">
+                  {allImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        selectedImage === index ? 'bg-black w-4' : 'bg-gray-300'
+                      }`}
+                      aria-label={`תמונה ${index + 1}`}
+                    />
                   ))}
                 </div>
+              )}
+              
+              {/* Mobile: Video Button - Only render after mount to avoid hydration mismatch */}
+              {mounted && video && (
+                <button
+                  onClick={() => {
+                    const videoSection = document.getElementById('product-video-section');
+                    if (videoSection) {
+                      videoSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="flex items-center justify-center gap-2 w-full mt-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                >
+                  <Play className="w-5 h-5" />
+                  <span className="text-sm font-medium">צפה בסרטון המוצר</span>
+                </button>
+              )}
+            </div>
+            
+            {/* Desktop: All Images Stacked */}
+            <div className="hidden md:block space-y-4">
+              {/* Main Image - Changes based on selected variation */}
+              <div className="relative aspect-square rounded-2xl overflow-hidden">
+                {allImages[selectedImage]?.sourceUrl && (
+                  <Image
+                    src={allImages[selectedImage].sourceUrl}
+                    alt={allImages[selectedImage].altText || product.name}
+                    fill
+                    className="object-contain"
+                    priority
+                    fetchPriority="high"
+                    sizes="50vw"
+                    quality={75}
+                  />
+                )}
+                {hasDiscount && discountPercentage > 0 && (
+                  <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                    -{discountPercentage}%
+                  </span>
+                )}
               </div>
-            )}
+              
+              {/* Rest of gallery images (excluding the selected one) */}
+              {allImages.map((img, index) => {
+                // Skip the currently selected image (already shown above)
+                if (index === selectedImage) return null;
+                
+                return (
+                  <div 
+                    key={`image-${index}-${img.sourceUrl}`}
+                    className="relative aspect-square rounded-2xl overflow-hidden"
+                  >
+                    {img.sourceUrl && (
+                      <Image
+                        src={img.sourceUrl}
+                        alt={img.altText || `${product.name} - תמונה ${index + 1}`}
+                        fill
+                        className="object-contain"
+                        sizes="50vw"
+                        quality={75}
+                        loading="lazy"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+              
+              {/* Video in gallery - Desktop - Only render after mount */}
+              {mounted && video && (
+                <div className="relative aspect-square rounded-2xl overflow-hidden">
+                  <ProductVideo video={video} productName={product.name} />
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Product Info */}
-          <div>
+          {/* Product Info - Right side on desktop */}
+          <div dir="rtl">
             {/* Title */}
             <div className="flex items-start justify-between gap-2 mb-1 md:mb-2">
               <h1 className="text-lg md:text-xl lg:text-2xl font-medium text-gray-900">
@@ -695,74 +835,76 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
               })()}
             </div>
 
-            {/* Short Description */}
+            {/* Short Description - expandable after 4 lines */}
             {product.shortDescription && (
-              <>
-                {/* Desktop - full description */}
-                <HtmlContent 
-                  html={product.shortDescription}
-                  className="text-sm text-gray-600 leading-relaxed mb-4 md:mb-6 hidden md:block [&_*]:!font-sans"
-                />
-                {/* Mobile - expandable description */}
-                <ExpandableShortDescription 
-                  html={product.shortDescription}
-                  className="md:hidden mb-4 [&_*]:!font-sans"
-                />
-              </>
+              <ExpandableShortDescription 
+                html={product.shortDescription}
+                maxLines={4}
+                className="mb-4 md:mb-6 [&_*]:!font-sans"
+              />
             )}
 
             {/* Variations */}
-            <div className="space-y-4 md:space-y-5 mb-4 md:mb-6">
+            <div className="space-y-6 mb-4 md:mb-6">
               {attributes.map((attr) => {
                 const isColor = isColorAttribute(attr.name);
                 
                 return (
                   <div key={attr.name}>
-                    <label className="block text-xs font-medium text-gray-700 mb-2">
-                      {attr.name}: {selectedAttributes[attr.name] || ''}
-                    </label>
-                    
                     {isColor ? (
-                      <div className="flex flex-wrap gap-2">
-                        {attr.options.map((option) => {
-                          const swatch = findSwatchByName(swatches, option);
-                          const hasSwatchImage = swatch?.image;
-                          
-                          return (
-                            <button
-                              key={option}
-                              onClick={() => setSelectedAttributes(prev => ({ ...prev, [attr.name]: option }))}
-                              className={`w-8 h-8 rounded-full transition overflow-hidden border border-gray-200 shadow-sm ${
-                                selectedAttributes[attr.name] === option
-                                  ? 'ring-2 ring-offset-1 ring-black'
-                                  : 'ring-1 ring-gray-300 hover:ring-gray-400'
-                              }`}
-                              style={hasSwatchImage ? undefined : getColorStyle(option)}
-                              title={option}
-                            >
-                              {hasSwatchImage && (
-                                <Image
-                                  src={swatch.image!}
-                                  alt={option}
-                                  width={32}
-                                  height={32}
-                                  className="w-full h-full object-cover"
-                                />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <>
+                        <label className="block text-sm text-gray-600 mb-3">
+                          {attr.name}
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {attr.options.map((option) => {
+                            const swatch = findSwatchByName(swatches, option);
+                            const hasSwatchImage = swatch?.image;
+                            
+                            return (
+                              <button
+                                key={option}
+                                onClick={() => setSelectedAttributes(prev => ({ ...prev, [attr.name]: option }))}
+                                className={`w-10 h-10 rounded-full transition overflow-hidden ${
+                                  selectedAttributes[attr.name] === option
+                                    ? 'ring-2 ring-offset-2 ring-black'
+                                    : 'ring-1 ring-gray-300 hover:ring-gray-400'
+                                }`}
+                                style={hasSwatchImage ? undefined : getColorStyle(option)}
+                                title={option}
+                              >
+                                {hasSwatchImage && (
+                                  <Image
+                                    src={swatch.image!}
+                                    alt={option}
+                                    width={40}
+                                    height={40}
+                                    className="w-full h-full object-cover"
+                                  />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
                     ) : (
-                      <select
-                        value={selectedAttributes[attr.name] || ''}
-                        onChange={(e) => setSelectedAttributes(prev => ({ ...prev, [attr.name]: e.target.value }))}
-                        className="w-full max-w-xs text-sm border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black"
-                      >
-                        {attr.options.map((option) => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
+                      <div className="flex items-center justify-between gap-4">
+                        <label className="text-sm text-gray-600 shrink-0">
+                          {attr.name}
+                        </label>
+                        <div className="relative flex-1 max-w-xs">
+                          <select
+                            value={selectedAttributes[attr.name] || ''}
+                            onChange={(e) => setSelectedAttributes(prev => ({ ...prev, [attr.name]: e.target.value }))}
+                            className="w-full appearance-none bg-transparent text-center text-gray-900 py-2 border-b border-gray-300 focus:outline-none focus:border-black cursor-pointer"
+                          >
+                            {attr.options.map((option) => (
+                              <option key={option} value={option}>{option}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        </div>
+                      </div>
                     )}
                   </div>
                 );
@@ -853,7 +995,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
             )}
 
             {/* Add to Cart */}
-            <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div ref={addToCartRef} className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
               {/* Quantity */}
               <div className="flex items-center border border-gray-300 rounded" role="group" aria-label="כמות">
                 <button
@@ -938,8 +1080,8 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
               relatedData={relatedData}
             />
 
-            {/* AI Product Chat */}
-            {featureFlags.aiProductChat && (
+            {/* AI Product Chat - Hidden temporarily */}
+            {/* {featureFlags.aiProductChat && (
               <ProductAIChat 
                 product={{
                   name: product.name,
@@ -961,13 +1103,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                   } : null,
                 }}
               />
-            )}
-
-            {/* Return policy notice */}
-            <div className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5 text-xs text-blue-700">
-              <span className="font-medium">📦 </span>
-              במידה והפריט אינו מגיע כפי שמתואר, ניתן להחזירו במעמד האספקה.
-            </div>
+            )} */}
 
             {/* FAQ Section - Below info badges */}
             {faqs && faqs.length > 0 && (
@@ -1006,16 +1142,16 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
         {/* Tabs */}
         <div className="mt-8 md:mt-12 border-t pt-6 md:pt-8">
           <div className={`flex flex-col-reverse ${video ? 'lg:flex-row lg:gap-8' : ''}`}>
-            {/* Video Section - Left side on desktop */}
+            {/* Video Section - Left side on desktop (hidden on desktop since it's in gallery) */}
             {video && (
-              <div className="lg:w-1/3 mt-6 lg:mt-0">
+              <div id="product-video-section" className="lg:hidden mt-6">
                 <h3 className="text-sm font-medium text-gray-900 mb-3">סרטון המוצר</h3>
                 <ProductVideo video={video} productName={product.name} />
               </div>
             )}
 
             {/* Description/Specs Section */}
-            <div className={`${video ? 'lg:w-2/3' : 'w-full'}`}>
+            <div className="w-full">
               <div className="flex gap-4 md:gap-6 border-b mb-4 md:mb-6">
                 <button 
                   onClick={() => setActiveTab('description')}
@@ -1073,6 +1209,24 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
         </div>
 
       </div>
+      
+      {/* Floating Add to Cart Button */}
+      {mounted && showFloatingButton && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-50 animate-in slide-in-from-bottom duration-300">
+          <div className="container mx-auto flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm truncate">{product.name}</p>
+              <p className="text-lg font-semibold">{currentPrice}</p>
+            </div>
+            <Button 
+              className="h-11 px-8 bg-black hover:bg-gray-800 text-sm whitespace-nowrap"
+              onClick={scrollToPurchase}
+            >
+              בחירת אפשרויות
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

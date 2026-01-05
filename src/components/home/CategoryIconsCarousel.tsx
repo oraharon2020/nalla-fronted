@@ -19,14 +19,14 @@ interface CategoryIconsCarouselProps {
 
 // Default categories with placeholders
 const defaultCategories: CategoryIcon[] = [
-  { id: 1, name: 'פינות אוכל', slug: 'dining-tables', link: '/category/dining-tables' },
-  { id: 2, name: 'קונסולות', slug: 'consoles', link: '/category/consoles' },
-  { id: 3, name: 'ספריות', slug: 'bookcases', link: '/category/bookcases' },
-  { id: 4, name: 'קומודות', slug: 'dressers', link: '/category/dressers' },
-  { id: 5, name: 'NALLA SALE', slug: 'sale', link: '/category/sale' },
-  { id: 6, name: 'שולחנות סלון', slug: 'coffee-tables', link: '/category/coffee-tables' },
-  { id: 7, name: 'מזנונים', slug: 'tv-stands', link: '/category/tv-stands' },
-  { id: 8, name: 'שולחנות משרד', slug: 'office-desks', link: '/category/office-desks' },
+  { id: 1, name: 'פינות אוכל', slug: 'dining-tables', link: '/product-category/dining-tables' },
+  { id: 2, name: 'קונסולות', slug: 'consoles', link: '/product-category/consoles' },
+  { id: 3, name: 'ספריות', slug: 'bookcases', link: '/product-category/bookcases' },
+  { id: 4, name: 'קומודות', slug: 'dressers', link: '/product-category/dressers' },
+  { id: 5, name: 'NALLA SALE', slug: 'sale', link: '/product-category/sale' },
+  { id: 6, name: 'שולחנות סלון', slug: 'coffee-tables', link: '/product-category/coffee-tables' },
+  { id: 7, name: 'מזנונים', slug: 'tv-stands', link: '/product-category/tv-stands' },
+  { id: 8, name: 'שולחנות משרד', slug: 'office-desks', link: '/product-category/office-desks' },
 ];
 
 // Placeholder SVG component

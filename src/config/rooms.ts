@@ -31,7 +31,7 @@ export const rooms: Room[] = [
         id: 'sofa-1',
         name: 'ספה תלת מושבית',
         price: '4,500',
-        link: '/category/sofas',
+        link: '/product-category/sofas',
         x: 55,
         y: 30
       },
@@ -39,7 +39,7 @@ export const rooms: Room[] = [
         id: 'table-1',
         name: 'שולחן סלון',
         price: '1,800',
-        link: '/category/coffee-tables',
+        link: '/product-category/coffee-tables',
         x: 35,
         y: 65
       }
@@ -56,7 +56,7 @@ export const rooms: Room[] = [
         id: 'dining-table-1',
         name: 'שולחן אוכל',
         price: '3,200',
-        link: '/category/dining-tables',
+        link: '/product-category/dining-tables',
         x: 50,
         y: 55
       }
@@ -73,7 +73,7 @@ export const rooms: Room[] = [
         id: 'dresser-1',
         name: 'קומודה',
         price: '2,400',
-        link: '/category/dressers',
+        link: '/product-category/dressers',
         x: 70,
         y: 45
       }
@@ -90,7 +90,7 @@ export const rooms: Room[] = [
         id: 'console-1',
         name: 'קונסולה',
         price: '2,100',
-        link: '/category/consoles',
+        link: '/product-category/consoles',
         x: 50,
         y: 50
       }
@@ -107,7 +107,7 @@ export const rooms: Room[] = [
         id: 'desk-1',
         name: 'שולחן משרד',
         price: '1,900',
-        link: '/category/office-desks',
+        link: '/product-category/office-desks',
         x: 45,
         y: 55
       },
@@ -115,7 +115,7 @@ export const rooms: Room[] = [
         id: 'bookcase-1',
         name: 'ספרייה',
         price: '3,500',
-        link: '/category/bookcases',
+        link: '/product-category/bookcases',
         x: 75,
         y: 40
       }

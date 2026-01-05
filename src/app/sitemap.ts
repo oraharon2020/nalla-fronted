@@ -73,7 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     categoryPages = categories
       .filter((cat) => cat.slug !== 'uncategorized')
       .map((category) => ({
-        url: `${SITE_URL}/category/${category.slug}`,
+        url: `${SITE_URL}/product-category/${category.slug}`,
         lastModified: new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.7,

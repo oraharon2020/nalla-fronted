@@ -113,44 +113,67 @@ export default function RootLayout({
         <LocalBusinessJsonLd />
       </head>
       <body className={`${rubik.variable} ${inter.variable} font-sans antialiased`}>
-        {/* Google Ads & GA4 - gtag.js - loads after page becomes interactive */}
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics.googleAds}`}
-          strategy="afterInteractive"
-        />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${siteConfig.analytics.googleAds}');
-          `}
-        </Script>
+        {/* Google Ads - gtag.js - loads after page becomes interactive */}
+        {siteConfig.analytics.googleAds && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics.googleAds}`}
+              strategy="afterInteractive"
+            />
+            <Script id="gtag-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                  'ad_storage': 'granted',
+                  'analytics_storage': 'granted',
+                  'ad_user_data': 'granted',
+                  'ad_personalization': 'granted'
+                });
+                gtag('js', new Date());
+                gtag('set', 'developer_id.dOGY3NW', true);
+                gtag('config', '${siteConfig.analytics.googleAds}', { "groups": "GLA", "send_page_view": true });
+              `}
+            </Script>
+          </>
+        )}
         
-        {/* Meta Pixel (Facebook) - loads after page becomes interactive */}
-        <Script id="meta-pixel" strategy="afterInteractive">
-          {`
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${siteConfig.analytics.facebookPixel}');
-            fbq('track', 'PageView');
-          `}
-        </Script>
-        <noscript>
-          <img 
-            height="1" 
-            width="1" 
-            style={{ display: 'none' }}
-            src={`https://www.facebook.com/tr?id=${siteConfig.analytics.facebookPixel}&ev=PageView&noscript=1`}
-            alt=""
+        {/* Upixel Tracking */}
+        {siteConfig.analytics.upixelKey && (
+          <Script
+            src={`https://p.pixelinf.com/upixel2.js?ukey=${siteConfig.analytics.upixelKey}`}
+            strategy="afterInteractive"
           />
-        </noscript>
+        )}
+        
+        {/* Meta Pixel (Facebook) - loads only if configured */}
+        {siteConfig.analytics.facebookPixel && (
+          <>
+            <Script id="meta-pixel" strategy="afterInteractive">
+              {`
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${siteConfig.analytics.facebookPixel}');
+                fbq('track', 'PageView');
+              `}
+            </Script>
+            <noscript>
+              <img 
+                height="1" 
+                width="1" 
+                style={{ display: 'none' }}
+                src={`https://www.facebook.com/tr?id=${siteConfig.analytics.facebookPixel}&ev=PageView&noscript=1`}
+                alt=""
+              />
+            </noscript>
+          </>
+        )}
         
         <AdminBar />
         <Header />

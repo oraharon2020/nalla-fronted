@@ -51,6 +51,18 @@ class Bellano_Admin_Pages {
                 <a href="?page=bellano-settings&tab=cache" class="<?php echo $active_tab === 'cache' ? 'active' : ''; ?>">
                     🗑️ ניקוי קאש
                 </a>
+                <a href="?page=bellano-settings&tab=mega-menu" class="<?php echo $active_tab === 'mega-menu' ? 'active' : ''; ?>">
+                    📋 מגה מניו
+                </a>
+                <a href="?page=bellano-settings&tab=navigation" class="<?php echo $active_tab === 'navigation' ? 'active' : ''; ?>">
+                    🧭 תפריט ראשי
+                </a>
+                <a href="?page=bellano-settings&tab=footer" class="<?php echo $active_tab === 'footer' ? 'active' : ''; ?>">
+                    📝 פוטר
+                </a>
+                <a href="?page=bellano-settings&tab=announcements" class="<?php echo $active_tab === 'announcements' ? 'active' : ''; ?>">
+                    📢 הודעות עליונות
+                </a>
             </nav>
             
             <?php
@@ -75,6 +87,18 @@ class Bellano_Admin_Pages {
                     break;
                 case 'cache':
                     $plugin->cache->render_tab();
+                    break;
+                case 'mega-menu':
+                    $this->render_mega_menu_tab();
+                    break;
+                case 'navigation':
+                    $this->render_navigation_tab();
+                    break;
+                case 'footer':
+                    $this->render_footer_tab();
+                    break;
+                case 'announcements':
+                    $this->render_announcements_tab();
                     break;
                 default:
                     $this->render_homepage_tab();
@@ -108,7 +132,7 @@ class Bellano_Admin_Pages {
         ?>
         <div class="bellano-card">
             <h2>🏷️ קטגוריות מומלצות</h2>
-            <p class="description">בחרו עד 8 קטגוריות שיוצגו בסקציית "מה אתם מחפשים?" בעמוד הבית. גררו לשינוי הסדר.</p>
+            <p class="description">בחרו קטגוריות שיוצגו בסקציית "מה אתם מחפשים?" בעמוד הבית. גררו לשינוי הסדר.</p></p>
             
             <div class="categories-container" style="display: flex; gap: 30px; margin-top: 20px;">
                 <!-- Available Categories -->
@@ -136,7 +160,7 @@ class Bellano_Admin_Pages {
                 
                 <!-- Featured Categories -->
                 <div class="featured-categories" style="flex: 1;">
-                    <h4 style="margin-bottom: 10px;">✓ קטגוריות נבחרות (עד 8)</h4>
+                    <h4 style="margin-bottom: 10px;">✓ קטגוריות נבחרות</h4>
                     <div id="featured-list" style="background: #e8f5e9; padding: 15px; border-radius: 8px; min-height: 200px; border: 2px dashed #4CAF50;">
                         <?php foreach ($featured_ids as $cat_id): 
                             $cat = get_term($cat_id, 'product_cat');
@@ -191,11 +215,6 @@ class Bellano_Admin_Pages {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
                 onAdd: function(evt) {
-                    var items = evt.to.querySelectorAll('.category-item');
-                    if (items.length > 8) {
-                        evt.from.appendChild(evt.item);
-                        alert('ניתן לבחור עד 8 קטגוריות');
-                    }
                     updatePreview();
                 },
                 onSort: function() {
@@ -477,6 +496,764 @@ class Bellano_Admin_Pages {
             if (confirm('האם אתה בטוח?')) {
                 btn.closest('.icon-item').remove();
             }
+        }
+        </script>
+        <?php
+    }
+
+    /**
+     * Render Mega Menu Tab
+     */
+    public function render_mega_menu_tab() {
+        // Handle save
+        if (isset($_POST['save_mega_menu']) && check_admin_referer('bellano_mega_menu')) {
+            $menus = [];
+            
+            // Save Living Spaces menu
+            if (isset($_POST['living_spaces']) && is_array($_POST['living_spaces'])) {
+                $items = [];
+                foreach ($_POST['living_spaces'] as $item) {
+                    if (!empty($item['name'])) {
+                        $items[] = [
+                            'name' => sanitize_text_field($item['name']),
+                            'description' => sanitize_text_field($item['description'] ?? ''),
+                            'link' => sanitize_text_field($item['link']),
+                            'icon_id' => intval($item['icon_id'] ?? 0),
+                            'icon_url' => esc_url_raw($item['icon_url'] ?? ''),
+                        ];
+                    }
+                }
+                $menus['living_spaces'] = $items;
+            }
+            
+            // Save featured sections
+            if (isset($_POST['featured_sections']) && is_array($_POST['featured_sections'])) {
+                $sections = [];
+                foreach ($_POST['featured_sections'] as $section) {
+                    if (!empty($section['title'])) {
+                        $sections[] = [
+                            'title' => sanitize_text_field($section['title']),
+                            'link' => sanitize_text_field($section['link']),
+                            'image_id' => intval($section['image_id'] ?? 0),
+                            'image_url' => esc_url_raw($section['image_url'] ?? ''),
+                            'bg_color' => sanitize_hex_color($section['bg_color'] ?? '#f5f5f5'),
+                        ];
+                    }
+                }
+                $menus['featured_sections'] = $sections;
+            }
+            
+            update_option('bellano_mega_menus', $menus);
+            echo '<div class="notice notice-success"><p>✅ המגה מניו נשמר בהצלחה!</p></div>';
+        }
+        
+        $saved_menus = get_option('bellano_mega_menus', []);
+        $living_spaces = $saved_menus['living_spaces'] ?? [
+            ['name' => 'סלון', 'description' => 'מזנונים, ספריות ושולחנות סלון', 'link' => '/product-tag/living-room', 'icon_id' => 0],
+            ['name' => 'פינת אוכל', 'description' => 'שולחנות, כסאות וריהוט לפינת אוכל', 'link' => '/product-tag/dining-room', 'icon_id' => 0],
+            ['name' => 'חדר שינה', 'description' => 'מיטות, שידות וארונות', 'link' => '/product-tag/bedroom', 'icon_id' => 0],
+            ['name' => 'חדר עבודה', 'description' => 'שולחנות עבודה וריהוט למשרד', 'link' => '/product-tag/office', 'icon_id' => 0],
+            ['name' => 'כניסה למבואה', 'description' => 'קונסולות ופתרונות אחסון', 'link' => '/product-tag/entrance', 'icon_id' => 0],
+        ];
+        $featured_sections = $saved_menus['featured_sections'] ?? [
+            ['title' => 'הטרנדים החמים', 'link' => '/product-tag/trends', 'image_id' => 0, 'bg_color' => '#f5ebe0'],
+            ['title' => 'מבצעים', 'link' => '/category/sale', 'image_id' => 0, 'bg_color' => '#fef3c7'],
+        ];
+        ?>
+        <div class="bellano-card">
+            <h2>📋 מגה מניו - חללי מגורים</h2>
+            <p class="description">הגדר את הפריטים שיוצגו בתפריט הנפתח "חללי מגורים" בהדר</p>
+            
+            <form method="post">
+                <?php wp_nonce_field('bellano_mega_menu'); ?>
+                
+                <h3 style="margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">🏠 קטגוריות חללים</h3>
+                <div id="living-spaces-list" style="margin-top: 15px;">
+                    <?php foreach ($living_spaces as $index => $item): ?>
+                    <div class="menu-item" style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                        <span class="handle" style="cursor: grab; color: #999; padding-top: 8px;">☰</span>
+                        
+                        <!-- Icon -->
+                        <div class="icon-preview" style="width: 50px; height: 50px; background: #e8f0e6; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; flex-shrink: 0;" onclick="selectMegaMenuIcon(this, 'living_spaces', <?php echo $index; ?>)">
+                            <?php 
+                            $icon_url = '';
+                            if (!empty($item['icon_id'])) {
+                                $icon_url = wp_get_attachment_image_url($item['icon_id'], 'thumbnail');
+                            } elseif (!empty($item['icon_url'])) {
+                                $icon_url = $item['icon_url'];
+                            }
+                            if ($icon_url): ?>
+                                <img src="<?php echo esc_url($icon_url); ?>" style="width: 100%; height: 100%; object-fit: contain;">
+                            <?php else: ?>
+                                <span style="color: #999; font-size: 20px;">🖼️</span>
+                            <?php endif; ?>
+                        </div>
+                        <input type="hidden" name="living_spaces[<?php echo $index; ?>][icon_id]" class="icon-id-input" value="<?php echo esc_attr($item['icon_id'] ?? ''); ?>">
+                        <input type="hidden" name="living_spaces[<?php echo $index; ?>][icon_url]" class="icon-url-input" value="<?php echo esc_attr($item['icon_url'] ?? ''); ?>">
+                        
+                        <!-- Name -->
+                        <div style="width: 150px;">
+                            <label style="font-size: 11px; color: #666;">שם</label>
+                            <input type="text" name="living_spaces[<?php echo $index; ?>][name]" value="<?php echo esc_attr($item['name']); ?>" style="width: 100%;" placeholder="שם הקטגוריה">
+                        </div>
+                        
+                        <!-- Description -->
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-size: 11px; color: #666;">תיאור</label>
+                            <input type="text" name="living_spaces[<?php echo $index; ?>][description]" value="<?php echo esc_attr($item['description'] ?? ''); ?>" style="width: 100%;" placeholder="תיאור קצר">
+                        </div>
+                        
+                        <!-- Link -->
+                        <div style="width: 200px;">
+                            <label style="font-size: 11px; color: #666;">קישור</label>
+                            <input type="text" name="living_spaces[<?php echo $index; ?>][link]" value="<?php echo esc_attr($item['link']); ?>" style="width: 100%;" placeholder="/product-tag/slug">
+                        </div>
+                        
+                        <!-- Remove -->
+                        <button type="button" onclick="removeMegaMenuItem(this)" class="button" style="color: red; flex-shrink: 0;">✕</button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <button type="button" onclick="addLivingSpaceItem()" class="button" style="margin-top: 10px;">➕ הוסף חלל</button>
+                
+                <h3 style="margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">⭐ סקציות מיוחדות</h3>
+                <p class="description">באנרים קטנים שיוצגו בצד ימין של המגה מניו</p>
+                <div id="featured-sections-list" style="margin-top: 15px;">
+                    <?php foreach ($featured_sections as $index => $section): ?>
+                    <div class="featured-item" style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; background: #fff9e6; border-radius: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                        <!-- Image -->
+                        <div class="image-preview" style="width: 80px; height: 60px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; flex-shrink: 0;" onclick="selectMegaMenuImage(this, <?php echo $index; ?>)">
+                            <?php 
+                            $image_url = '';
+                            if (!empty($section['image_id'])) {
+                                $image_url = wp_get_attachment_image_url($section['image_id'], 'thumbnail');
+                            } elseif (!empty($section['image_url'])) {
+                                $image_url = $section['image_url'];
+                            }
+                            if ($image_url): ?>
+                                <img src="<?php echo esc_url($image_url); ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                            <?php else: ?>
+                                <span style="color: #999; font-size: 20px;">🖼️</span>
+                            <?php endif; ?>
+                        </div>
+                        <input type="hidden" name="featured_sections[<?php echo $index; ?>][image_id]" class="image-id-input" value="<?php echo esc_attr($section['image_id'] ?? ''); ?>">
+                        <input type="hidden" name="featured_sections[<?php echo $index; ?>][image_url]" class="image-url-input" value="<?php echo esc_attr($section['image_url'] ?? ''); ?>">
+                        
+                        <!-- Title -->
+                        <div style="width: 150px;">
+                            <label style="font-size: 11px; color: #666;">כותרת</label>
+                            <input type="text" name="featured_sections[<?php echo $index; ?>][title]" value="<?php echo esc_attr($section['title']); ?>" style="width: 100%;" placeholder="כותרת">
+                        </div>
+                        
+                        <!-- Link -->
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 11px; color: #666;">קישור</label>
+                            <input type="text" name="featured_sections[<?php echo $index; ?>][link]" value="<?php echo esc_attr($section['link']); ?>" style="width: 100%;" placeholder="/category/sale">
+                        </div>
+                        
+                        <!-- BG Color -->
+                        <div style="width: 100px;">
+                            <label style="font-size: 11px; color: #666;">צבע רקע</label>
+                            <input type="color" name="featured_sections[<?php echo $index; ?>][bg_color]" value="<?php echo esc_attr($section['bg_color'] ?? '#f5f5f5'); ?>" style="width: 100%; height: 32px; padding: 2px;">
+                        </div>
+                        
+                        <!-- Remove -->
+                        <button type="button" onclick="removeMegaMenuItem(this)" class="button" style="color: red; flex-shrink: 0;">✕</button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <button type="button" onclick="addFeaturedSection()" class="button" style="margin-top: 10px;">➕ הוסף סקציה</button>
+                
+                <div style="margin-top: 25px; padding-top: 15px; border-top: 2px solid #ddd;">
+                    <button type="submit" name="save_mega_menu" class="button button-primary button-large">💾 שמור מגה מניו</button>
+                </div>
+            </form>
+        </div>
+        
+        <script>
+        var livingSpaceIndex = <?php echo count($living_spaces); ?>;
+        var featuredSectionIndex = <?php echo count($featured_sections); ?>;
+        
+        function selectMegaMenuIcon(previewEl, type, index) {
+            var frame = wp.media({
+                title: 'בחר אייקון',
+                button: { text: 'בחר' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+            
+            frame.on('select', function() {
+                var attachment = frame.state().get('selection').first().toJSON();
+                var container = previewEl.closest('.menu-item');
+                container.querySelector('.icon-id-input').value = attachment.id;
+                container.querySelector('.icon-url-input').value = attachment.url;
+                previewEl.innerHTML = '<img src="' + attachment.url + '" style="width: 100%; height: 100%; object-fit: contain;">';
+            });
+            
+            frame.open();
+        }
+        
+        function selectMegaMenuImage(previewEl, index) {
+            var frame = wp.media({
+                title: 'בחר תמונה',
+                button: { text: 'בחר' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+            
+            frame.on('select', function() {
+                var attachment = frame.state().get('selection').first().toJSON();
+                var container = previewEl.closest('.featured-item');
+                container.querySelector('.image-id-input').value = attachment.id;
+                container.querySelector('.image-url-input').value = attachment.url;
+                previewEl.innerHTML = '<img src="' + attachment.url + '" style="width: 100%; height: 100%; object-fit: cover;">';
+            });
+            
+            frame.open();
+        }
+        
+        function addLivingSpaceItem() {
+            var container = document.getElementById('living-spaces-list');
+            var html = `
+                <div class="menu-item" style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                    <span class="handle" style="cursor: grab; color: #999; padding-top: 8px;">☰</span>
+                    <div class="icon-preview" style="width: 50px; height: 50px; background: #e8f0e6; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; flex-shrink: 0;" onclick="selectMegaMenuIcon(this, 'living_spaces', ${livingSpaceIndex})">
+                        <span style="color: #999; font-size: 20px;">🖼️</span>
+                    </div>
+                    <input type="hidden" name="living_spaces[${livingSpaceIndex}][icon_id]" class="icon-id-input" value="">
+                    <input type="hidden" name="living_spaces[${livingSpaceIndex}][icon_url]" class="icon-url-input" value="">
+                    <div style="width: 150px;">
+                        <label style="font-size: 11px; color: #666;">שם</label>
+                        <input type="text" name="living_spaces[${livingSpaceIndex}][name]" value="" style="width: 100%;" placeholder="שם הקטגוריה">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="font-size: 11px; color: #666;">תיאור</label>
+                        <input type="text" name="living_spaces[${livingSpaceIndex}][description]" value="" style="width: 100%;" placeholder="תיאור קצר">
+                    </div>
+                    <div style="width: 200px;">
+                        <label style="font-size: 11px; color: #666;">קישור</label>
+                        <input type="text" name="living_spaces[${livingSpaceIndex}][link]" value="" style="width: 100%;" placeholder="/product-tag/slug">
+                    </div>
+                    <button type="button" onclick="removeMegaMenuItem(this)" class="button" style="color: red; flex-shrink: 0;">✕</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            livingSpaceIndex++;
+        }
+        
+        function addFeaturedSection() {
+            var container = document.getElementById('featured-sections-list');
+            var html = `
+                <div class="featured-item" style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; background: #fff9e6; border-radius: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                    <div class="image-preview" style="width: 80px; height: 60px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; flex-shrink: 0;" onclick="selectMegaMenuImage(this, ${featuredSectionIndex})">
+                        <span style="color: #999; font-size: 20px;">🖼️</span>
+                    </div>
+                    <input type="hidden" name="featured_sections[${featuredSectionIndex}][image_id]" class="image-id-input" value="">
+                    <input type="hidden" name="featured_sections[${featuredSectionIndex}][image_url]" class="image-url-input" value="">
+                    <div style="width: 150px;">
+                        <label style="font-size: 11px; color: #666;">כותרת</label>
+                        <input type="text" name="featured_sections[${featuredSectionIndex}][title]" value="" style="width: 100%;" placeholder="כותרת">
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="font-size: 11px; color: #666;">קישור</label>
+                        <input type="text" name="featured_sections[${featuredSectionIndex}][link]" value="" style="width: 100%;" placeholder="/category/sale">
+                    </div>
+                    <div style="width: 100px;">
+                        <label style="font-size: 11px; color: #666;">צבע רקע</label>
+                        <input type="color" name="featured_sections[${featuredSectionIndex}][bg_color]" value="#f5f5f5" style="width: 100%; height: 32px; padding: 2px;">
+                    </div>
+                    <button type="button" onclick="removeMegaMenuItem(this)" class="button" style="color: red; flex-shrink: 0;">✕</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            featuredSectionIndex++;
+        }
+        
+        function removeMegaMenuItem(btn) {
+            if (confirm('האם אתה בטוח?')) {
+                btn.closest('.menu-item, .featured-item').remove();
+            }
+        }
+        </script>
+        <?php
+    }
+
+    /**
+     * Render Navigation Tab - Header Menu
+     */
+    public function render_navigation_tab() {
+        // Handle save
+        if (isset($_POST['save_navigation']) && check_admin_referer('bellano_navigation')) {
+            $nav_items = [];
+            if (isset($_POST['nav_items']) && is_array($_POST['nav_items'])) {
+                foreach ($_POST['nav_items'] as $item) {
+                    if (!empty($item['name'])) {
+                        $nav_items[] = [
+                            'name' => sanitize_text_field($item['name']),
+                            'link' => sanitize_text_field($item['link']),
+                            'highlight' => isset($item['highlight']) ? true : false,
+                            'has_mega_menu' => isset($item['has_mega_menu']) ? true : false,
+                        ];
+                    }
+                }
+            }
+            update_option('bellano_navigation', $nav_items);
+            echo '<div class="notice notice-success"><p>✅ התפריט נשמר בהצלחה!</p></div>';
+        }
+        
+        $saved_nav = get_option('bellano_navigation', []);
+        if (empty($saved_nav)) {
+            // Default navigation items
+            $saved_nav = [
+                ['name' => 'בית', 'link' => '/', 'highlight' => false, 'has_mega_menu' => false],
+                ['name' => 'NALLA SALE', 'link' => '/category/sale', 'highlight' => true, 'has_mega_menu' => false],
+                ['name' => 'חללי מגורים', 'link' => '#', 'highlight' => false, 'has_mega_menu' => true],
+                ['name' => 'SHOWROOM', 'link' => '/showroom', 'highlight' => false, 'has_mega_menu' => false],
+                ['name' => 'בלוג', 'link' => '/blog', 'highlight' => false, 'has_mega_menu' => false],
+                ['name' => 'יצירת קשר', 'link' => '/contact', 'highlight' => false, 'has_mega_menu' => false],
+                ['name' => 'צביעה בתנור', 'link' => '/tambour-color', 'highlight' => false, 'has_mega_menu' => false],
+            ];
+        }
+        ?>
+        <div class="bellano-card">
+            <h2>🧭 תפריט ראשי - Header</h2>
+            <p class="description">הגדר את פריטי התפריט שיופיעו בהדר האתר</p>
+            
+            <form method="post">
+                <?php wp_nonce_field('bellano_navigation'); ?>
+                
+                <div id="nav-items-list" style="margin-top: 20px;">
+                    <?php foreach ($saved_nav as $index => $item): ?>
+                    <div class="nav-item" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px;">
+                        <span class="handle" style="cursor: grab; color: #999;">☰</span>
+                        
+                        <!-- Name -->
+                        <div style="width: 150px;">
+                            <label style="font-size: 11px; color: #666;">שם</label>
+                            <input type="text" name="nav_items[<?php echo $index; ?>][name]" value="<?php echo esc_attr($item['name']); ?>" style="width: 100%;" placeholder="שם הקישור">
+                        </div>
+                        
+                        <!-- Link -->
+                        <div style="flex: 1;">
+                            <label style="font-size: 11px; color: #666;">קישור</label>
+                            <input type="text" name="nav_items[<?php echo $index; ?>][link]" value="<?php echo esc_attr($item['link']); ?>" style="width: 100%;" placeholder="/page">
+                        </div>
+                        
+                        <!-- Highlight -->
+                        <div style="text-align: center;">
+                            <label style="font-size: 11px; color: #666; display: block;">מודגש</label>
+                            <input type="checkbox" name="nav_items[<?php echo $index; ?>][highlight]" <?php checked($item['highlight'] ?? false); ?>>
+                        </div>
+                        
+                        <!-- Has Mega Menu -->
+                        <div style="text-align: center;">
+                            <label style="font-size: 11px; color: #666; display: block;">מגה מניו</label>
+                            <input type="checkbox" name="nav_items[<?php echo $index; ?>][has_mega_menu]" <?php checked($item['has_mega_menu'] ?? false); ?>>
+                        </div>
+                        
+                        <!-- Remove -->
+                        <button type="button" onclick="removeNavItem(this)" class="button" style="color: red;">✕</button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <button type="button" onclick="addNavItem()" class="button" style="margin-top: 10px;">➕ הוסף פריט</button>
+                
+                <div style="margin-top: 20px;">
+                    <button type="submit" name="save_navigation" class="button button-primary">💾 שמור תפריט</button>
+                </div>
+            </form>
+        </div>
+        
+        <script>
+        var navItemIndex = <?php echo count($saved_nav); ?>;
+        
+        function addNavItem() {
+            var container = document.getElementById('nav-items-list');
+            var html = `
+                <div class="nav-item" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px;">
+                    <span class="handle" style="cursor: grab; color: #999;">☰</span>
+                    <div style="width: 150px;">
+                        <label style="font-size: 11px; color: #666;">שם</label>
+                        <input type="text" name="nav_items[${navItemIndex}][name]" value="" style="width: 100%;" placeholder="שם הקישור">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: #666;">קישור</label>
+                        <input type="text" name="nav_items[${navItemIndex}][link]" value="" style="width: 100%;" placeholder="/page">
+                    </div>
+                    <div style="text-align: center;">
+                        <label style="font-size: 11px; color: #666; display: block;">מודגש</label>
+                        <input type="checkbox" name="nav_items[${navItemIndex}][highlight]">
+                    </div>
+                    <div style="text-align: center;">
+                        <label style="font-size: 11px; color: #666; display: block;">מגה מניו</label>
+                        <input type="checkbox" name="nav_items[${navItemIndex}][has_mega_menu]">
+                    </div>
+                    <button type="button" onclick="removeNavItem(this)" class="button" style="color: red;">✕</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            navItemIndex++;
+        }
+        
+        function removeNavItem(btn) {
+            if (confirm('האם אתה בטוח?')) {
+                btn.closest('.nav-item').remove();
+            }
+        }
+        </script>
+        <?php
+    }
+
+    /**
+     * Render Footer Tab
+     */
+    public function render_footer_tab() {
+        // Handle save
+        if (isset($_POST['save_footer']) && check_admin_referer('bellano_footer')) {
+            $footer = [];
+            
+            // Contact info
+            $footer['contact'] = [
+                'phone' => sanitize_text_field($_POST['phone'] ?? ''),
+                'address' => sanitize_text_field($_POST['address'] ?? ''),
+                'facebook' => esc_url_raw($_POST['facebook'] ?? ''),
+                'instagram' => esc_url_raw($_POST['instagram'] ?? ''),
+            ];
+            
+            // Hours
+            $footer['hours'] = [
+                'showroom_title' => sanitize_text_field($_POST['showroom_title'] ?? ''),
+                'showroom_weekdays' => sanitize_text_field($_POST['showroom_weekdays'] ?? ''),
+                'showroom_friday' => sanitize_text_field($_POST['showroom_friday'] ?? ''),
+                'service_title' => sanitize_text_field($_POST['service_title'] ?? ''),
+                'service_hours' => sanitize_text_field($_POST['service_hours'] ?? ''),
+            ];
+            
+            // Links Column 1
+            if (isset($_POST['links_col1']) && is_array($_POST['links_col1'])) {
+                foreach ($_POST['links_col1'] as $link) {
+                    if (!empty($link['name'])) {
+                        $footer['links_col1'][] = [
+                            'name' => sanitize_text_field($link['name']),
+                            'href' => sanitize_text_field($link['href']),
+                        ];
+                    }
+                }
+            }
+            
+            // Links Column 2
+            if (isset($_POST['links_col2']) && is_array($_POST['links_col2'])) {
+                foreach ($_POST['links_col2'] as $link) {
+                    if (!empty($link['name'])) {
+                        $footer['links_col2'][] = [
+                            'name' => sanitize_text_field($link['name']),
+                            'href' => sanitize_text_field($link['href']),
+                        ];
+                    }
+                }
+            }
+            
+            update_option('bellano_footer', $footer);
+            echo '<div class="notice notice-success"><p>✅ הפוטר נשמר בהצלחה!</p></div>';
+        }
+        
+        $saved_footer = get_option('bellano_footer', []);
+        $contact = $saved_footer['contact'] ?? [
+            'phone' => '03-3732350',
+            'address' => 'אברהם בומה שביט 1 ראשון לציון, מחסן F-101',
+            'facebook' => 'https://facebook.com/nalla',
+            'instagram' => 'https://instagram.com/nalla',
+        ];
+        $hours = $saved_footer['hours'] ?? [
+            'showroom_title' => 'Show-room ומוקד מכירות',
+            'showroom_weekdays' => 'ימים א-ה: 10:00 - 20:00',
+            'showroom_friday' => 'שישי: 10:00 - 14:00',
+            'service_title' => 'שירות לקוחות',
+            'service_hours' => 'ימים א-ה: 10:00 - 16:00',
+        ];
+        $links_col1 = $saved_footer['links_col1'] ?? [
+            ['name' => 'אודות', 'href' => '/about'],
+            ['name' => 'אחריות המוצרים', 'href' => '/page/warranty'],
+            ['name' => 'בלוג', 'href' => '/blog'],
+            ['name' => 'יצירת קשר', 'href' => '/contact'],
+        ];
+        $links_col2 = $saved_footer['links_col2'] ?? [
+            ['name' => 'תקנון האתר', 'href' => '/page/terms'],
+            ['name' => 'תקנון משלוחים', 'href' => '/page/shipping'],
+            ['name' => 'הצהרת נגישות', 'href' => '/accessibility'],
+            ['name' => 'מדיניות פרטיות', 'href' => '/page/privacy-policy'],
+        ];
+        ?>
+        <div class="bellano-card">
+            <h2>📝 הגדרות פוטר</h2>
+            <p class="description">הגדר את פרטי הקשר, שעות הפעילות והקישורים בפוטר</p>
+            
+            <form method="post">
+                <?php wp_nonce_field('bellano_footer'); ?>
+                
+                <h3 style="margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">📞 פרטי קשר</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                    <div>
+                        <label style="font-size: 12px; color: #666;">טלפון</label>
+                        <input type="text" name="phone" value="<?php echo esc_attr($contact['phone']); ?>" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">כתובת</label>
+                        <input type="text" name="address" value="<?php echo esc_attr($contact['address']); ?>" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">Facebook URL</label>
+                        <input type="url" name="facebook" value="<?php echo esc_attr($contact['facebook']); ?>" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">Instagram URL</label>
+                        <input type="url" name="instagram" value="<?php echo esc_attr($contact['instagram']); ?>" style="width: 100%;">
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">🕐 שעות פעילות</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                    <div>
+                        <label style="font-size: 12px; color: #666;">כותרת שואורום</label>
+                        <input type="text" name="showroom_title" value="<?php echo esc_attr($hours['showroom_title']); ?>" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">כותרת שירות לקוחות</label>
+                        <input type="text" name="service_title" value="<?php echo esc_attr($hours['service_title']); ?>" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">שואורום - ימים א-ה</label>
+                        <input type="text" name="showroom_weekdays" value="<?php echo esc_attr($hours['showroom_weekdays']); ?>" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">שירות לקוחות - שעות</label>
+                        <input type="text" name="service_hours" value="<?php echo esc_attr($hours['service_hours']); ?>" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #666;">שואורום - שישי</label>
+                        <input type="text" name="showroom_friday" value="<?php echo esc_attr($hours['showroom_friday']); ?>" style="width: 100%;">
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">🔗 קישורים - עמודה 1</h3>
+                <div id="links-col1-list" style="margin-top: 15px;">
+                    <?php foreach ($links_col1 as $index => $link): ?>
+                    <div class="link-item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <input type="text" name="links_col1[<?php echo $index; ?>][name]" value="<?php echo esc_attr($link['name']); ?>" style="width: 150px;" placeholder="שם">
+                        <input type="text" name="links_col1[<?php echo $index; ?>][href]" value="<?php echo esc_attr($link['href']); ?>" style="flex: 1;" placeholder="/page">
+                        <button type="button" onclick="this.closest('.link-item').remove()" class="button" style="color: red;">✕</button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" onclick="addLinkCol1()" class="button" style="margin-top: 5px;">➕ הוסף קישור</button>
+                
+                <h3 style="margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">🔗 קישורים - עמודה 2</h3>
+                <div id="links-col2-list" style="margin-top: 15px;">
+                    <?php foreach ($links_col2 as $index => $link): ?>
+                    <div class="link-item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <input type="text" name="links_col2[<?php echo $index; ?>][name]" value="<?php echo esc_attr($link['name']); ?>" style="width: 150px;" placeholder="שם">
+                        <input type="text" name="links_col2[<?php echo $index; ?>][href]" value="<?php echo esc_attr($link['href']); ?>" style="flex: 1;" placeholder="/page">
+                        <button type="button" onclick="this.closest('.link-item').remove()" class="button" style="color: red;">✕</button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" onclick="addLinkCol2()" class="button" style="margin-top: 5px;">➕ הוסף קישור</button>
+                
+                <div style="margin-top: 25px; padding-top: 15px; border-top: 2px solid #ddd;">
+                    <button type="submit" name="save_footer" class="button button-primary button-large">💾 שמור פוטר</button>
+                </div>
+            </form>
+        </div>
+        
+        <script>
+        var linkCol1Index = <?php echo count($links_col1); ?>;
+        var linkCol2Index = <?php echo count($links_col2); ?>;
+        
+        function addLinkCol1() {
+            var container = document.getElementById('links-col1-list');
+            var html = `
+                <div class="link-item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <input type="text" name="links_col1[${linkCol1Index}][name]" value="" style="width: 150px;" placeholder="שם">
+                    <input type="text" name="links_col1[${linkCol1Index}][href]" value="" style="flex: 1;" placeholder="/page">
+                    <button type="button" onclick="this.closest('.link-item').remove()" class="button" style="color: red;">✕</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            linkCol1Index++;
+        }
+        
+        function addLinkCol2() {
+            var container = document.getElementById('links-col2-list');
+            var html = `
+                <div class="link-item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <input type="text" name="links_col2[${linkCol2Index}][name]" value="" style="width: 150px;" placeholder="שם">
+                    <input type="text" name="links_col2[${linkCol2Index}][href]" value="" style="flex: 1;" placeholder="/page">
+                    <button type="button" onclick="this.closest('.link-item').remove()" class="button" style="color: red;">✕</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            linkCol2Index++;
+        }
+        </script>
+        <?php
+    }
+    
+    /**
+     * Render Announcements Tab
+     */
+    public function render_announcements_tab() {
+        // Handle save
+        if (isset($_POST['save_announcements'])) {
+            check_admin_referer('bellano_announcements_nonce');
+            
+            $announcements = array();
+            if (isset($_POST['announcements']) && is_array($_POST['announcements'])) {
+                foreach ($_POST['announcements'] as $item) {
+                    if (!empty($item['text'])) {
+                        $announcements[] = array(
+                            'text' => sanitize_text_field($item['text']),
+                            'link' => sanitize_text_field($item['link'] ?? ''),
+                            'bg_color' => sanitize_hex_color($item['bg_color'] ?? '#e1eadf'),
+                            'text_color' => sanitize_hex_color($item['text_color'] ?? '#4a7c59'),
+                        );
+                    }
+                }
+            }
+            
+            $settings = array(
+                'enabled' => isset($_POST['enabled']) ? true : false,
+                'interval' => absint($_POST['interval'] ?? 5000),
+                'announcements' => $announcements,
+            );
+            
+            update_option('bellano_announcements', $settings);
+            echo '<div class="notice notice-success"><p>✅ ההודעות נשמרו בהצלחה!</p></div>';
+        }
+        
+        // Get saved settings
+        $settings = get_option('bellano_announcements', array(
+            'enabled' => true,
+            'interval' => 5000,
+            'announcements' => array(
+                array(
+                    'text' => 'מגוון מוצרים בהנחות ענק בקטגוריית NALLA SALE בין 20% ל-50% הנחה!',
+                    'link' => '/category/nalla-sale',
+                    'bg_color' => '#e1eadf',
+                    'text_color' => '#4a7c59',
+                ),
+            ),
+        ));
+        
+        $enabled = $settings['enabled'] ?? true;
+        $interval = $settings['interval'] ?? 5000;
+        $announcements = $settings['announcements'] ?? array();
+        
+        if (empty($announcements)) {
+            $announcements = array(
+                array('text' => '', 'link' => '', 'bg_color' => '#e1eadf', 'text_color' => '#4a7c59')
+            );
+        }
+        ?>
+        <div class="bellano-card">
+            <h2>📢 הודעות עליונות</h2>
+            <p class="description">הגדירו הודעות שיופיעו בחלק העליון של האתר. ניתן להוסיף מספר הודעות שיתחלפו אוטומטית.</p>
+            
+            <form method="post">
+                <?php wp_nonce_field('bellano_announcements_nonce'); ?>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="enabled" <?php checked($enabled); ?>>
+                        <strong>הפעל הודעות עליונות</strong>
+                    </label>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px;"><strong>⏱️ זמן בין הודעות (מילישניות)</strong></label>
+                    <input type="number" name="interval" value="<?php echo esc_attr($interval); ?>" min="1000" step="500" style="width: 120px;">
+                    <span style="color: #666; margin-right: 10px;">(5000 = 5 שניות)</span>
+                </div>
+                
+                <h3 style="margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">📝 רשימת הודעות</h3>
+                <div id="announcements-list" style="margin-top: 15px;">
+                    <?php foreach ($announcements as $index => $announcement): ?>
+                    <div class="announcement-item" style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="cursor: move; font-size: 18px;">⋮⋮</span>
+                            <strong>הודעה <?php echo $index + 1; ?></strong>
+                            <button type="button" onclick="this.closest('.announcement-item').remove()" class="button" style="color: red; margin-right: auto;">🗑️ מחק</button>
+                        </div>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 5px;">טקסט ההודעה</label>
+                            <input type="text" name="announcements[<?php echo $index; ?>][text]" value="<?php echo esc_attr($announcement['text']); ?>" style="width: 100%;" placeholder="הקלד את ההודעה כאן...">
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px;">
+                            <div style="flex: 1;">
+                                <label style="display: block; margin-bottom: 5px;">קישור (אופציונלי)</label>
+                                <input type="text" name="announcements[<?php echo $index; ?>][link]" value="<?php echo esc_attr($announcement['link'] ?? ''); ?>" placeholder="/category/sale">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px;">צבע רקע</label>
+                                <input type="color" name="announcements[<?php echo $index; ?>][bg_color]" value="<?php echo esc_attr($announcement['bg_color'] ?? '#e1eadf'); ?>">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px;">צבע טקסט</label>
+                                <input type="color" name="announcements[<?php echo $index; ?>][text_color]" value="<?php echo esc_attr($announcement['text_color'] ?? '#4a7c59'); ?>">
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <button type="button" onclick="addAnnouncement()" class="button" style="margin-top: 10px;">➕ הוסף הודעה</button>
+                
+                <div style="margin-top: 25px; padding-top: 15px; border-top: 2px solid #ddd;">
+                    <button type="submit" name="save_announcements" class="button button-primary button-large">💾 שמור הודעות</button>
+                </div>
+            </form>
+        </div>
+        
+        <script>
+        var announcementIndex = <?php echo count($announcements); ?>;
+        
+        function addAnnouncement() {
+            var container = document.getElementById('announcements-list');
+            var html = `
+                <div class="announcement-item" style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <span style="cursor: move; font-size: 18px;">⋮⋮</span>
+                        <strong>הודעה חדשה</strong>
+                        <button type="button" onclick="this.closest('.announcement-item').remove()" class="button" style="color: red; margin-right: auto;">🗑️ מחק</button>
+                    </div>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px;">טקסט ההודעה</label>
+                        <input type="text" name="announcements[${announcementIndex}][text]" value="" style="width: 100%;" placeholder="הקלד את ההודעה כאן...">
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px;">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 5px;">קישור (אופציונלי)</label>
+                            <input type="text" name="announcements[${announcementIndex}][link]" value="" placeholder="/category/sale">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px;">צבע רקע</label>
+                            <input type="color" name="announcements[${announcementIndex}][bg_color]" value="#e1eadf">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px;">צבע טקסט</label>
+                            <input type="color" name="announcements[${announcementIndex}][text_color]" value="#4a7c59">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            announcementIndex++;
         }
         </script>
         <?php

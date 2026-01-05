@@ -279,7 +279,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div ref={cardRef} className="group">
       {/* Image Container */}
-      <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden mb-3">
+      <div className="relative aspect-square bg-[#f5f5f0] rounded-[20px] rounded-tl-none overflow-hidden mb-3">
         {/* Clickable overlay with loading state */}
         <button
           onClick={handleNavigate}
@@ -317,45 +317,42 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
 
-        {/* Discount Badge - Left side */}
+        {/* Sale Badge - Top Right */}
         {hasDiscount && discountPercentage > 0 && (
-          <Badge className="absolute top-3 left-3 bg-red-500 hover:bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium" aria-label={`הנחה של ${discountPercentage} אחוז`}>
-            {discountPercentage}%-
-          </Badge>
+          <div className="absolute top-3 right-3">
+            <span className="bg-[#e1eadf] text-[#4a7c59] text-xs font-english tracking-wider px-3 py-1.5 rounded-full">
+              {discountPercentage}%- OFF
+            </span>
+          </div>
         )}
 
-        {/* Availability Badge - Right side */}
-        <span 
-          className={`absolute top-3 right-3 text-xs font-medium px-2 py-1 rounded-full ${
-            product.availabilityType === 'custom_order' 
-              ? 'bg-amber-100 text-amber-700' 
-              : 'bg-green-100 text-green-700'
-          }`}
-        >
-          {product.availabilityType === 'custom_order' ? 'בהזמנה אישית' : 'במלאי'}
-        </span>
+        {/* Bottom Left Corner Cover */}
+        <div className="absolute bottom-0 left-0 w-[72px] h-[72px] z-10">
+          <Image
+            src="/images/bg-1.png"
+            alt=""
+            width={72}
+            height={72}
+            className="w-full h-full"
+          />
+        </div>
 
-        {/* Wishlist Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute bottom-3 left-3 bg-transparent hover:bg-transparent p-0 z-20"
+        {/* Wishlist Heart - bottom left corner */}
+        <button
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             toggleItem(wishlistItem);
           }}
+          className="absolute bottom-1.5 left-1.5 w-9 h-9 rounded-full flex items-center justify-center hover:scale-110 transition-transform z-20 cursor-pointer"
+          style={{ backgroundColor: '#D7CEBF' }}
           aria-label={isWishlisted ? `הסר ${product.name} מהמועדפים` : `הוסף ${product.name} למועדפים`}
           aria-pressed={isWishlisted}
         >
           <Heart 
-            className={`h-6 w-6 transition-colors ${
-              isWishlisted 
-                ? 'fill-red-500 text-red-500' 
-                : 'text-gray-400 hover:text-gray-600'
-            }`} 
+            className={`w-4 h-4 ${isWishlisted ? 'text-red-500 fill-red-500' : 'text-white'}`} 
           />
-        </Button>
+        </button>
       </div>
 
       {/* Product Info */}

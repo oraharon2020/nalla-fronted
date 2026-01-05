@@ -6,9 +6,10 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 interface ExpandableDescriptionProps {
   description: string;
   maxLines?: number;
+  className?: string;
 }
 
-export function ExpandableDescription({ description, maxLines = 2 }: ExpandableDescriptionProps) {
+export function ExpandableDescription({ description, maxLines = 2, className }: ExpandableDescriptionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [needsTruncation, setNeedsTruncation] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -33,20 +34,29 @@ export function ExpandableDescription({ description, maxLines = 2 }: ExpandableD
   }
 
   return (
-    <div className="mb-4">
-      <div 
-        ref={contentRef}
-        className={`text-muted-foreground text-sm overflow-hidden transition-all duration-300 ${
-          isExpanded ? '' : 'line-clamp-2'
-        }`}
-        style={{ 
-          maxHeight: isExpanded ? '500px' : `${maxLines * 1.5}em`,
-        }}
-      >
+    <div className={className}>
+      <div className="relative">
         <div 
-          className="prose prose-sm max-w-none prose-p:my-1 prose-p:leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: cleanDescription }}
-        />
+          ref={contentRef}
+          className="overflow-hidden transition-all duration-300"
+          style={{ 
+            maxHeight: isExpanded ? '500px' : `${maxLines * 1.5}em`,
+          }}
+        >
+          <div 
+            className="prose prose-sm max-w-none prose-p:my-1 prose-p:leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: cleanDescription }}
+          />
+        </div>
+        {/* Fade effect when truncated */}
+        {needsTruncation && !isExpanded && (
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to bottom, transparent, rgb(245 245 245))'
+            }}
+          />
+        )}
       </div>
       
       {/* Toggle button - only show if content is truncated */}

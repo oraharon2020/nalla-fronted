@@ -46,7 +46,7 @@ export default async function CategoriesPage() {
           {mainCategories.map((category) => (
             <Link 
               key={category.id} 
-              href={`/category/${category.slug}`}
+              href={`/product-category/${category.slug}`}
               className="group block"
             >
               {/* Card Container */}

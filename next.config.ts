@@ -16,10 +16,10 @@ const nextConfig: NextConfig = {
         destination: 'https://nalla.co.il/wp-login.php',
         permanent: false,
       },
-      // Category pages: /product-category/X → /category/X
+      // Old category URLs redirect to new product-category URLs
       {
-        source: '/product-category/:slug*',
-        destination: '/category/:slug*',
+        source: '/category/:slug*',
+        destination: '/product-category/:slug*',
         permanent: true,
       },
       // Shop page
@@ -116,23 +116,14 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Rewrites - clean URLs that load from /page/[slug]
+  // Rewrites - for special cases only
+  // Most WordPress pages are now handled automatically by /[...slug]/page.tsx
   async rewrites() {
     return [
-      // About page - /about loads content from /page/about-us
+      // About page - /about loads WordPress page with slug 'about-us'
       {
         source: '/about',
-        destination: '/page/about-us',
-      },
-      // Privacy policy
-      {
-        source: '/privacy-policy',
-        destination: '/page/privacy-policy',
-      },
-      // Terms
-      {
-        source: '/terms',
-        destination: '/page/privacy-policy',
+        destination: '/about-us',
       },
     ];
   },

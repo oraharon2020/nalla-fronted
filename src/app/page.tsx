@@ -221,10 +221,9 @@ async function CategoriesSection() {
   
   // Fallback: get from WooCommerce
   if (categories.length === 0) {
-    const wooCategories = await getCategories({ per_page: 8, hide_empty: true });
+    const wooCategories = await getCategories({ per_page: 20, hide_empty: true });
     categories = wooCategories
       .filter((cat: { parent: number }) => cat.parent === 0)
-      .slice(0, 8)
       .map(transformCategory) as CategoryItem[];
   }
 
@@ -251,10 +250,10 @@ async function CategoriesSection() {
 
         {/* Categories Grid - 2 cols mobile, 4 cols desktop */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-          {categories.slice(0, 8).map((category, index) => (
+          {categories.map((category, index) => (
             <Link
               key={category.id}
-              href={`/category/${category.slug}`}
+              href={`/product-category/${category.slug}`}
               className="group"
             >
               {/* Card Container */}
@@ -382,7 +381,7 @@ function ShowroomSection() {
             playsInline
             className="w-full h-full object-cover"
           >
-            <source src="https://nalla.co.il/wp-content/uploads/2025/09/nalla-showroom.mp4" type="video/mp4" />
+            <source src="/videos/nalla-showroom.mp4" type="video/mp4" />
           </video>
         </div>
       </div>

@@ -180,7 +180,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <BreadcrumbJsonLd
           items={[
             { name: 'דף הבית', url: SITE_URL },
-            ...(categorySlug ? [{ name: categoryName, url: `${SITE_URL}/category/${categorySlug}` }] : []),
+            ...(categorySlug ? [{ name: categoryName, url: `${SITE_URL}/product-category/${categorySlug}` }] : []),
             { name: product.name, url: `${SITE_URL}/product/${slug}` },
           ]}
         />

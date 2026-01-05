@@ -133,15 +133,15 @@ export const siteConfig = {
   ogImage: '/images/nalla-logo.png',
   
   // Analytics & Tracking
-  // TODO: לעדכן עם קודי Analytics של נלה!
   analytics: {
-    googleTagManager: '', // TODO: להוסיף GTM של נלה
-    googleAds: '', // TODO: להוסיף Google Ads של נלה
-    googleAdsConversionLabel: '', // TODO: Purchase conversion
-    googleAdsAddToCartLabel: '', // TODO: Add to cart conversion
+    googleTagManager: '', // אין GTM, משתמשים ב-gtag ישירות
+    googleAds: 'AW-11152128573', // Google Ads conversion tracking
+    googleAdsConversionLabel: '', // TODO: Purchase conversion label
+    googleAdsAddToCartLabel: '', // TODO: Add to cart conversion label
     googleVerification: '', // TODO: Google Search Console verification
-    facebookPixel: '', // TODO: להוסיף Facebook Pixel של נלה
+    facebookPixel: '', // אין פיקסל פייסבוק פעיל כרגע
     facebookDomainVerification: '', // TODO: Facebook domain verification
+    upixelKey: '3l2j8016q1r00000000000000gepgp', // Upixel tracking
   },
   
   // Business Info (for JSON-LD)

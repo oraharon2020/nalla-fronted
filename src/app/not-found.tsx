@@ -30,16 +30,16 @@ export default function NotFound() {
         <div className="mt-12 pt-8 border-t border-gray-200">
           <p className="text-sm text-gray-500 mb-4">אולי תמצאו מה שחיפשתם כאן:</p>
           <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <Link href="/category/living-room-sideboards" className="text-gray-600 hover:text-black">
+            <Link href="/product-category/living-room-sideboards" className="text-gray-600 hover:text-black">
               מזנונים
             </Link>
-            <Link href="/category/living-room-tables" className="text-gray-600 hover:text-black">
+            <Link href="/product-category/living-room-tables" className="text-gray-600 hover:text-black">
               שולחנות סלון
             </Link>
-            <Link href="/category/designed-armchairs" className="text-gray-600 hover:text-black">
+            <Link href="/product-category/designed-armchairs" className="text-gray-600 hover:text-black">
               כורסאות
             </Link>
-            <Link href="/category/beds" className="text-gray-600 hover:text-black">
+            <Link href="/product-category/beds" className="text-gray-600 hover:text-black">
               מיטות
             </Link>
             <Link href="/contact" className="text-gray-600 hover:text-black">

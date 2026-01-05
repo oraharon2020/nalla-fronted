@@ -99,6 +99,47 @@ class Bellano_REST_API {
             'permission_callback' => '__return_true'
         ]);
         
+        // Mega Menu routes
+        register_rest_route('bellano/v1', '/menus', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_menu_locations'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        register_rest_route('bellano/v1', '/menu/(?P<location>[a-zA-Z0-9_-]+)', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_menu_by_location'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        // Mega Menu from settings
+        register_rest_route('bellano/v1', '/mega-menu', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_mega_menu'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        // Navigation menu
+        register_rest_route('bellano/v1', '/navigation', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_navigation'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        // Footer settings
+        register_rest_route('bellano/v1', '/footer', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_footer'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        // Top announcements bar
+        register_rest_route('bellano/v1', '/announcements', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_announcements'],
+            'permission_callback' => '__return_true'
+        ]);
+        
         // Admin upgrades
         register_rest_route('bellano/v1', '/admin-upgrades', [
             'methods' => 'GET',
@@ -816,5 +857,185 @@ class Bellano_REST_API {
         }
         
         return $data;
+    }
+    
+    /**
+     * Get all menu locations
+     */
+    public function get_menu_locations() {
+        $locations = get_nav_menu_locations();
+        $menus = [];
+        
+        foreach ($locations as $location => $menu_id) {
+            $menu = wp_get_nav_menu_object($menu_id);
+            if ($menu) {
+                $menus[$location] = [
+                    'id' => $menu_id,
+                    'name' => $menu->name,
+                    'slug' => $menu->slug,
+                ];
+            }
+        }
+        
+        // Also list all available menus (not just assigned to locations)
+        $all_menus = wp_get_nav_menus();
+        $available = [];
+        foreach ($all_menus as $menu) {
+            $available[] = [
+                'id' => $menu->term_id,
+                'name' => $menu->name,
+                'slug' => $menu->slug,
+            ];
+        }
+        
+        return rest_ensure_response([
+            'locations' => $menus,
+            'available' => $available,
+        ]);
+    }
+    
+    /**
+     * Get menu by location or slug
+     */
+    public function get_menu_by_location($request) {
+        $location = $request['location'];
+        $locations = get_nav_menu_locations();
+        
+        $menu_id = null;
+        
+        // First try to find by location
+        if (isset($locations[$location])) {
+            $menu_id = $locations[$location];
+        } else {
+            // Try to find by menu slug or name
+            $menu = wp_get_nav_menu_object($location);
+            if ($menu) {
+                $menu_id = $menu->term_id;
+            }
+        }
+        
+        if (!$menu_id) {
+            return new WP_Error('menu_not_found', 'תפריט לא נמצא', ['status' => 404]);
+        }
+        
+        $menu_items = wp_get_nav_menu_items($menu_id);
+        
+        if (empty($menu_items)) {
+            return rest_ensure_response(['items' => [], 'featured' => []]);
+        }
+        
+        $items = [];
+        $children_map = [];
+        
+        // First pass: organize items by parent
+        foreach ($menu_items as $item) {
+            $menu_item = $this->format_menu_item($item);
+            
+            if ($item->menu_item_parent == 0) {
+                $items[$item->ID] = $menu_item;
+            } else {
+                if (!isset($children_map[$item->menu_item_parent])) {
+                    $children_map[$item->menu_item_parent] = [];
+                }
+                $children_map[$item->menu_item_parent][] = $menu_item;
+            }
+        }
+        
+        // Second pass: attach children to parents
+        foreach ($items as $id => &$item) {
+            if (isset($children_map[$id])) {
+                $item['children'] = $children_map[$id];
+            }
+        }
+        
+        // Separate regular items from featured items
+        $regular_items = [];
+        $featured_items = [];
+        
+        foreach (array_values($items) as $item) {
+            if ($item['featured']) {
+                $featured_items[] = $item;
+            } else {
+                $regular_items[] = $item;
+            }
+        }
+        
+        return rest_ensure_response([
+            'items' => $regular_items,
+            'featured' => $featured_items,
+        ]);
+    }
+    
+    /**
+     * Format a single menu item
+     */
+    private function format_menu_item($item) {
+        return [
+            'id' => $item->ID,
+            'title' => $item->title,
+            'url' => $item->url,
+            'target' => $item->target,
+            'description' => get_post_meta($item->ID, '_bellano_menu_description', true),
+            'icon' => get_post_meta($item->ID, '_bellano_menu_icon', true),
+            'icon_svg' => get_post_meta($item->ID, '_bellano_menu_icon_svg', true),
+            'image' => get_post_meta($item->ID, '_bellano_menu_image', true),
+            'featured' => get_post_meta($item->ID, '_bellano_menu_featured', true) === '1',
+            'featured_bg' => get_post_meta($item->ID, '_bellano_menu_featured_bg', true),
+            'type' => $item->type,
+            'object' => $item->object,
+            'object_id' => $item->object_id,
+            'children' => [],
+        ];
+    }
+    
+    /**
+     * Get mega menu from Bellano settings
+     */
+    public function get_mega_menu() {
+        $saved_menus = get_option('bellano_mega_menus', []);
+        
+        $living_spaces = $saved_menus['living_spaces'] ?? [];
+        $featured_sections = $saved_menus['featured_sections'] ?? [];
+        
+        return rest_ensure_response([
+            'living_spaces' => $living_spaces,
+            'featured_sections' => $featured_sections,
+        ]);
+    }
+    
+    /**
+     * Get navigation menu
+     */
+    public function get_navigation() {
+        $navigation = get_option('bellano_navigation', []);
+        return rest_ensure_response($navigation);
+    }
+    
+    /**
+     * Get footer settings
+     */
+    public function get_footer() {
+        $footer = get_option('bellano_footer', []);
+        return rest_ensure_response($footer);
+    }
+    
+    /**
+     * Get top announcements bar settings
+     */
+    public function get_announcements() {
+        $settings = get_option('bellano_announcements', [
+            'enabled' => true,
+            'interval' => 5000,
+            'announcements' => [
+                [
+                    'text' => 'מגוון מוצרים בהנחות ענק בקטגוריית NALLA SALE בין 20% ל-50% הנחה!',
+                    'link' => '/category/nalla-sale',
+                    'bg_color' => '#e1eadf',
+                    'text_color' => '#4a7c59',
+                ],
+            ],
+        ]);
+        
+        return rest_ensure_response($settings);
     }
 }

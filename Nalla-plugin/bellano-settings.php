@@ -12,6 +12,15 @@ if (!defined('ABSPATH')) exit;
 // Increase PHP memory limit (safe method only)
 @ini_set('memory_limit', '1024M');
 
+// Register Mega Menu locations
+function bellano_register_mega_menu_locations() {
+    register_nav_menus([
+        'nalla-mega-menu' => 'Mega Menu (Next.js)',
+        'nalla-mega-menu-mobile' => 'Mega Menu Mobile (Next.js)',
+    ]);
+}
+add_action('after_setup_theme', 'bellano_register_mega_menu_locations', 99);
+
 // Define plugin constants
 define('BELLANO_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BELLANO_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -33,6 +42,7 @@ require_once BELLANO_PLUGIN_DIR . 'modules/class-product-availability.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-tambour-color.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-glass-option.php';
 require_once BELLANO_PLUGIN_DIR . 'modules/class-product-assembly.php';
+require_once BELLANO_PLUGIN_DIR . 'modules/class-mega-menu.php';
 
 /**
  * Main plugin class
@@ -55,6 +65,7 @@ class Bellano_Settings {
     public $product_availability;
     public $tambour_color;
     public $glass_option;
+    public $mega_menu;
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -78,6 +89,7 @@ class Bellano_Settings {
         $this->product_availability = new Bellano_Product_Availability();
         $this->tambour_color = new Bellano_Tambour_Color();
         $this->glass_option = new Bellano_Glass_Option();
+        $this->mega_menu = new Bellano_Mega_Menu();
         
         // Register hooks
         add_action('admin_menu', [$this->admin_pages, 'add_admin_menu']);

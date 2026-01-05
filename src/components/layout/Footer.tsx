@@ -3,25 +3,80 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Phone, MapPin, Instagram, Facebook, LogIn, LogOut, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { siteConfig } from '@/config/site';
 import { useAdminStore } from '@/lib/store/admin';
 
-const linksCol1 = [
-  { name: 'אודות', href: '/about' },
-  { name: 'אחריות המוצרים', href: '/page/warranty' },
-  { name: 'בלוג', href: '/blog' },
-  { name: 'יצירת קשר', href: '/contact' },
-];
+interface FooterData {
+  contact: {
+    phone: string;
+    address: string;
+    facebook: string;
+    instagram: string;
+  };
+  hours: {
+    showroom_title: string;
+    showroom_weekdays: string;
+    showroom_friday: string;
+    service_title: string;
+    service_hours: string;
+  };
+  links_col1: { name: string; href: string }[];
+  links_col2: { name: string; href: string }[];
+}
 
-const linksCol2 = [
-  { name: 'תקנון האתר', href: '/page/terms' },
-  { name: 'תקנון משלוחים', href: '/page/shipping' },
-  { name: 'הצהרת נגישות', href: '/accessibility' },
-  { name: 'מדיניות פרטיות', href: '/page/privacy-policy' },
-];
+const defaultFooterData: FooterData = {
+  contact: {
+    phone: '03-3732350',
+    address: 'אברהם בומה שביט 1 ראשון לציון, מחסן F-101',
+    facebook: 'https://facebook.com/nalla',
+    instagram: 'https://instagram.com/nalla',
+  },
+  hours: {
+    showroom_title: 'Show-room ומוקד מכירות',
+    showroom_weekdays: 'ימים א-ה: 10:00 - 20:00',
+    showroom_friday: 'שישי: 10:00 - 14:00',
+    service_title: 'שירות לקוחות',
+    service_hours: 'ימים א-ה: 10:00 - 16:00',
+  },
+  links_col1: [
+    { name: 'אודות', href: '/about' },
+    { name: 'אחריות המוצרים', href: '/page/warranty' },
+    { name: 'בלוג', href: '/blog' },
+    { name: 'יצירת קשר', href: '/contact' },
+  ],
+  links_col2: [
+    { name: 'תקנון האתר', href: '/page/terms' },
+    { name: 'תקנון משלוחים', href: '/page/shipping' },
+    { name: 'הצהרת נגישות', href: '/accessibility' },
+    { name: 'מדיניות פרטיות', href: '/page/privacy-policy' },
+  ],
+};
 
 export function Footer() {
   const { isAdmin, adminName, openLoginModal, logout } = useAdminStore();
+  const [footerData, setFooterData] = useState<FooterData>(defaultFooterData);
+
+  useEffect(() => {
+    const fetchFooter = async () => {
+      try {
+        const res = await fetch('/api/footer');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        if (data.contact || data.links_col1) {
+          setFooterData({
+            contact: data.contact || defaultFooterData.contact,
+            hours: data.hours || defaultFooterData.hours,
+            links_col1: data.links_col1?.length > 0 ? data.links_col1 : defaultFooterData.links_col1,
+            links_col2: data.links_col2?.length > 0 ? data.links_col2 : defaultFooterData.links_col2,
+          });
+        }
+      } catch (error) {
+        console.log('Using default footer data');
+      }
+    };
+    fetchFooter();
+  }, []);
   
   return (
     <footer className="bg-white border-t border-gray-200 mt-16">
@@ -32,12 +87,12 @@ export function Footer() {
           <div className="text-center">
             <h4 className="font-bold text-lg mb-4">שעות פעילות</h4>
             
-            <p className="font-medium text-[15px] text-gray-800 mb-1">Show-room ומוקד מכירות</p>
-            <p className="text-[14px] text-gray-600 mb-0.5">ימים א-ה: 10:00 - 20:00</p>
-            <p className="text-[14px] text-gray-600 mb-4">שישי: 10:00 - 14:00</p>
+            <p className="font-medium text-[15px] text-gray-800 mb-1">{footerData.hours.showroom_title}</p>
+            <p className="text-[14px] text-gray-600 mb-0.5">{footerData.hours.showroom_weekdays}</p>
+            <p className="text-[14px] text-gray-600 mb-4">{footerData.hours.showroom_friday}</p>
             
-            <p className="font-medium text-[15px] text-gray-800 mb-1">שירות לקוחות</p>
-            <p className="text-[14px] text-gray-600 mb-5">ימים א-ה: 10:00 - 16:00</p>
+            <p className="font-medium text-[15px] text-gray-800 mb-1">{footerData.hours.service_title}</p>
+            <p className="text-[14px] text-gray-600 mb-5">{footerData.hours.service_hours}</p>
             
             {/* Payment Methods */}
             <div className="flex items-center gap-2 justify-center">
@@ -70,8 +125,8 @@ export function Footer() {
           {/* אודות Column */}
           <div className="text-center">
             <ul className="space-y-3">
-              {linksCol1.map((link) => (
-                <li key={link.href}>
+              {footerData.links_col1.map((link, index) => (
+                <li key={index}>
                   <Link href={link.href} className="text-[15px] text-gray-700 hover:text-black transition-colors">
                     {link.name}
                   </Link>
@@ -83,8 +138,8 @@ export function Footer() {
           {/* תקנון Column */}
           <div className="text-center">
             <ul className="space-y-3">
-              {linksCol2.map((link) => (
-                <li key={link.href}>
+              {footerData.links_col2.map((link, index) => (
+                <li key={index}>
                   <Link href={link.href} className="text-[15px] text-gray-700 hover:text-black transition-colors">
                     {link.name}
                   </Link>
@@ -106,14 +161,14 @@ export function Footer() {
             
             {/* Address */}
             <div className="flex items-start gap-2 mb-3 justify-center">
-              <p className="text-[14px] text-gray-600">אברהם בומה שביט 1 ראשון לציון, מחסן F-101</p>
+              <p className="text-[14px] text-gray-600">{footerData.contact.address}</p>
               <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
             </div>
             
             {/* Phone */}
             <div className="flex items-center gap-2 mb-6 justify-center">
-              <a href="tel:03-3732350" className="text-[14px] text-gray-600 hover:text-black transition-colors">
-                03-3732350
+              <a href={`tel:${footerData.contact.phone}`} className="text-[14px] text-gray-600 hover:text-black transition-colors">
+                {footerData.contact.phone}
               </a>
               <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
             </div>
@@ -121,7 +176,7 @@ export function Footer() {
             {/* Social Icons */}
             <div className="flex gap-3 justify-center">
               <a
-                href={siteConfig.social.facebook}
+                href={footerData.contact.facebook || siteConfig.social.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
@@ -129,7 +184,7 @@ export function Footer() {
                 <Facebook className="h-4 w-4 text-white" />
               </a>
               <a
-                href={siteConfig.social.instagram}
+                href={footerData.contact.instagram || siteConfig.social.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"

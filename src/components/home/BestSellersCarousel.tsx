@@ -129,7 +129,7 @@ export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: Be
               >
                 {/* Image Container */}
                 <div className="relative aspect-square overflow-hidden bg-[#f5f5f0] mb-4 rounded-[20px] rounded-tl-none">
-                  <Link href={`/product/${product.slug}`}>
+                  <Link href={`/product/${product.slug}`} className="relative block w-full h-full">
                     {product.image && (
                       <Image
                         src={product.image.sourceUrl}
@@ -151,17 +151,16 @@ export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: Be
                     </div>
                   )}
                   
-                  {/* Bottom Left Corner Cover */}
-                  <div className="absolute bottom-0 left-0 w-20 h-20">
+                  {/* Wishlist Heart - bottom left corner with curved background */}
+                  <div className="absolute bottom-0 left-0 w-[72px] h-[72px] z-10">
                     <Image
-                      src="https://nalla.co.il/wp-content/uploads/2025/09/bg-1.png"
+                      src="/images/bg-1.png"
                       alt=""
-                      fill
-                      className="object-cover"
+                      width={72}
+                      height={72}
+                      className="w-full h-full"
                     />
                   </div>
-                  
-                  {/* Wishlist Heart - bottom left corner */}
                   <button 
                     onClick={(e) => {
                       e.preventDefault();
@@ -178,12 +177,12 @@ export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: Be
                         image: product.image ? { sourceUrl: product.image.sourceUrl } : undefined,
                       });
                     }}
-                    className="absolute bottom-0 left-0 m-2 w-10 h-10 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity shadow-sm z-20 cursor-pointer"
+                    className="absolute bottom-1.5 left-1.5 w-9 h-9 rounded-full flex items-center justify-center hover:scale-110 transition-transform z-20 cursor-pointer"
                     style={{ backgroundColor: '#D7CEBF' }}
                     aria-label={isHydrated && isInWishlist(String(product.id)) ? 'הסר מהמועדפים' : 'הוסף למועדפים'}
                   >
                     <Heart 
-                      className={`w-5 h-5 ${isHydrated && isInWishlist(String(product.id)) ? 'text-red-500 fill-red-500' : 'text-white'}`} 
+                      className={`w-4 h-4 ${isHydrated && isInWishlist(String(product.id)) ? 'text-red-500 fill-red-500' : 'text-white'}`} 
                     />
                   </button>
                 </div>

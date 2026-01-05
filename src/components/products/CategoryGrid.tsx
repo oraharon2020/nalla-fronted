@@ -11,7 +11,7 @@ interface CategoryCardProps {
 
 export function CategoryCard({ category }: CategoryCardProps) {
   return (
-    <Link href={`/category/${category.slug}`}>
+    <Link href={`/product-category/${category.slug}`}>
       <Card className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-all">
         <div className="relative aspect-square bg-muted overflow-hidden">
           {category.image?.sourceUrl ? (

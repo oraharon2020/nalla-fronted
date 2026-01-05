@@ -2,8 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Phone, Mail, MessageCircle, Clock, Send, AlertCircle } from 'lucide-react';
+import { Phone, Mail, MessageCircle, Clock, Send, AlertCircle, ChevronDown } from 'lucide-react';
 import { siteConfig, getApiEndpoint } from '@/config/site';
+
+const subjectOptions = [
+  'שאלה כללית',
+  'בירור לגבי הזמנה',
+  'שירות לקוחות',
+  'שיתוף פעולה עסקי',
+  'אחר',
+];
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -58,158 +66,163 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2 text-center">צרו קשר</h1>
-          <p className="text-gray-500 text-center mb-10">נשמח לעמוד לשירותכם ולענות על כל שאלה</p>
-          
-          {/* Contact Cards */}
-          <div className="grid sm:grid-cols-3 gap-4 mb-12">
-            <a 
-              href={`tel:${siteConfig.phoneClean}`}
-              className="flex flex-col items-center p-6 border border-gray-200 rounded-lg hover:border-black transition-colors group"
-            >
-              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 group-hover:bg-black group-hover:text-white transition-colors">
-                <Phone className="w-5 h-5" />
-              </div>
-              <span className="text-sm text-gray-500 mb-1">טלפון</span>
-              <span className="font-medium">{siteConfig.phone}</span>
-            </a>
-
-            <a 
-              href={`https://wa.me/${siteConfig.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center p-6 border border-gray-200 rounded-lg hover:border-green-500 transition-colors group"
-            >
-              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 group-hover:bg-green-500 group-hover:text-white transition-colors">
-                <MessageCircle className="w-5 h-5" />
-              </div>
-              <span className="text-sm text-gray-500 mb-1">וואטסאפ</span>
-              <span className="font-medium">{siteConfig.phone}</span>
-            </a>
-
-            <a 
-              href={`mailto:${siteConfig.email}`}
-              className="flex flex-col items-center p-6 border border-gray-200 rounded-lg hover:border-black transition-colors group"
-            >
-              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 group-hover:bg-black group-hover:text-white transition-colors">
-                <Mail className="w-5 h-5" />
-              </div>
-              <span className="text-sm text-gray-500 mb-1">אימייל</span>
-              <span className="font-medium">{siteConfig.email}</span>
-            </a>
-          </div>
-
-          {/* Hours */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-12">
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-5 h-5" />
-              <h2 className="font-medium">שעות פעילות</h2>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
-              <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
-                <span className="text-gray-600">ימים א׳ - ה׳</span>
-                <span className="font-medium">10:00 - 17:00</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
-                <span className="text-gray-600">יום ו׳ וערבי חג</span>
-                <span className="font-medium">10:00 - 13:00</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Contact Form */}
-          <div className="border border-gray-200 rounded-lg p-6 md:p-8">
-            <h2 className="text-xl font-bold mb-2">שלחו לנו הודעה</h2>
-            <p className="text-gray-500 text-sm mb-6">נחזור אליכם בהקדם האפשרי</p>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-10 md:py-14">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
             
-            {submitted ? (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Send className="w-8 h-8 text-green-600" />
+            {/* Left Side - Contact Info */}
+            <div className="lg:order-1">
+              <div className="space-y-6">
+                {/* Contact Details */}
+                <div>
+                  <h2 className="text-lg font-bold mb-3">לקוחות יקרים,</h2>
+                  <p className="text-gray-700 leading-relaxed mb-5">
+                    נשמח לעמוד לשירותכם ולספק מענה לכל שאלה, בקשה או בעיה.
+                    <br />
+                    ניתן ליצור איתנו קשר באחת מהדרכים הבאות:
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">טלפון:</span>
+                      <a href={`tel:${siteConfig.phoneClean}`} className="text-black hover:underline">
+                        {siteConfig.phone}
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">WhatsApp:</span>
+                      <a 
+                        href={`https://wa.me/${siteConfig.whatsapp}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-black hover:underline"
+                      >
+                        [לחצו כאן]
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">דוא״ל:</span>
+                      <a href={`mailto:${siteConfig.email}`} className="text-black hover:underline">
+                        {siteConfig.email}
+                      </a>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-medium mb-2">ההודעה נשלחה בהצלחה!</h3>
-                <p className="text-gray-500">נחזור אליכם בהקדם</p>
+
+                {/* Customer Service Hours */}
+                <div>
+                  <h3 className="font-bold mb-1">שעות פעילות שירות הלקוחות:</h3>
+                  <p className="text-gray-700">ימים א׳-ה׳: 10:00-16:00</p>
+                </div>
+
+                {/* Showroom Hours */}
+                <div>
+                  <h3 className="font-bold mb-1">שעות פעילות אולם התצוגה:</h3>
+                  <div className="text-gray-700 space-y-0.5">
+                    <p>ימים א׳-ה׳: 10:00-20:00</p>
+                    <p>ימי שישי: 10:00-14:00</p>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5">שם מלא *</label>
+            </div>
+
+            {/* Right Side - Form */}
+            <div className="lg:order-2">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-wide mb-10 text-left" style={{ fontFamily: 'var(--font-amandine)' }}>DROP US A LINE</h1>
+              
+              {submitted ? (
+                <div className="text-center py-12 bg-white rounded-lg">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Send className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-medium mb-2">ההודעה נשלחה בהצלחה!</h3>
+                  <p className="text-gray-500">נחזור אליכם בהקדם</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Row 1: Name & Phone */}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <input 
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        className="w-full px-0 py-3 bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-black transition-colors text-right"
+                        placeholder="שם מלא"
+                      />
+                    </div>
+                    <div className="relative sm:order-first">
+                      <input 
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        className="w-full px-0 py-3 bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-black transition-colors text-right"
+                        placeholder="מספר טלפון"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Row 2: Email */}
+                  <div className="relative">
                     <input 
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                      placeholder="השם שלכם"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-black transition-colors text-right"
+                      placeholder="אימייל"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5">טלפון *</label>
-                    <input 
-                      type="tel"
+                  
+                  {/* Row 3: Subject */}
+                  <div className="relative">
+                    <select
+                      value={formData.subject}
+                      onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-gray-300 focus:outline-none focus:border-black transition-colors appearance-none cursor-pointer text-right"
+                      dir="rtl"
+                    >
+                      <option value="">מטרת הפנייה</option>
+                      {subjectOptions.map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                  
+                  {/* Row 4: Message */}
+                  <div className="relative">
+                    <textarea 
                       required
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                      placeholder="מספר טלפון"
+                      value={formData.message}
+                      onChange={(e) => setFormData({...formData, message: e.target.value})}
+                      className="w-full min-h-[120px] px-0 py-3 bg-transparent border-0 border-b border-gray-300 resize-none focus:outline-none focus:border-black transition-colors text-right"
+                      placeholder="הודעה"
                     />
                   </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">אימייל</label>
-                  <input 
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                    placeholder="כתובת אימייל"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">נושא</label>
-                  <input 
-                    type="text"
-                    value={formData.subject}
-                    onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                    placeholder="נושא הפנייה"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">הודעה *</label>
-                  <textarea 
-                    required
-                    value={formData.message}
-                    onChange={(e) => setFormData({...formData, message: e.target.value})}
-                    className="w-full min-h-[120px] px-4 py-2.5 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                    placeholder="כתבו את ההודעה שלכם..."
-                  />
-                </div>
 
-                {/* Error Message */}
-                {error && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <span>{error}</span>
+                  {/* Error Message */}
+                  {error && (
+                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 text-red-700 text-sm">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <div className="pt-4">
+                    <button 
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full py-4 bg-black text-white text-sm tracking-wide hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
+                    >
+                      {isSubmitting ? 'שולח...' : 'שליחה'}
+                    </button>
                   </div>
-                )}
-
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full sm:w-auto px-8 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? 'שולח...' : 'שליחת הודעה'}
-                </button>
-              </form>
-            )}
+                </form>
+              )}
+            </div>
           </div>
         </div>
       </div>

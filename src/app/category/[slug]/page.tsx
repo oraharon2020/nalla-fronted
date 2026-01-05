@@ -1,4 +1,4 @@
-import { ProductGrid } from '@/components/products';
+import { CategoryFilters } from '@/components/products';
 import { getProductsByCategorySlugWithSwatches, getCategoryBySlug, getCategories } from '@/lib/woocommerce';
 import { BreadcrumbJsonLd } from '@/components/seo';
 import { ExpandableDescription } from '@/components/ui/ExpandableDescription';
@@ -96,15 +96,18 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   
   let category = null;
   let products: any[] = [];
+  let allCategories: any[] = [];
 
   try {
-    const [categoryData, productsData] = await Promise.all([
+    const [categoryData, productsData, categoriesData] = await Promise.all([
       getCategoryBySlug(slug),
       getProductsByCategorySlugWithSwatches(slug, { per_page: 24 }),
+      getCategories({ per_page: 50, hide_empty: true }),
     ]);
     
     category = categoryData;
     products = productsData;
+    allCategories = categoriesData.filter((cat: any) => cat.slug !== 'uncategorized' && cat.count > 0);
   } catch (error) {
     console.error('Error fetching category data:', error);
   }
@@ -130,52 +133,60 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           { name: categoryName, url: `${SITE_URL}/category/${slug}` },
         ]} 
       />
-      
-      <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-muted-foreground mb-6" aria-label="Breadcrumb">
-          <a href="/" className="hover:text-primary">דף הבית</a>
-          <span className="mx-2">/</span>
-          <span>{categoryName}</span>
-        </nav>
 
-        {/* Category Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{categoryName}</h1>
-          {category?.description && (
-            <ExpandableDescription description={category.description} />
-          )}
-        </div>
-
-        {/* Sort Options */}
-        <div className="flex justify-between items-center mb-6">
-          <p className="text-sm text-muted-foreground">
-            {products.length} מוצרים
-          </p>
-          <div className="flex items-center gap-2">
-            <label htmlFor="sort-select" className="text-sm text-muted-foreground sr-only">מיון לפי</label>
-            <select 
-              id="sort-select"
-              className="border rounded-md px-3 py-2 text-sm bg-background"
-              aria-label="מיין מוצרים"
-            >
-              <option value="default">מיון בחירת מחדל</option>
-              <option value="price-low">מחיר: נמוך לגבוה</option>
-              <option value="price-high">מחיר: גבוה לנמוך</option>
-              <option value="newest">חדשים ביותר</option>
-            </select>
+      {/* Category Header with Gray Background */}
+      <div className="bg-[#f5f5f5] py-6 md:py-10">
+        <div className="max-w-[1300px] mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            {/* Right Side - Breadcrumb, Title and Count */}
+            <div className="md:w-1/3">
+              {/* Breadcrumb */}
+              <nav className="text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
+                <a href="/" className="hover:text-black">נלה - Nalla</a>
+                <span className="mx-2">/</span>
+                <span className="text-gray-700">{categoryName}</span>
+              </nav>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-light mb-2">{categoryName}</h1>
+              <p className="text-gray-500 text-sm">{products.length} מוצרים</p>
+            </div>
+            
+            {/* Left Side - Description - Desktop only */}
+            <div className="hidden md:block md:w-2/3">
+              {category?.description && (
+                <ExpandableDescription 
+                  description={category.description} 
+                  maxLines={5}
+                  className="text-gray-600 text-sm leading-relaxed"
+                />
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Products Grid */}
+      </div>
+      
+      <div className="max-w-[1300px] mx-auto px-4 py-8">
         {products.length > 0 ? (
-          <ProductGrid products={products} />
+          <CategoryFilters products={products} />
         ) : (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">לא נמצאו מוצרים בקטגוריה זו</p>
+            <p className="text-gray-500">לא נמצאו מוצרים בקטגוריה זו</p>
           </div>
         )}
       </div>
+
+      {/* Mobile Description - Below products section */}
+      {category?.description && (
+        <div className="md:hidden bg-[#f5f5f5] py-6">
+          <div className="max-w-[1300px] mx-auto px-4">
+            <h2 className="text-lg font-medium mb-3">אודות {categoryName}</h2>
+            <ExpandableDescription 
+              description={category.description} 
+              maxLines={4}
+              className="text-gray-600 text-sm leading-relaxed"
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }
