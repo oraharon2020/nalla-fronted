@@ -53,9 +53,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"');
   
-  // Extract description from excerpt or use default
-  const description = page.excerpt?.rendered
-    ? page.excerpt.rendered.replace(/<[^>]+>/g, '').slice(0, 160)
+  // Extract description from content or use default
+  const description = page.content?.rendered
+    ? page.content.rendered.replace(/<[^>]+>/g, '').slice(0, 160)
     : `${title} - נלה רהיטים`;
   
   return {
