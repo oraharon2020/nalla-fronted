@@ -42,7 +42,8 @@ interface CreatePaymentRequest {
 
 // Get Meshulam user ID and page codes from WordPress
 async function getMeshulamConfig(): Promise<{ userId: string; pageCodes: typeof PAGE_CODES }> {
-  const fallbackUserId = siteConfig.meshulam.userId || 'e1ee96ba76032485';
+  // Nalla's Meshulam user ID - used as fallback if WordPress API fails
+  const fallbackUserId = siteConfig.meshulam.userId || '4cad5c2071201009';
   
   try {
     const response = await fetch(getApiEndpoint('meshulam-config'));
