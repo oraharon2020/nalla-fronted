@@ -384,7 +384,7 @@ class Bellano_Admin_Pages {
                             'slug' => sanitize_title($item['slug']),
                             'icon_id' => intval($item['icon_id'] ?? 0),
                             'icon_url' => esc_url_raw($item['icon_url'] ?? ''),
-                            'link' => sanitize_text_field($item['link'])
+                            'link' => esc_url_raw($item['link'] ?? '')
                         ];
                     }
                 }

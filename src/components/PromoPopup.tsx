@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
 import { promoPopupConfig } from '@/config/promo-popup';
 
@@ -74,69 +74,74 @@ export default function PromoPopup() {
         }`}
       >
         <div 
-          className="relative w-full max-w-[320px] bg-white overflow-hidden shadow-xl rounded-3xl"
+          className="relative w-full max-w-[340px] bg-white rounded-2xl shadow-xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button
             onClick={handleClose}
-            className="absolute top-4 left-4 w-7 h-7 flex items-center justify-center text-gray-300 hover:text-gray-500 transition-colors z-10"
+            className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all z-10"
             aria-label="סגור"
           >
-            <X className="w-5 h-5" strokeWidth={1.5} />
+            <X className="w-4 h-4" />
           </button>
 
           {/* Content */}
-          <div className="px-8 pt-12 pb-8">
-            
-            {/* Headline */}
-            <div className="text-center mb-8">
-              <p className="text-[11px] text-gray-400 uppercase tracking-[0.2em] mb-3">
-                {content.englishText}
-              </p>
-              <h2 className="text-2xl font-light text-gray-900 tracking-wide">
-                {content.headline}
-              </h2>
-            </div>
+          <div className="p-6 pt-8 text-center">
+            {/* Badge */}
+            <span className="inline-block bg-[#e8f0e6] text-[#4a7c59] text-xs font-medium px-3 py-1 rounded-full mb-4">
+              {content.badge}
+            </span>
 
+            {/* Headline */}
+            <h2 className="text-gray-900 text-xl font-bold mb-1">
+              {content.headline}
+            </h2>
+            
             {/* Discount */}
-            <div className="text-center mb-8">
-              <span className="text-6xl font-extralight text-gray-900 tracking-tight">
-                7<span className="text-3xl">%</span>
+            <div className="my-4">
+              <span className="text-[#4a7c59] text-4xl font-bold">
+                {content.discountNumber}
               </span>
-              <p className="text-[13px] text-gray-500 mt-2 font-light">
+              <p className="text-gray-500 text-sm mt-1">
                 {content.discountText}
               </p>
             </div>
 
             {/* Coupon Code */}
-            <div className="mb-6">
+            <div className="mb-5">
+              <p className="text-gray-400 text-xs mb-2">
+                {content.couponLabel}
+              </p>
               <button
                 onClick={handleCopy}
-                className="w-full group"
+                className="w-full flex items-center justify-center gap-2 bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 hover:bg-gray-100 transition-colors"
               >
-                <div className={`border ${copied ? 'border-gray-900 bg-gray-900' : 'border-gray-200 bg-gray-50 hover:border-gray-300'} rounded-xl py-4 px-6 transition-all duration-200`}>
-                  <p className="text-[10px] text-gray-400 uppercase tracking-[0.15em] mb-1">
-                    {content.couponLabel}
-                  </p>
-                  <p className={`font-mono text-lg tracking-[0.1em] transition-colors ${copied ? 'text-white' : 'text-gray-900'}`}>
-                    {copied ? '✓ הועתק' : content.couponCode}
-                  </p>
-                </div>
+                <span className="font-mono text-lg font-semibold text-gray-800 tracking-wide">
+                  {content.couponCode}
+                </span>
+                {copied ? (
+                  <Check className="w-4 h-4 text-[#4a7c59]" />
+                ) : (
+                  <Copy className="w-4 h-4 text-gray-400" />
+                )}
               </button>
+              {copied && (
+                <p className="text-[#4a7c59] text-xs mt-1.5">הקוד הועתק!</p>
+              )}
             </div>
 
             {/* CTA Button */}
             <Link
               href={content.ctaLink}
               onClick={handleClose}
-              className="block w-full bg-gray-900 text-white py-4 rounded-xl text-[13px] font-medium text-center hover:bg-gray-800 transition-colors tracking-wide"
+              className="block w-full bg-[#4a7c59] text-white py-3 rounded-lg text-sm font-medium hover:bg-[#3d6a4a] transition-colors"
             >
               {content.ctaText}
             </Link>
 
             {/* Footer */}
-            <p className="text-gray-300 text-[10px] text-center mt-6 tracking-wide">
+            <p className="text-gray-400 text-[11px] mt-4">
               {content.footerNote}
             </p>
           </div>

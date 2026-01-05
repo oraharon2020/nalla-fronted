@@ -18,7 +18,7 @@ export const promoPopupConfig = {
     badge: 'שנה חדשה',
     
     // Hebrew headline
-    headline: 'פותחים שנה עם בלאנו ✨',
+    headline: 'פותחים שנה עם נלה ✨',
     
     // English text
     englishText: 'New Year, New Home',
