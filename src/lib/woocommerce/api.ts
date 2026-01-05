@@ -699,3 +699,90 @@ export function transformCategory(wooCategory: WooCategory) {
     count: wooCategory.count,
   };
 }
+
+// ============================================
+// SPACES (Custom Taxonomy)
+// ============================================
+
+export interface Space {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  count: number;
+  image?: string;
+}
+
+export interface SpaceWithProducts {
+  space: Space;
+  products: any[];
+  total: number;
+  total_pages: number;
+  page: number;
+  per_page: number;
+}
+
+/**
+ * Get all spaces
+ */
+export async function getSpaces(): Promise<Space[]> {
+  const WORDPRESS_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
+  
+  try {
+    const response = await fetch(`${WORDPRESS_URL}/wp-json/bellano/v1/spaces`, {
+      next: { revalidate: 3600 },
+    });
+    
+    if (!response.ok) return [];
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching spaces:', error);
+    return [];
+  }
+}
+
+/**
+ * Get single space by slug
+ */
+export async function getSpaceBySlug(slug: string): Promise<Space | null> {
+  const WORDPRESS_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
+  
+  try {
+    const response = await fetch(`${WORDPRESS_URL}/wp-json/bellano/v1/spaces/${slug}`, {
+      next: { revalidate: 3600 },
+    });
+    
+    if (!response.ok) return null;
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching space:', error);
+    return null;
+  }
+}
+
+/**
+ * Get products by space slug
+ */
+export async function getProductsBySpace(
+  slug: string, 
+  params?: { per_page?: number; page?: number }
+): Promise<SpaceWithProducts | null> {
+  const WORDPRESS_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
+  
+  try {
+    const searchParams = new URLSearchParams();
+    if (params?.per_page) searchParams.set('per_page', String(params.per_page));
+    if (params?.page) searchParams.set('page', String(params.page));
+    
+    const url = `${WORDPRESS_URL}/wp-json/bellano/v1/spaces/${slug}/products?${searchParams}`;
+    const response = await fetch(url, {
+      next: { revalidate: 300 },
+    });
+    
+    if (!response.ok) return null;
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching products by space:', error);
+    return null;
+  }
+}

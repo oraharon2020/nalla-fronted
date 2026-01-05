@@ -119,6 +119,25 @@ class Bellano_REST_API {
             'permission_callback' => '__return_true'
         ]);
         
+        // Spaces taxonomy routes
+        register_rest_route('bellano/v1', '/spaces', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_spaces'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        register_rest_route('bellano/v1', '/spaces/(?P<slug>[a-zA-Z0-9_-]+)', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_space_by_slug'],
+            'permission_callback' => '__return_true'
+        ]);
+        
+        register_rest_route('bellano/v1', '/spaces/(?P<slug>[a-zA-Z0-9_-]+)/products', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_products_by_space'],
+            'permission_callback' => '__return_true'
+        ]);
+        
         // Navigation menu
         register_rest_route('bellano/v1', '/navigation', [
             'methods' => 'GET',
@@ -1037,5 +1056,135 @@ class Bellano_REST_API {
         ]);
         
         return rest_ensure_response($settings);
+    }
+    
+    /**
+     * Get all spaces (custom taxonomy)
+     */
+    public function get_spaces() {
+        $terms = get_terms([
+            'taxonomy' => 'spaces',
+            'hide_empty' => false,
+        ]);
+        
+        if (is_wp_error($terms)) {
+            return rest_ensure_response([]);
+        }
+        
+        $spaces = array_map(function($term) {
+            return [
+                'id' => $term->term_id,
+                'name' => $term->name,
+                'slug' => $term->slug,
+                'description' => $term->description,
+                'count' => $term->count,
+                'image' => get_term_meta($term->term_id, 'spaces_image', true),
+            ];
+        }, $terms);
+        
+        return rest_ensure_response($spaces);
+    }
+    
+    /**
+     * Get single space by slug
+     */
+    public function get_space_by_slug($request) {
+        $slug = $request->get_param('slug');
+        
+        $term = get_term_by('slug', $slug, 'spaces');
+        
+        if (!$term || is_wp_error($term)) {
+            return new WP_Error('space_not_found', 'Space not found', ['status' => 404]);
+        }
+        
+        return rest_ensure_response([
+            'id' => $term->term_id,
+            'name' => $term->name,
+            'slug' => $term->slug,
+            'description' => $term->description,
+            'count' => $term->count,
+            'image' => get_term_meta($term->term_id, 'spaces_image', true),
+        ]);
+    }
+    
+    /**
+     * Get products by space slug
+     */
+    public function get_products_by_space($request) {
+        $slug = $request->get_param('slug');
+        $per_page = $request->get_param('per_page') ?? 24;
+        $page = $request->get_param('page') ?? 1;
+        
+        $term = get_term_by('slug', $slug, 'spaces');
+        
+        if (!$term || is_wp_error($term)) {
+            return new WP_Error('space_not_found', 'Space not found', ['status' => 404]);
+        }
+        
+        $args = [
+            'post_type' => 'product',
+            'post_status' => 'publish',
+            'posts_per_page' => $per_page,
+            'paged' => $page,
+            'tax_query' => [
+                [
+                    'taxonomy' => 'spaces',
+                    'field' => 'slug',
+                    'terms' => $slug,
+                ],
+            ],
+        ];
+        
+        $query = new WP_Query($args);
+        $products = [];
+        
+        foreach ($query->posts as $post) {
+            $product = wc_get_product($post->ID);
+            if (!$product) continue;
+            
+            $image_id = $product->get_image_id();
+            $gallery_ids = $product->get_gallery_image_ids();
+            
+            $products[] = [
+                'id' => $product->get_id(),
+                'name' => $product->get_name(),
+                'slug' => $product->get_slug(),
+                'permalink' => get_permalink($post->ID),
+                'price' => $product->get_price(),
+                'regular_price' => $product->get_regular_price(),
+                'sale_price' => $product->get_sale_price(),
+                'on_sale' => $product->is_on_sale(),
+                'stock_status' => $product->get_stock_status(),
+                'images' => array_merge(
+                    $image_id ? [[
+                        'id' => $image_id,
+                        'src' => wp_get_attachment_image_url($image_id, 'large'),
+                        'alt' => get_post_meta($image_id, '_wp_attachment_image_alt', true),
+                    ]] : [],
+                    array_map(function($id) {
+                        return [
+                            'id' => $id,
+                            'src' => wp_get_attachment_image_url($id, 'large'),
+                            'alt' => get_post_meta($id, '_wp_attachment_image_alt', true),
+                        ];
+                    }, $gallery_ids)
+                ),
+                'categories' => wp_get_post_terms($post->ID, 'product_cat', ['fields' => 'names']),
+            ];
+        }
+        
+        return rest_ensure_response([
+            'space' => [
+                'id' => $term->term_id,
+                'name' => $term->name,
+                'slug' => $term->slug,
+                'description' => $term->description,
+            ],
+            'products' => $products,
+            'total' => $query->found_posts,
+            'total_pages' => $query->max_num_pages,
+            'page' => (int)$page,
+            'per_page' => (int)$per_page,
+        ]);
     }
 }

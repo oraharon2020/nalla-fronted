@@ -1,9 +1,18 @@
 import Link from 'next/link';
 import { MapPin, Phone, Clock, Navigation, Car, Calendar, Sparkles, ArrowLeft } from 'lucide-react';
+import { siteConfig } from '@/config/site';
 
 export const metadata = {
-  title: 'אולם התצוגה שלנו | נלה - מעצבים את הבית',
+  title: 'אולם התצוגה שלנו',
   description: 'בואו לבקר באולם התצוגה של נלה בראשון לציון. חוו את הרהיטים מקרוב, קבלו ייעוץ מקצועי והתרשמו מהאיכות.',
+  alternates: {
+    canonical: `${siteConfig.url}/showroom`,
+  },
+  openGraph: {
+    title: 'אולם התצוגה | נלה',
+    description: 'בואו לבקר באולם התצוגה של נלה בראשון לציון',
+    type: 'website',
+  },
 };
 
 export default function ShowroomPage() {

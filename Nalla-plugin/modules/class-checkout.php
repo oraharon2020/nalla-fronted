@@ -15,18 +15,24 @@ class Bellano_Checkout {
      * Constructor - register WC-API hooks
      */
     public function __construct() {
+        // TEMPORARILY DISABLED - Enable when Next.js goes live
+        // ===================================================
+        
         // CRITICAL: Remove X-Frame-Options for WC-API requests (Meshulam uses iframe!)
         // This must run early, before WordPress sends headers
-        add_action('init', [$this, 'remove_frame_options_for_wc_api'], 1);
+        // add_action('init', [$this, 'remove_frame_options_for_wc_api'], 1);
         
         // Hook into the OFFICIAL Meshulam plugin's callbacks with HIGH priority
         // This way we intercept them BEFORE the official plugin and redirect to Next.js
-        add_action('woocommerce_api_meshulam_payment_gateway_direct_j4execute', [$this, 'intercept_meshulam_success'], 1);
-        add_action('woocommerce_api_meshulam_server_response_direct_j4execute', [$this, 'intercept_meshulam_notify'], 1);
+        // add_action('woocommerce_api_meshulam_payment_gateway_direct_j4execute', [$this, 'intercept_meshulam_success'], 1);
+        // add_action('woocommerce_api_meshulam_server_response_direct_j4execute', [$this, 'intercept_meshulam_notify'], 1);
         
         // Also keep our custom hooks as backup
-        add_action('woocommerce_api_bellano_meshulam_success', [$this, 'handle_wc_api_success']);
-        add_action('woocommerce_api_bellano_meshulam_notify', [$this, 'handle_wc_api_notify']);
+        // add_action('woocommerce_api_bellano_meshulam_success', [$this, 'handle_wc_api_success']);
+        // add_action('woocommerce_api_bellano_meshulam_notify', [$this, 'handle_wc_api_notify']);
+        
+        // ===================================================
+        // END TEMPORARILY DISABLED
     }
     
     /**
