@@ -180,8 +180,8 @@ async function HeroSection() {
         </div>
       
         {/* WELCOME HOME Text - Below banner with negative margin to overlap */}
-        <div className="flex justify-center -mt-[20px] md:-mt-[100px] lg:-mt-[70px] relative z-10">
-          <span className="font-english text-[40px] md:text-[100px] lg:text-[127px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.2em] leading-none" aria-hidden="true">
+        <div className="flex justify-center -mt-[20px] md:-mt-[80px] lg:-mt-[50px] relative z-10">
+          <span className="font-english text-[32px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.2em] leading-none" aria-hidden="true">
             WELCOME HOME
           </span>
         </div>
