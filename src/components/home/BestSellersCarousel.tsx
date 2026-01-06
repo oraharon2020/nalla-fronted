@@ -71,7 +71,7 @@ export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: Be
   };
 
   return (
-    <section className="py-10 md:py-14 bg-white">
+    <section className="pt-4 pb-10 md:py-14 bg-white">
       <div className="max-w-[1300px] mx-auto px-4">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-10">

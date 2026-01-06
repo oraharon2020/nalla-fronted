@@ -46,20 +46,20 @@ export function ShopByRoom() {
           {/* Left Side - Room List */}
           <div className="w-full md:w-2/5 order-2 md:order-1 flex flex-col justify-between" dir="ltr">
             {/* Section Title */}
-            <div className="mb-6">
-              <p className="font-english text-gray-400 text-base md:text-lg tracking-[0.25em] uppercase flex items-center gap-3">
+            <div className="mb-6 text-center md:text-left">
+              <p className="font-english text-gray-400 text-lg md:text-lg tracking-[0.25em] uppercase flex items-center gap-3 justify-center md:justify-start">
                 SHOP BY ROOM
                 <span className="text-3xl">↘</span>
               </p>
             </div>
             
             {/* Room Names - with reasonable spacing */}
-            <div className="flex-1 flex flex-col justify-center gap-4 md:gap-7">
+            <div className="flex-1 flex flex-col justify-center items-center md:items-start gap-3 md:gap-7">
               {rooms.map((room) => (
                 <button
                   key={room.id}
                   onClick={() => handleRoomClick(room)}
-                  className={`block w-full text-left font-english text-3xl md:text-5xl lg:text-6xl tracking-wide transition-all duration-300 ${
+                  className={`block text-center md:text-left font-english text-[32px] md:text-5xl lg:text-6xl tracking-wide transition-all duration-300 ${
                     activeRoom.id === room.id
                       ? 'text-gray-900 font-medium'
                       : 'text-gray-300 hover:text-gray-500 font-light'

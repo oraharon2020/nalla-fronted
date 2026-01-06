@@ -363,27 +363,27 @@ function ChooseColorSection() {
 // Showroom Video Section
 function ShowroomSection() {
   return (
-    <section className="py-10 md:py-14 bg-white">
+    <section className="pt-4 md:pt-14 pb-2 md:pb-14 bg-white">
       <div className="max-w-[1300px] mx-auto px-4">
-        {/* OUR SHOWROOM Title - Same style as WELCOME HOME */}
-        <div className="flex justify-center relative z-10">
-          <h2 className="font-english text-[32px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.2em] leading-none">
+        {/* OUR SHOWROOM Title - Same style as WELCOME HOME - Clickable */}
+        <Link href="/showroom" className="flex justify-center relative z-10 group">
+          <h2 className="font-english text-[32px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.2em] leading-none group-hover:text-[#4a7c59] transition-colors">
             OUR SHOWROOM
           </h2>
-        </div>
+        </Link>
         
-        {/* Video - with negative margin to overlap title */}
-        <div className="relative w-full aspect-video rounded-[30px] overflow-hidden -mt-[15px] md:-mt-[70px] lg:-mt-[50px]">
+        {/* Video - with negative margin to overlap title - Clickable */}
+        <Link href="/showroom" className="block relative w-full aspect-video rounded-[30px] overflow-hidden -mt-[10px] md:-mt-[70px] lg:-mt-[50px] group">
           <video
             autoPlay
             muted
             loop
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
           >
             <source src="/videos/nalla-showroom.mp4" type="video/mp4" />
           </video>
-        </div>
+        </Link>
       </div>
     </section>
   );

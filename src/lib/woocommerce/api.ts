@@ -98,6 +98,7 @@ export interface WooCategory {
   description: string;
   image: { id: number; src: string; alt: string } | null;
   count: number;
+  menu_order: number;
 }
 
 export interface WooVariation {
@@ -126,12 +127,23 @@ export interface WooTag {
 export async function getCategories(params?: {
   per_page?: number;
   hide_empty?: boolean;
+  orderby?: 'id' | 'include' | 'name' | 'slug' | 'term_group' | 'description' | 'count';
+  order?: 'asc' | 'desc';
 }): Promise<WooCategory[]> {
   const searchParams = new URLSearchParams();
   searchParams.append('per_page', String(params?.per_page || 100));
   searchParams.append('hide_empty', String(params?.hide_empty ?? true));
+  // Note: WooCommerce API doesn't support menu_order for categories orderby
+  // We sort by menu_order after fetching
+  if (params?.orderby) {
+    searchParams.append('orderby', params.orderby);
+    searchParams.append('order', params?.order || 'asc');
+  }
   
-  return wooFetch<WooCategory[]>(`products/categories?${searchParams}`);
+  const categories = await wooFetch<WooCategory[]>(`products/categories?${searchParams}`);
+  
+  // Sort by menu_order (ascending) by default
+  return categories.sort((a, b) => (a.menu_order || 0) - (b.menu_order || 0));
 }
 
 /**
