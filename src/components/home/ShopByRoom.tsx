@@ -1,13 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { rooms, Room, Hotspot } from '@/config/rooms';
 
+const AUTO_ROTATE_INTERVAL = 4000; // 4 seconds between rotations
+
 export function ShopByRoom() {
   const [activeRoom, setActiveRoom] = useState<Room>(rooms[0]);
   const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
+  const [isAutoRotating, setIsAutoRotating] = useState(true);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-rotate rooms
+  useEffect(() => {
+    if (isAutoRotating) {
+      intervalRef.current = setInterval(() => {
+        setActiveRoom(current => {
+          const currentIndex = rooms.findIndex(r => r.id === current.id);
+          const nextIndex = (currentIndex + 1) % rooms.length;
+          return rooms[nextIndex];
+        });
+      }, AUTO_ROTATE_INTERVAL);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isAutoRotating]);
+
+  // Handle room click - stop auto-rotation
+  const handleRoomClick = (room: Room) => {
+    setIsAutoRotating(false);
+    setActiveRoom(room);
+  };
 
   return (
     <section className="py-10 md:py-14 bg-white">
@@ -29,7 +58,7 @@ export function ShopByRoom() {
               {rooms.map((room) => (
                 <button
                   key={room.id}
-                  onClick={() => setActiveRoom(room)}
+                  onClick={() => handleRoomClick(room)}
                   className={`block w-full text-left font-english text-3xl md:text-5xl lg:text-6xl tracking-wide transition-all duration-300 ${
                     activeRoom.id === room.id
                       ? 'text-gray-900 font-medium'
