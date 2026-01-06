@@ -38,7 +38,7 @@ export default function ShowroomPage() {
           </div>
           
           {/* Video - with negative margin to overlap title */}
-          <div className="relative w-full aspect-video rounded-[30px] overflow-hidden -mt-[15px] md:-mt-[70px] lg:-mt-[50px]">
+          <div className="relative w-full aspect-video rounded-[30px] overflow-hidden -mt-[12px] md:-mt-[70px] lg:-mt-[50px]">
             <video
               autoPlay
               muted
@@ -57,7 +57,7 @@ export default function ShowroomPage() {
         <div className="max-w-[1300px] mx-auto px-4">
           {/* VISIT US Title */}
           <div className="flex justify-center mb-8">
-            <h2 className="font-english text-[32px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.1em] leading-none">
+            <h2 className="font-english text-[50px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.1em] leading-none">
               VISIT US
             </h2>
           </div>
@@ -147,7 +147,7 @@ export default function ShowroomPage() {
         <div className="max-w-[1300px] mx-auto px-4">
           {/* Title */}
           <div className="flex justify-center mb-12">
-            <h2 className="font-english text-[28px] md:text-[60px] lg:text-[80px] font-[300] text-[#333] tracking-[0.15em] leading-none">
+            <h2 className="font-english text-[50px] md:text-[60px] lg:text-[80px] font-[300] text-[#333] tracking-[0.15em] leading-none">
               WHY VISIT
             </h2>
           </div>
