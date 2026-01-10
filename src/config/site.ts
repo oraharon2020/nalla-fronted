@@ -16,7 +16,7 @@ export const siteConfig = {
   // URLs
   // Production URL - used for sitemap, canonical URLs, and SEO
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://nalla.co.il',
-  wordpressUrl: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://nalla.co.il',
+  wordpressUrl: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://admin.nalla.co.il',
   vercelUrl: 'https://nalla.vercel.app',
   
   // ============================================================
@@ -94,7 +94,7 @@ export const siteConfig = {
   
   // Social Media
   social: {
-    instagram: 'https://www.instagram.com/nalla_decor/',
+    instagram: 'https://www.instagram.com/nalla_decor',
     instagramHandle: 'nalla_decor',
     facebook: 'https://www.facebook.com/nollaisrael',
     facebookHandle: 'nollaisrael',
@@ -122,7 +122,7 @@ export const siteConfig = {
     dark: '/images/nalla-logo.png', // Black logo on transparent
     light: '/images/nalla-logo-white.png', // White logo for dark backgrounds
     square: '/images/nalla-logo-square.png',
-    wordpressUrl: 'https://nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
+    wordpressUrl: 'https://admin.nalla.co.il/wp-content/uploads/2025/09/logo-19.png',
   },
   favicon: {
     ico32: '/favicon.png',
@@ -194,7 +194,7 @@ export const siteConfig = {
   apiNamespace: 'bellano',
   
   // Default banner image
-  defaultBannerImage: 'https://nalla.co.il/wp-content/uploads/2025/09/banner-main.jpg',
+  defaultBannerImage: 'https://admin.nalla.co.il/wp-content/uploads/2025/09/banner-main.jpg',
   
   // Currency
   currency: {
@@ -220,16 +220,14 @@ export const getWpUrl = (path: string = '') => {
 };
 
 // Helper function to fix media URLs - convert nalla.co.il to admin.nalla.co.il
-// TODO: לאחר העברת WordPress ל-admin.nalla.co.il - להפעיל את הפונקציה
+// Activated: WordPress moved to admin.nalla.co.il
 export const fixMediaUrl = (url: string | undefined | null): string => {
   if (!url) return '';
-  // כרגע WordPress יושב על nalla.co.il אז לא צריך להמיר
-  // לאחר ההעברה: Replace any nalla.co.il/wp-content URL with admin.nalla.co.il
-  // return url.replace(
-  //   /https?:\/\/(www\.)?nalla\.co\.il\/wp-content/g,
-  //   'https://admin.nalla.co.il/wp-content'
-  // );
-  return url;
+  // Replace any nalla.co.il/wp-content URL with admin.nalla.co.il
+  return url.replace(
+    /https?:\/\/(www\.)?nalla\.co\.il\/wp-content/g,
+    'https://admin.nalla.co.il/wp-content'
+  );
 };
 
 // Helper function to get API endpoint

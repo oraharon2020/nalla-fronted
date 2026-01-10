@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const res = await fetch('https://nalla.co.il/wp-json/bellano/v1/footer', {
+    const res = await fetch('https://admin.nalla.co.il/wp-json/bellano/v1/footer', {
       next: { revalidate: 300 }, // Cache for 5 minutes
     });
     
@@ -19,8 +19,8 @@ export async function GET() {
       contact: {
         phone: ' 03-3732350',
         address: 'אברהם בומה שביט 1 ראשון לציון, אולם F-101',
-        facebook: 'https://facebook.com/nalla',
-        instagram: 'https://instagram.com/nalla',
+        facebook: 'https://www.facebook.com/nollaisrael',
+        instagram: 'https://www.instagram.com/nalla_decor',
       },
       hours: {
         showroom_title: 'Show-room ומוקד מכירות',

@@ -322,7 +322,7 @@ function ChooseColorSection() {
           {/* Left - Image */}
           <div className="w-full md:w-1/2">
             <Image
-              src="https://nalla.co.il/wp-content/uploads/2025/09/tanoor.png.webp"
+              src="https://admin.nalla.co.il/wp-content/uploads/2025/09/tanoor.png.webp"
               alt="צביעה בתנור"
               width={600}
               height={500}
@@ -534,7 +534,7 @@ function StoneTravertineSection() {
             {/* Sideboard Image */}
             <div className="relative rounded-[30px] rounded-tl-none overflow-hidden bg-[#f5f5f0] mb-6">
               <Image
-                src="https://nalla.co.il/wp-content/uploads/2025/09/WhatsApp-Image-2025-07-07-at-12.15.58-1.jpg.webp"
+                src="https://admin.nalla.co.il/wp-content/uploads/2025/09/WhatsApp-Image-2025-07-07-at-12.15.58-1.jpg.webp"
                 alt="מזנון Stone Travertine"
                 width={800}
                 height={500}
@@ -566,7 +566,7 @@ function StoneTravertineSection() {
           <div className="w-full md:w-[40%] flex items-end">
             <div className="relative rounded-[30px] rounded-tl-none overflow-hidden bg-[#f5f5f0] w-full">
               <Image
-                src="https://nalla.co.il/wp-content/uploads/2025/09/DSC_9517-1.jpg.webp"
+                src="https://admin.nalla.co.il/wp-content/uploads/2025/09/DSC_9517-1.jpg.webp"
                 alt="שולחן Stone Travertine"
                 width={600}
                 height={600}

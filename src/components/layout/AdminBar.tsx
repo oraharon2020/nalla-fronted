@@ -54,7 +54,7 @@ export function AdminBar() {
         <span className="font-semibold text-yellow-400">⚡ Admin</span>
         
         <a
-          href="https://nalla.co.il/wp-admin/"
+          href="https://admin.nalla.co.il/wp-admin/"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 hover:text-yellow-400 transition-colors"
@@ -65,7 +65,7 @@ export function AdminBar() {
         </a>
 
         <a
-          href="https://nalla.co.il/wp-admin/edit.php?post_type=product"
+          href="https://admin.nalla.co.il/wp-admin/edit.php?post_type=product"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 hover:text-yellow-400 transition-colors"
@@ -78,7 +78,7 @@ export function AdminBar() {
         {/* Context-specific links */}
         {isProductPage && currentProductId && (
           <a
-            href={`https://nalla.co.il/wp-admin/post.php?post=${currentProductId}&action=edit`}
+            href={`https://admin.nalla.co.il/wp-admin/post.php?post=${currentProductId}&action=edit`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 bg-yellow-500 text-gray-900 px-2 py-1 rounded hover:bg-yellow-400 transition-colors"
@@ -90,7 +90,7 @@ export function AdminBar() {
 
         {isCategoryPage && currentCategoryId && (
           <a
-            href={`https://nalla.co.il/wp-admin/term.php?taxonomy=product_cat&tag_ID=${currentCategoryId}&post_type=product`}
+            href={`https://admin.nalla.co.il/wp-admin/term.php?taxonomy=product_cat&tag_ID=${currentCategoryId}&post_type=product`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-400 transition-colors"

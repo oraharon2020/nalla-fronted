@@ -8,16 +8,16 @@ export const metadata: Metadata = {
 };
 
 const colorSwatches = [
-  { code: '0849P', image: 'https://nalla.co.il/wp-content/uploads/2025/02/5.jpg' },
-  { code: '1513P', image: 'https://nalla.co.il/wp-content/uploads/2025/02/3.png' },
-  { code: '1515P', image: 'https://nalla.co.il/wp-content/uploads/2025/02/2-1.png' },
-  { code: '1517P', image: 'https://nalla.co.il/wp-content/uploads/2025/02/1-2.png' },
+  { code: '0849P', image: 'https://admin.nalla.co.il/wp-content/uploads/2025/02/5.jpg' },
+  { code: '1513P', image: 'https://admin.nalla.co.il/wp-content/uploads/2025/02/3.png' },
+  { code: '1515P', image: 'https://admin.nalla.co.il/wp-content/uploads/2025/02/2-1.png' },
+  { code: '1517P', image: 'https://admin.nalla.co.il/wp-content/uploads/2025/02/1-2.png' },
 ];
 
 const galleryImages = [
-  'https://nalla.co.il/wp-content/uploads/2025/02/HomePage-OurProjects-img_1.jpg',
-  'https://nalla.co.il/wp-content/uploads/2025/02/404_2.jpg',
-  'https://nalla.co.il/wp-content/uploads/2025/02/HomePage-OurProjects-img_3.jpg',
+  'https://admin.nalla.co.il/wp-content/uploads/2025/02/HomePage-OurProjects-img_1.jpg',
+  'https://admin.nalla.co.il/wp-content/uploads/2025/02/404_2.jpg',
+  'https://admin.nalla.co.il/wp-content/uploads/2025/02/HomePage-OurProjects-img_3.jpg',
 ];
 
 export default function TambourPage() {
@@ -94,7 +94,7 @@ export default function TambourPage() {
       {/* Color Strip */}
       <section className="w-full overflow-hidden">
         <Image
-          src="https://nalla.co.il/wp-content/uploads/2025/02/1-1024x394.webp"
+          src="https://admin.nalla.co.il/wp-content/uploads/2025/02/1-1024x394.webp"
           alt="פלטת צבעי טמבור"
           width={1024}
           height={394}
@@ -157,7 +157,7 @@ export default function TambourPage() {
             {/* Image */}
             <div className="relative aspect-[4/3]">
               <Image
-                src="https://nalla.co.il/wp-content/uploads/2025/02/404Page-Hero.jpg"
+                src="https://admin.nalla.co.il/wp-content/uploads/2025/02/404Page-Hero.jpg"
                 alt="רהיט בצביעת טמבור"
                 fill
                 className="object-cover"

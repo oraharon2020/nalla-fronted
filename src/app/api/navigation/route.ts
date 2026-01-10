@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const res = await fetch('https://nalla.co.il/wp-json/bellano/v1/navigation', {
+    const res = await fetch('https://admin.nalla.co.il/wp-json/bellano/v1/navigation', {
       next: { revalidate: 300 }, // Cache for 5 minutes
     });
     

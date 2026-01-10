@@ -154,7 +154,7 @@ export function Header() {
               
               {/* Desktop: Social Icons */}
               <a 
-                href="https://facebook.com/nalla" 
+                href="https://www.facebook.com/nollaisrael" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="hidden lg:flex w-8 h-8 bg-black rounded-full items-center justify-center hover:bg-gray-800 transition-colors"
@@ -165,7 +165,7 @@ export function Header() {
                 </svg>
               </a>
               <a 
-                href="https://instagram.com/nalla" 
+                href="https://www.instagram.com/nalla_decor" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="hidden lg:flex w-8 h-8 bg-black rounded-full items-center justify-center hover:bg-gray-800 transition-colors"
