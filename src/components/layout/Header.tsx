@@ -125,7 +125,7 @@ export function Header() {
       }`}>
         <div className="max-w-[1300px] mx-auto px-4">
           {/* Top Row - Icons and Logo */}
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between py-3 lg:py-4">
             {/* Right Side - Hamburger (mobile) / Search & Social (desktop) */}
             <div className="flex items-center gap-3">
               {/* Mobile: Hamburger Menu */}
@@ -177,17 +177,34 @@ export function Header() {
               </a>
             </div>
 
-            {/* Center Logo */}
-            <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-              <Image
-                src={siteConfig.logo.wordpressUrl}
-                alt={siteConfig.fullName}
-                width={180}
-                height={60}
-                className="h-10 lg:h-14 w-auto"
-                priority
-              />
-            </Link>
+            {/* Center Logo with Miluimnik Badge */}
+            {/* Desktop: badge on right side of logo | Mobile: badge below logo */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex flex-col lg:flex-row items-center lg:gap-3">
+              {/* Miluimnik Badge - Desktop: RIGHT side with separator */}
+              {/* TODO: To remove badge, delete this block */}
+              {!isScrolled && (
+                <>
+                  <Image
+                    src="/images/miluimnik-badge.webp"
+                    alt="עסק של מילואימניק"
+                    width={130}
+                    height={42}
+                    className="h-10 lg:h-11 w-auto hidden lg:block"
+                  />
+                  <div className="w-px h-10 bg-gray-300 hidden lg:block" />
+                </>
+              )}
+              <Link href="/">
+                <Image
+                  src={siteConfig.logo.wordpressUrl}
+                  alt={siteConfig.fullName}
+                  width={180}
+                  height={60}
+                  className="h-10 lg:h-14 w-auto"
+                  priority
+                />
+              </Link>
+            </div>
 
             {/* Left Icons - Search (mobile), Wishlist & Cart */}
             <div className="flex items-center gap-3 lg:gap-3">
@@ -251,6 +268,19 @@ export function Header() {
 
       {/* Spacer when header is fixed - prevents content jump */}
       {isScrolled && <div className="h-[72px] lg:h-[104px]" />}
+
+      {/* Miluimnik Badge - Mobile only, between header and category icons */}
+      {!isScrolled && (
+        <div className="lg:hidden flex justify-center py-1 bg-white border-b border-gray-100">
+          <Image
+            src="/images/miluimnik-badge.webp"
+            alt="עסק של מילואימניק"
+            width={140}
+            height={36}
+            className="h-8 w-auto"
+          />
+        </div>
+      )}
 
       {/* Category Icons Carousel */}
       <CategoryIconsCarousel />

@@ -164,12 +164,23 @@ export function Footer() {
           {/* Logo & Contact - Right Side */}
           <div className="text-center">
             {/* Logo */}
-            <div className="mb-6">
+            <div className="mb-4">
               <Link href="/">
                 <span className="font-english text-[42px] font-light tracking-[0.15em] text-[#333]">
                   NALLA
                 </span>
               </Link>
+            </div>
+            
+            {/* Miluimnik Badge */}
+            <div className="mb-4">
+              <Image
+                src="/images/miluimnik-badge.webp"
+                alt="עסק של מילואימניק"
+                width={200}
+                height={50}
+                className="h-12 w-auto mx-auto"
+              />
             </div>
             
             {/* Address */}
