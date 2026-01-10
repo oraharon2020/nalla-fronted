@@ -242,7 +242,9 @@ export async function getProducts(params?: {
  * Get single product by slug
  */
 export async function getProductBySlug(slug: string): Promise<WooProduct | null> {
-  const products = await wooFetch<WooProduct[]>(`products?slug=${slug}`);
+  // Normalize Hebrew slug encoding
+  const normalizedSlug = encodeURIComponent(decodeURIComponent(slug));
+  const products = await wooFetch<WooProduct[]>(`products?slug=${normalizedSlug}`);
   return products[0] || null;
 }
 
@@ -290,7 +292,10 @@ export interface FullProductData {
  */
 export const getFullProductData = cache(async (slug: string): Promise<FullProductData | null> => {
   try {
-    const url = getApiEndpoint(`product-full/${slug}`);
+    // Decode then re-encode slug to handle Hebrew characters correctly
+    // Next.js sometimes passes lowercase encoded slugs (%d7) instead of uppercase (%D7)
+    const normalizedSlug = encodeURIComponent(decodeURIComponent(slug));
+    const url = getApiEndpoint(`product-full/${normalizedSlug}`);
     
     const response = await fetch(url, {
       next: { revalidate: 600 } // 10 minutes cache

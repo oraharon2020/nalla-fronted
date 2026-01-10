@@ -9,12 +9,16 @@ interface AdminStore {
   adminToken: string | null;
   upgrades: { name: string; price: number }[];
   showLoginModal: boolean;
+  currentProductId: number | null;
+  currentCategoryId: number | null;
   
   // Actions
   setAdmin: (isAdmin: boolean, adminName: string, token: string | null, upgrades?: { name: string; price: number }[]) => void;
   logout: () => void;
   openLoginModal: () => void;
   closeLoginModal: () => void;
+  setCurrentProduct: (id: number | null) => void;
+  setCurrentCategory: (id: number | null) => void;
 }
 
 export const useAdminStore = create<AdminStore>()(
@@ -25,6 +29,8 @@ export const useAdminStore = create<AdminStore>()(
       adminToken: null,
       upgrades: [],
       showLoginModal: false,
+      currentProductId: null,
+      currentCategoryId: null,
       
       setAdmin: (isAdmin, adminName, token, upgrades = []) => 
         set({ isAdmin, adminName, adminToken: token, upgrades }),
@@ -37,6 +43,12 @@ export const useAdminStore = create<AdminStore>()(
       
       closeLoginModal: () => 
         set({ showLoginModal: false }),
+      
+      setCurrentProduct: (id) => 
+        set({ currentProductId: id }),
+      
+      setCurrentCategory: (id) => 
+        set({ currentCategoryId: id }),
     }),
     {
       name: 'nalla-admin',

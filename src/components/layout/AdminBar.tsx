@@ -6,7 +6,7 @@ import { ExternalLink, Edit, LayoutDashboard, Package, LogOut, X } from 'lucide-
 import { useState, useEffect } from 'react';
 
 export function AdminBar() {
-  const { isAdmin, adminName, logout } = useAdminStore();
+  const { isAdmin, adminName, logout, currentProductId, currentCategoryId } = useAdminStore();
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -30,13 +30,11 @@ export function AdminBar() {
   // Don't render on server or if not admin
   if (!mounted || !isAdmin) return null;
 
-  // Extract product slug from URL if on product page
-  const productMatch = pathname.match(/^\/product\/([^/]+)/);
-  const productSlug = productMatch ? productMatch[1] : null;
+  // Check if on product page
+  const isProductPage = pathname.startsWith('/product/');
 
-  // Extract category slug from URL if on category page
-  const categoryMatch = pathname.match(/^\/category\/([^/]+)/);
-  const categorySlug = categoryMatch ? categoryMatch[1] : null;
+  // Check if on category page  
+  const isCategoryPage = pathname.startsWith('/category/') || pathname.startsWith('/product-category/');
 
   if (!isVisible) {
     return (
@@ -78,9 +76,9 @@ export function AdminBar() {
         </a>
 
         {/* Context-specific links */}
-        {productSlug && (
+        {isProductPage && currentProductId && (
           <a
-            href={`https://nalla.co.il/wp-admin/edit.php?post_type=product&s=${encodeURIComponent(productSlug)}`}
+            href={`https://nalla.co.il/wp-admin/post.php?post=${currentProductId}&action=edit`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 bg-yellow-500 text-gray-900 px-2 py-1 rounded hover:bg-yellow-400 transition-colors"
@@ -90,9 +88,9 @@ export function AdminBar() {
           </a>
         )}
 
-        {categorySlug && (
+        {isCategoryPage && currentCategoryId && (
           <a
-            href={`https://nalla.co.il/wp-admin/edit-tags.php?taxonomy=product_cat&post_type=product&s=${encodeURIComponent(categorySlug)}`}
+            href={`https://nalla.co.il/wp-admin/term.php?taxonomy=product_cat&tag_ID=${currentCategoryId}&post_type=product`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-400 transition-colors"

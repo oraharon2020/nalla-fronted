@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
+import { useAdminStore } from '@/lib/store/admin';
 import { AdminProductFields } from '@/components/product/AdminProductFields';
 import { ProductVideo } from '@/components/product/ProductVideo';
 import { ColorSwatch, findSwatchByName } from '@/lib/woocommerce/api';
@@ -271,6 +272,14 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
   const addToCartRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const [showFloatingButton, setShowFloatingButton] = useState(false);
+  
+  const setCurrentProduct = useAdminStore((state) => state.setCurrentProduct);
+  
+  // Set current product ID for admin bar
+  useEffect(() => {
+    setCurrentProduct(product.databaseId);
+    return () => setCurrentProduct(null);
+  }, [product.databaseId, setCurrentProduct]);
   
   // Hydration fix - wait for client mount
   useEffect(() => {
