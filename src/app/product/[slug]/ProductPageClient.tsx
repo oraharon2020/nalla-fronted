@@ -1324,7 +1324,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                       </button>
                       
                       {openFaq === index && (
-                        <div className="px-3 pb-3 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
+                        <div className="px-3 pb-3 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-3 whitespace-pre-line">
                           {faq.answer}
                         </div>
                       )}
