@@ -13,6 +13,7 @@ import { useWishlistStore } from '@/lib/store/wishlist';
 import { useAdminStore } from '@/lib/store/admin';
 import { AdminProductFields } from '@/components/product/AdminProductFields';
 import { ProductVideo } from '@/components/product/ProductVideo';
+import { ProductLightbox } from '@/components/product/ProductLightbox';
 import { ColorSwatch, findSwatchByName } from '@/lib/woocommerce/api';
 import { siteConfig } from '@/config/site';
 import ProductAIChat from '@/components/product/ProductAIChat';
@@ -313,6 +314,8 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
   const [quantity, setQuantity] = useState(1);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const thumbnailsRef = useRef<HTMLDivElement>(null);
   const addToCartRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -372,6 +375,12 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
   // Scroll to purchase section
   const scrollToPurchase = () => {
     addToCartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  
+  // Open lightbox at specific image index
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
   
   // Admin fields state
@@ -733,13 +742,14 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                     }
                   }
                 }}
+                onClick={() => openLightbox(selectedImage)}
               >
                 {allImages[selectedImage]?.sourceUrl && (
                   <Image
                     src={allImages[selectedImage].sourceUrl}
                     alt={allImages[selectedImage].altText || product.name}
                     fill
-                    className="object-contain"
+                    className="object-contain cursor-zoom-in"
                     priority
                     fetchPriority="high"
                     sizes="100vw"
@@ -756,14 +766,14 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                 {allImages.length > 1 && (
                   <>
                     <button
-                      onClick={() => setSelectedImage(prev => prev > 0 ? prev - 1 : allImages.length - 1)}
+                      onClick={(e) => { e.stopPropagation(); setSelectedImage(prev => prev > 0 ? prev - 1 : allImages.length - 1); }}
                       className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md flex items-center justify-center"
                       aria-label="תמונה קודמת"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => setSelectedImage(prev => prev < allImages.length - 1 ? prev + 1 : 0)}
+                      onClick={(e) => { e.stopPropagation(); setSelectedImage(prev => prev < allImages.length - 1 ? prev + 1 : 0); }}
                       className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md flex items-center justify-center"
                       aria-label="תמונה הבאה"
                     >
@@ -809,7 +819,10 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
             {/* Desktop: All Images Stacked */}
             <div className="hidden md:block space-y-4">
               {/* Main Image - Changes based on selected variation */}
-              <div className="relative aspect-square rounded-2xl overflow-hidden">
+              <div 
+                className="relative aspect-square rounded-2xl overflow-hidden cursor-zoom-in"
+                onClick={() => openLightbox(selectedImage)}
+              >
                 {allImages[selectedImage]?.sourceUrl && (
                   <Image
                     src={allImages[selectedImage].sourceUrl}
@@ -837,7 +850,8 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                 return (
                   <div 
                     key={`image-${index}-${img.sourceUrl}`}
-                    className="relative aspect-square rounded-2xl overflow-hidden"
+                    className="relative aspect-square rounded-2xl overflow-hidden cursor-zoom-in"
+                    onClick={() => openLightbox(index)}
                   >
                     {img.sourceUrl && (
                       <Image
@@ -1391,6 +1405,14 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
           </div>
         </div>
       )}
+
+      {/* Product Image Lightbox */}
+      <ProductLightbox
+        images={allImages}
+        initialIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
     </div>
   );
 }
