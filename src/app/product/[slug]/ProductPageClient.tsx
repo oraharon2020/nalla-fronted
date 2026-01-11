@@ -1195,7 +1195,63 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
               />
             )} */}
 
-            {/* FAQ Section - Below info badges */}
+            {/* Desktop: Description/Specs Tabs - Shows ABOVE FAQ on desktop */}
+            <div className="hidden md:block pt-4 border-t border-gray-100">
+              <div className="flex gap-4 md:gap-6 border-b mb-4 md:mb-6">
+                <button 
+                  onClick={() => setActiveTab('description')}
+                  className={`pb-3 text-sm transition ${
+                    activeTab === 'description' 
+                      ? 'text-black border-b-2 border-black font-medium' 
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  תיאור המוצר
+                </button>
+                <button 
+                  onClick={() => setActiveTab('specs')}
+                  className={`pb-3 text-sm transition ${
+                    activeTab === 'specs' 
+                      ? 'text-black border-b-2 border-black font-medium' 
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  מפרט טכני
+                </button>
+              </div>
+              
+              <div className="max-w-3xl">
+                {activeTab === 'description' ? (
+                  <HtmlContent 
+                    html={product.description || ''}
+                    className="text-sm text-gray-600 leading-relaxed [&_*]:!font-sans [&_p]:mb-3 [&_ul]:list-disc [&_ul]:mr-5 [&_li]:mb-1"
+                  />
+                ) : (
+                  <div className="text-sm">
+                    <table className="w-full">
+                      <tbody>
+                        {attributes.map(attr => (
+                          <tr key={attr.name} className="border-b border-gray-100">
+                            <td className="py-2.5 text-gray-500 w-1/3">{attr.name}</td>
+                            <td className="py-2.5">{selectedAttributes[attr.name] || attr.options[0]}</td>
+                          </tr>
+                        ))}
+                        <tr className="border-b border-gray-100">
+                          <td className="py-2.5 text-gray-500">ייצור</td>
+                          <td className="py-2.5">ישראל</td>
+                        </tr>
+                        <tr className="border-b border-gray-100">
+                          <td className="py-2.5 text-gray-500">אחריות</td>
+                          <td className="py-2.5">שנה</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* FAQ Section - Below info badges on mobile, below tabs on desktop */}
             {faqs && faqs.length > 0 && (
               <div className="pt-4 border-t border-gray-100">
                 <div className="space-y-2">
@@ -1229,8 +1285,8 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="mt-8 md:mt-12 border-t pt-6 md:pt-8">
+        {/* Tabs - Mobile only */}
+        <div className="md:hidden mt-8 border-t pt-6">
           <div className={`flex flex-col-reverse ${video ? 'lg:flex-row lg:gap-8' : ''}`}>
             {/* Video Section - Left side on desktop (hidden on desktop since it's in gallery) */}
             {video && (
@@ -1242,7 +1298,7 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
 
             {/* Description/Specs Section */}
             <div className="w-full">
-              <div className="flex gap-4 md:gap-6 border-b mb-4 md:mb-6">
+              <div className="flex gap-4 border-b mb-4">
                 <button 
                   onClick={() => setActiveTab('description')}
                   className={`pb-3 text-sm transition ${
