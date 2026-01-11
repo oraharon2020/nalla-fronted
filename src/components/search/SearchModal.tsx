@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, X, Loader2 } from 'lucide-react';
+import { track } from '@vercel/analytics';
 import { searchProductsAction, SearchResult } from '@/app/actions/search';
 
 interface SearchModalProps {
@@ -60,6 +61,12 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     try {
       const searchResults = await searchProductsAction(searchQuery);
       setResults(searchResults);
+      
+      // Track search with Vercel Analytics
+      track('search', {
+        query: searchQuery,
+        results_count: searchResults.length,
+      });
     } catch (error) {
       console.error('Search error:', error);
       setResults([]);

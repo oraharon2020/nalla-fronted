@@ -6,6 +6,7 @@ import { GoogleReviews } from '@/components/home/GoogleReviews';
 import { ShopByRoom } from '@/components/home/ShopByRoom';
 import { BestSellersCarousel } from '@/components/home/BestSellersCarousel';
 import { HappyHomesReviews } from '@/components/home/HappyHomesReviews';
+import { NewsletterSection } from '@/components/home/NewsletterSection';
 import { siteConfig, getApiEndpoint, fixMediaUrl } from '@/config/site';
 
 // Helper to get optimized image URL through Next.js
@@ -392,66 +393,6 @@ function ShowroomSection() {
             <source src="/videos/nalla-showroom.mp4" type="video/mp4" />
           </video>
         </Link>
-      </div>
-    </section>
-  );
-}
-
-// Newsletter Section - Inspired Living design
-function NewsletterSection() {
-  return (
-    <section className="py-10 md:py-14 bg-white">
-      <div className="max-w-[1300px] mx-auto px-4">
-        {/* INSPIRED LIVING Title */}
-        <div className="flex justify-center mb-8">
-          <h2 className="font-english text-[32px] md:text-[80px] lg:text-[100px] font-[300] text-[#333] tracking-[0.15em] md:tracking-[0.1em] leading-none">
-            INSPIRED LIVING
-          </h2>
-        </div>
-        
-        {/* Form Container with green background */}
-        <div className="bg-[#e1eadf] rounded-br-[50px] rounded-bl-[50px] rounded-tr-[50px] rounded-tl-none py-12 px-6 md:px-12 -mt-[45px] md:-mt-[55px] lg:-mt-[70px]">
-          <div className="max-w-4xl mx-auto">
-            {/* Subtitle */}
-            <p className="text-center text-lg md:text-xl text-[#333] mb-8">
-              רכישה ראשונה אצלנו? <span className="font-bold">קבלו 5% הנחה + משלוח חינם</span>
-            </p>
-            
-            {/* Form */}
-            <form className="flex flex-col md:flex-row gap-3 items-center justify-center mb-4">
-              <input
-                type="text"
-                placeholder="שם מלא (חובה)"
-                className="w-full md:w-auto px-6 py-3 rounded-full border border-gray-300 bg-white text-right text-sm focus:outline-none focus:border-gray-400"
-                required
-              />
-              <input
-                type="tel"
-                placeholder="טלפון (חובה)"
-                className="w-full md:w-auto px-6 py-3 rounded-full border border-gray-300 bg-white text-right text-sm focus:outline-none focus:border-gray-400"
-                required
-              />
-              <input
-                type="email"
-                placeholder="אימייל (חובה)"
-                className="w-full md:w-auto px-6 py-3 rounded-full border border-gray-300 bg-white text-right text-sm focus:outline-none focus:border-gray-400"
-                required
-              />
-              <button
-                type="submit"
-                className="w-full md:w-auto px-8 py-3 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                שלח פרטים
-              </button>
-            </form>
-            
-            {/* Checkbox */}
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-sm text-[#333]">מאשר/ת קבלת חומר פרסומי</span>
-              <input type="checkbox" className="w-4 h-4" />
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

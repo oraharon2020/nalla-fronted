@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { track } from '@vercel/analytics';
 import { Heart, Minus, Plus, Truck, ShieldCheck, CreditCard, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, HelpCircle, Play } from 'lucide-react';
 import { ShareButtons } from '@/components/product/ShareButtons';
 import { Button } from '@/components/ui/button';
@@ -634,6 +635,15 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
       });
     }
     
+    // Vercel Analytics - Add to Cart
+    track('add_to_cart', {
+      product_id: product.databaseId,
+      product_name: product.name,
+      price: priceValue,
+      quantity: quantity,
+      total: priceValue * quantity,
+    });
+    
     const adminFieldsToSave = {
       ...(adminFieldsData ? {
         width: adminFieldsData.width,
@@ -1152,7 +1162,16 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                     ? 'border-red-500 bg-red-50' 
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
-                onClick={() => toggleItem(wishlistItem)}
+                onClick={() => {
+                  toggleItem(wishlistItem);
+                  // Track wishlist action
+                  if (!isWishlisted) {
+                    track('wishlist_add', {
+                      product_id: product.databaseId,
+                      product_name: product.name,
+                    });
+                  }
+                }}
                 aria-label={isWishlisted ? 'הסר מהמועדפים' : 'הוסף למועדפים'}
                 aria-pressed={isWishlisted}
               >

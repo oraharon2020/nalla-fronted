@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { track } from '@vercel/analytics';
 import Image from 'next/image';
 import { CheckCircle, Loader2, ArrowRight, Package, Truck, Phone, Mail, ShoppingBag } from 'lucide-react';
 import { siteConfig, getWhatsAppLink } from '@/config/site';
@@ -86,6 +87,14 @@ function SuccessContent() {
         });
         console.log(`GA4 ${isPhoneOrder ? 'generate_lead' : 'purchase'} event fired:`, totalValue);
       }
+      
+      // Vercel Analytics - Purchase
+      track('purchase', {
+        order_id: orderData.id,
+        total: totalValue,
+        items_count: orderData.items.reduce((sum, item) => sum + item.quantity, 0),
+        is_phone_order: isPhoneOrder,
+      });
     }
   }, [orderStatus, orderData, trackingFired]);
 
