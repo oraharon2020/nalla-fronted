@@ -112,7 +112,7 @@ async function HeroSection() {
         {/* Banner Image Container */}
         <div className="relative overflow-hidden rounded-tr-[50px] rounded-br-[50px] rounded-bl-[50px] rounded-tl-none">
       {/* Background - Video or Image */}
-      <div className="relative bg-[#f5f5f0]">
+      <div className="relative bg-[#f5f5f0] aspect-[16/9] md:aspect-[21/9]">
         {/* Desktop: Show video if available, otherwise image */}
         {hasDesktopVideo ? (
           <video
@@ -120,7 +120,9 @@ async function HeroSection() {
             muted
             playsInline
             poster={getOptimizedImageUrl(videoPoster || imageUrl, 1200)}
-            className="w-full h-auto hidden md:block"
+            className="w-full h-full object-cover hidden md:block"
+            width={1920}
+            height={823}
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
@@ -128,7 +130,9 @@ async function HeroSection() {
           <img
             src={imageUrl}
             alt="נלה - מעצבים את הבית"
-            className="w-full h-auto hidden md:block"
+            className="w-full h-full object-cover hidden md:block"
+            width={1920}
+            height={823}
           />
         )}
         
@@ -139,7 +143,9 @@ async function HeroSection() {
             muted
             playsInline
             poster={getOptimizedImageUrl(videoPoster || mobileImageUrl, 750)}
-            className="w-full h-auto md:hidden"
+            className="w-full h-full object-cover md:hidden"
+            width={750}
+            height={422}
           >
             <source src={mobileVideoUrl} type="video/mp4" />
           </video>
@@ -147,7 +153,9 @@ async function HeroSection() {
           <img
             src={mobileImageUrl}
             alt="נלה - מעצבים את הבית"
-            className="w-full h-auto md:hidden"
+            className="w-full h-full object-cover md:hidden"
+            width={750}
+            height={422}
           />
         )}
       </div>
