@@ -24,8 +24,9 @@ export async function POST(request: NextRequest) {
   }
   
   try {
-    // Revalidate the fetch cache tag (this clears WooCommerce API cache)
-    await revalidateTag('woocommerce');
+    // Expire the fetch cache tag (this clears WooCommerce API cache)
+    // In Next.js 16, revalidateTag requires a profile parameter
+    revalidateTag('woocommerce', { expire: 0 });
     
     // Revalidate the specified path
     revalidatePath(path);
