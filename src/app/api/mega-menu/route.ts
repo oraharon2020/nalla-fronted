@@ -3,7 +3,10 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     const res = await fetch('https://admin.nalla.co.il/wp-json/bellano/v1/mega-menu', {
-      next: { revalidate: 300 }, // Cache for 5 minutes
+      next: { 
+        revalidate: 60, // Cache for 1 minute
+        tags: ['mega-menu', 'woocommerce']
+      },
     });
     
     if (!res.ok) {
