@@ -311,7 +311,10 @@ export const getFullProductData = cache(async (slug: string): Promise<FullProduc
     const url = getApiEndpoint(`product-full/${normalizedSlug}`);
     
     const response = await fetch(url, {
-      next: { revalidate: 600 } // 10 minutes cache
+      next: { 
+        revalidate: 600, // 10 minutes cache
+        tags: ['woocommerce', `product-${decodedSlug}`]
+      }
     });
     
     if (!response.ok) {
