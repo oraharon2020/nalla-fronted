@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   
   try {
     // Revalidate the fetch cache tag (this clears WooCommerce API cache)
-    revalidateTag('woocommerce');
+    await revalidateTag('woocommerce');
     
     // Revalidate the specified path
     revalidatePath(path);
