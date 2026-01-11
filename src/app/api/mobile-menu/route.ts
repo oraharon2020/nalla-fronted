@@ -35,7 +35,10 @@ function normalizeMenuItems(items: WPMenuItem[]): MenuItem[] {
 export async function GET() {
   try {
     const response = await fetch(`${WP_URL}/wp-json/bellano/v1/mobile-menu`, {
-      next: { revalidate: 300 }, // Cache for 5 minutes
+      next: { 
+        revalidate: 60, // Cache for 1 minute
+        tags: ['mobile-menu', 'woocommerce']
+      },
     });
 
     if (!response.ok) {
