@@ -167,24 +167,14 @@ export async function POST(request: NextRequest) {
       // Initialize meta_data array
       lineItem.meta_data = [];
       
-      // Add variation_id - WooCommerce handles displaying attributes
+      // Add variation_id - WooCommerce handles displaying attributes automatically
       if (item.variation_id) {
         lineItem.variation_id = item.variation_id;
       }
       
-      // Add variation attributes as meta_data for display in emails
-      // Use special format that WooCommerce will display in emails
-      if (item.variation_attributes && item.variation_attributes.length > 0) {
-        item.variation_attributes.forEach((attr) => {
-          // Use bellano_attr_ prefix (without underscore at start - WooCommerce hides underscore-prefixed meta)
-          lineItem.meta_data.push({ 
-            key: `bellano_attr_${attr.name.replace(/\s+/g, '_')}`,
-            value: attr.value,
-            display_key: attr.name,
-            display_value: attr.value
-          });
-        });
-      }
+      // NOTE: We don't send variation_attributes as meta_data anymore
+      // WooCommerce automatically displays them when variation_id is set
+      // This prevents duplicate attributes in order display
       
       // If admin fields are present, add them as meta data and override price
       if (item.admin_fields) {

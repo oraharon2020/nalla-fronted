@@ -158,9 +158,20 @@ export function AdminProductFields({
     return Math.max(0, price);
   };
 
+  // Calculate upgrades total first (needed for discount calculation)
+  const upgradesTotal = Object.entries(selectedUpgrades).reduce((sum, [index, qty]) => {
+    const upgrade = upgrades[parseInt(index)];
+    return sum + (upgrade ? upgrade.price * qty : 0);
+  }, 0);
+
   const totalPrice = calculateTotalPrice();
-  const discountPercent = currentBasePrice > 0 
-    ? ((currentBasePrice - totalPrice) / currentBasePrice) * 100 
+  
+  // Calculate price before discount (base + upgrades + additional fee)
+  const priceBeforeDiscount = currentBasePrice + upgradesTotal + (parseFloat(formData.additionalFee) || 0);
+  
+  // Calculate actual discount percentage from price before discount
+  const discountPercent = priceBeforeDiscount > 0 && totalPrice < priceBeforeDiscount
+    ? ((priceBeforeDiscount - totalPrice) / priceBeforeDiscount) * 100 
     : 0;
 
   // Notify parent of changes
@@ -179,11 +190,6 @@ export function AdminProductFields({
       [index]: Math.max(0, quantity),
     }));
   };
-
-  const upgradesTotal = Object.entries(selectedUpgrades).reduce((sum, [index, qty]) => {
-    const upgrade = upgrades[parseInt(index)];
-    return sum + (upgrade ? upgrade.price * qty : 0);
-  }, 0);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('he-IL', {
