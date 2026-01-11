@@ -57,8 +57,6 @@ export async function POST(request: NextRequest) {
             PhoneNumber: normalizedPhone,
             FirstName: firstName,
             LastName: lastName,
-            // Custom field for marketing consent
-            Text1: marketingConsent ? 'כן' : 'לא',
           }
         ]
       }

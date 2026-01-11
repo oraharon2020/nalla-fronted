@@ -21,6 +21,12 @@ export function NewsletterSection() {
       setStatus('error');
       return;
     }
+
+    if (!formData.marketingConsent) {
+      setErrorMessage('נא לאשר קבלת חומר פרסומי');
+      setStatus('error');
+      return;
+    }
     
     setStatus('loading');
     setErrorMessage('');
