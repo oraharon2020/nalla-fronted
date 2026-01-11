@@ -637,8 +637,8 @@ export function transformProduct(wooProduct: WooProduct, variations?: WooVariati
     sku: wooProduct.sku,
     availabilityType: wooProduct.bellano_availability || 'custom_order', // Default to custom_order
     assemblyIncluded: wooProduct.bellano_assembly !== false, // Default to true if not specified
-    tambourColor: wooProduct.bellano_tambour ?? { enabled: true, price: 300 }, // Default enabled
-    glassOption: wooProduct.bellano_glass ?? { enabled: false, price: 350, label: 'הוסף זכוכית' }, // Default disabled - must be explicitly enabled per product
+    tambourColor: wooProduct.bellano_tambour || null, // Must be explicitly enabled per product
+    glassOption: wooProduct.bellano_glass || null, // Must be explicitly enabled per product
     image: wooProduct.images?.[0] ? {
       sourceUrl: wooProduct.images[0].src,
       altText: wooProduct.images[0].alt || wooProduct.name,
