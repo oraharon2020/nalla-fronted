@@ -1,11 +1,9 @@
 'use client';
 
-import { useMemo, useState, useRef, useEffect, useTransition } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { Heart, Loader2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Heart } from 'lucide-react';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import type { Product, ProductVariation } from '@/lib/types';
 
@@ -118,8 +116,6 @@ export function ProductCard({ product }: ProductCardProps) {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [variationImage, setVariationImage] = useState<string | null>(null);
   const [isLoadingImage, setIsLoadingImage] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
   
   // Get unique colors from variations (deduplicate by colorName)
   const uniqueColors = useMemo(() => {
@@ -174,13 +170,6 @@ export function ProductCard({ product }: ProductCardProps) {
   
   // Reference to card element
   const cardRef = useRef<HTMLDivElement>(null);
-  
-  // Navigate with loading state
-  const handleNavigate = () => {
-    startTransition(() => {
-      router.push(`/product/${product.slug}`);
-    });
-  };
   
   // Queue prefetch when card becomes visible
   useEffect(() => {
@@ -280,20 +269,12 @@ export function ProductCard({ product }: ProductCardProps) {
     <div ref={cardRef} className="group">
       {/* Image Container */}
       <div className="relative aspect-square bg-[#f5f5f0] rounded-[20px] rounded-tl-none overflow-hidden mb-3">
-        {/* Clickable overlay with loading state */}
-        <button
-          onClick={handleNavigate}
-          disabled={isPending}
-          className="absolute inset-0 z-10 cursor-pointer"
+        {/* Clickable link - supports right-click and open in new tab */}
+        <Link
+          href={`/product/${product.slug}`}
+          className="absolute inset-0 z-10"
           aria-label={`צפה במוצר ${product.name}`}
         />
-        
-        {/* Loading overlay when navigating */}
-        {isPending && (
-          <div className="absolute inset-0 z-20 bg-white/80 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
-          </div>
-        )}
         
         {/* Product Image */}
         {displayImage ? (
@@ -358,11 +339,11 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product Info */}
       <div className="text-center space-y-2">
         {/* Product Name */}
-        <button onClick={handleNavigate} className="w-full text-center">
+        <Link href={`/product/${product.slug}`} className="w-full block text-center">
           <h3 className="font-medium text-base hover:text-primary transition-colors line-clamp-2">
             {product.name}
           </h3>
-        </button>
+        </Link>
 
         {/* Price */}
         <div className="flex items-center justify-center gap-2">
