@@ -112,7 +112,7 @@ async function HeroSection() {
         {/* Banner Image Container */}
         <div className="relative overflow-hidden rounded-tr-[50px] rounded-br-[50px] rounded-bl-[50px] rounded-tl-none">
       {/* Background - Video or Image */}
-      <div className="relative bg-[#f5f5f0] aspect-[16/9] md:aspect-[21/9]">
+      <div className="relative bg-[#f5f5f0] aspect-[16/9]">
         {/* Desktop: Show video if available, otherwise image */}
         {hasDesktopVideo ? (
           <video
