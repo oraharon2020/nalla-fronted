@@ -1,47 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
 
-// Newsletter subscribers storage
-// In production, you'd use a database or external service like Mailchimp, SendGrid, etc.
-const SUBSCRIBERS_FILE = path.join(process.cwd(), 'data', 'newsletter-subscribers.json');
+// InfoRU API Configuration
+const INFORU_API_URL = 'https://capi.inforu.co.il/api/v2/Automation/Trigger';
+const INFORU_API_EVENT = 'NewReg';
+const INFORU_AUTH = 'Basic bmFsbGFUTEQ6OGFmZjI0OTEtZWNhYy00OTcwLTkwZGEtYmYwMmJhYTlkZjli';
 
-interface Subscriber {
+interface NewsletterFormData {
+  name: string;
+  phone: string;
   email: string;
-  subscribedAt: string;
-  source: string;
-  confirmed: boolean;
-}
-
-async function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data');
-  try {
-    await fs.access(dataDir);
-  } catch {
-    await fs.mkdir(dataDir, { recursive: true });
-  }
-}
-
-async function getSubscribers(): Promise<Subscriber[]> {
-  try {
-    await ensureDataDir();
-    const data = await fs.readFile(SUBSCRIBERS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-async function saveSubscribers(subscribers: Subscriber[]): Promise<void> {
-  await ensureDataDir();
-  await fs.writeFile(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+  marketingConsent?: boolean;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, source = 'website' } = await request.json();
+    const { name, phone, email, marketingConsent } = await request.json() as NewsletterFormData;
 
-    // Validate email
+    // Validate required fields
     if (!email || !email.includes('@')) {
       return NextResponse.json(
         { success: false, message: 'נא להזין כתובת אימייל תקינה' },
@@ -49,35 +24,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Normalize email
-    const normalizedEmail = email.toLowerCase().trim();
-
-    // Check if already subscribed
-    const subscribers = await getSubscribers();
-    const existingSubscriber = subscribers.find(s => s.email === normalizedEmail);
-
-    if (existingSubscriber) {
+    if (!phone) {
       return NextResponse.json(
-        { success: true, message: 'כתובת האימייל כבר רשומה לרשימת התפוצה' },
-        { status: 200 }
+        { success: false, message: 'נא להזין מספר טלפון' },
+        { status: 400 }
       );
     }
 
-    // Add new subscriber
-    const newSubscriber: Subscriber = {
-      email: normalizedEmail,
-      subscribedAt: new Date().toISOString(),
-      source,
-      confirmed: true, // Auto-confirm for now, can add double opt-in later
+    if (!name) {
+      return NextResponse.json(
+        { success: false, message: 'נא להזין שם מלא' },
+        { status: 400 }
+      );
+    }
+
+    // Normalize data
+    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedPhone = phone.replace(/\D/g, ''); // Remove non-digits
+    
+    // Split name into first and last name
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    // Prepare InfoRU API payload
+    const inforuPayload = {
+      Data: {
+        ApiEventName: INFORU_API_EVENT,
+        Contacts: [
+          {
+            Email: normalizedEmail,
+            PhoneNumber: normalizedPhone,
+            FirstName: firstName,
+            LastName: lastName,
+            // Custom field for marketing consent
+            Text1: marketingConsent ? 'כן' : 'לא',
+          }
+        ]
+      }
     };
 
-    subscribers.push(newSubscriber);
-    await saveSubscribers(subscribers);
+    // Send to InfoRU
+    const inforuResponse = await fetch(INFORU_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': INFORU_AUTH,
+      },
+      body: JSON.stringify(inforuPayload),
+    });
 
-    // TODO: Send welcome email when email service is configured
-    // TODO: Sync with external service (Mailchimp, SendGrid, etc.)
+    const inforuResult = await inforuResponse.json();
 
-    console.log(`New newsletter subscriber: ${normalizedEmail}`);
+    // Check InfoRU response
+    if (inforuResult.StatusId !== 1) {
+      console.error('InfoRU API error:', inforuResult);
+      return NextResponse.json(
+        { success: false, message: 'שגיאה בהרשמה. נא לנסות שוב.' },
+        { status: 500 }
+      );
+    }
+
+    console.log(`New newsletter subscriber sent to InfoRU: ${normalizedEmail}, Phone: ${normalizedPhone}`);
 
     return NextResponse.json({
       success: true,
@@ -93,31 +101,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Get all subscribers (admin only - for future admin panel)
-export async function GET(request: NextRequest) {
-  try {
-    // Check for admin auth header (simple token for now)
-    const adminToken = request.headers.get('x-admin-token');
-    if (adminToken !== process.env.ADMIN_SECRET) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const subscribers = await getSubscribers();
-    
-    return NextResponse.json({
-      success: true,
-      count: subscribers.length,
-      subscribers,
-    });
-
-  } catch (error) {
-    console.error('Get subscribers error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Error fetching subscribers' },
-      { status: 500 }
-    );
-  }
-}
