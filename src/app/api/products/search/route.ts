@@ -14,31 +14,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || siteConfig.wordpressUrl;
-    const consumerKey = process.env.WC_CONSUMER_KEY || process.env.WOOCOMMERCE_CONSUMER_KEY;
-    const consumerSecret = process.env.WC_CONSUMER_SECRET || process.env.WOOCOMMERCE_CONSUMER_SECRET;
     
-    console.log('WooCommerce config:', { 
-      wpUrl, 
-      hasKey: !!consumerKey, 
-      hasSecret: !!consumerSecret 
-    });
-    
-    if (!consumerKey || !consumerSecret) {
-      console.error('Missing WooCommerce credentials');
-      return NextResponse.json(
-        { error: 'WooCommerce credentials not configured', products: [] },
-        { status: 500 }
-      );
-    }
-
-    const url = new URL(`${wpUrl}/wp-json/wc/v3/products`);
-    url.searchParams.append('search', query);
+    // Use our custom Bellano search endpoint for better Hebrew support
+    const url = new URL(`${wpUrl}/wp-json/bellano/v1/search`);
+    url.searchParams.append('q', query);
     url.searchParams.append('per_page', perPage);
-    url.searchParams.append('status', 'publish');
-    url.searchParams.append('consumer_key', consumerKey);
-    url.searchParams.append('consumer_secret', consumerSecret);
 
-    console.log('Fetching from WooCommerce...');
+    console.log('Fetching from Bellano search...');
     
     const response = await fetch(url.toString(), {
       headers: {
@@ -47,29 +29,24 @@ export async function GET(request: NextRequest) {
       cache: 'no-store',
     });
 
-    console.log('WooCommerce response status:', response.status);
+    console.log('Bellano search response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('WooCommerce API error:', response.status, errorText);
+      console.error('Bellano search API error:', response.status, errorText);
       return NextResponse.json(
-        { error: `WooCommerce API error: ${response.status}`, products: [] },
+        { error: `Search API error: ${response.status}`, products: [] },
         { status: 500 }
       );
     }
 
     const data = await response.json();
-    console.log('Got', data.length, 'products from WooCommerce');
+    console.log('Got', data.products?.length || 0, 'products from Bellano search');
     
-    const products = data.map((product: any) => ({
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      image: product.images?.[0]?.src || product.images?.[0]?.thumbnail || '',
-      price: product.price,
-    }));
-
-    return NextResponse.json({ products });
+    return NextResponse.json({ 
+      products: data.products || [],
+      total: data.total || 0,
+    });
   } catch (error) {
     console.error('Product search error:', error);
     return NextResponse.json(
