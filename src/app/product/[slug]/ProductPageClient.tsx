@@ -96,6 +96,49 @@ const parseVideoShortcodes = (html: string): string => {
   });
 };
 
+/**
+ * Clean product description from unwanted HTML and shortcodes
+ * - Removes ChatGPT/AI-generated wrapper divs
+ * - Removes WordPress shortcodes like [read more] [/read]
+ * - Removes inline styles but keeps basic formatting
+ * - Preserves <br> and <p> tags for line breaks
+ */
+const cleanProductDescription = (html: string): string => {
+  if (!html) return '';
+  
+  let cleaned = html
+    // Remove WordPress shortcodes
+    .replace(/\[read\s*more\]/gi, '')
+    .replace(/\[\/read\]/gi, '')
+    .replace(/\[read\]/gi, '')
+    
+    // Remove ChatGPT/AI wrapper divs (keep inner content)
+    .replace(/<div[^>]*class="[^"]*(?:group|markdown|prose|dark:|flex|gap-)[^"]*"[^>]*>/gi, '')
+    .replace(/<\/div>/gi, '')
+    
+    // Remove span with inline color styles (keep content)
+    .replace(/<span[^>]*style="[^"]*color[^"]*"[^>]*>([\s\S]*?)<\/span>/gi, '$1')
+    
+    // Remove all inline styles from remaining tags
+    .replace(/\s*style="[^"]*"/gi, '')
+    
+    // Remove class attributes (we'll style with our own CSS)
+    .replace(/\s*class="[^"]*"/gi, '')
+    
+    // Clean up empty paragraphs
+    .replace(/<p>\s*<\/p>/g, '')
+    .replace(/<p>&nbsp;<\/p>/g, '')
+    
+    // Convert multiple <br> to single
+    .replace(/(<br\s*\/?>\s*){2,}/gi, '<br>')
+    
+    // Clean up whitespace
+    .replace(/\n\s*\n/g, '\n')
+    .trim();
+  
+  return cleaned;
+};
+
 // Component for safely rendering HTML content (client-only)
 function HtmlContent({ html, className }: { html: string; className?: string }) {
   const [mounted, setMounted] = useState(false);
@@ -104,8 +147,9 @@ function HtmlContent({ html, className }: { html: string; className?: string }) 
     setMounted(true);
   }, []);
   
-  // Parse video shortcodes
-  const parsedHtml = parseVideoShortcodes(html);
+  // Clean and parse video shortcodes
+  const cleanedHtml = cleanProductDescription(html);
+  const parsedHtml = parseVideoShortcodes(cleanedHtml);
   
   if (!mounted) {
     // Return plain text version during SSR
@@ -128,8 +172,9 @@ function ExpandableShortDescription({ html, className, maxLines = 4 }: { html: s
   const contentRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   
-  // Parse video shortcodes
-  const parsedHtml = parseVideoShortcodes(html);
+  // Clean and parse video shortcodes
+  const cleanedHtml = cleanProductDescription(html);
+  const parsedHtml = parseVideoShortcodes(cleanedHtml);
   
   useEffect(() => {
     setMounted(true);
