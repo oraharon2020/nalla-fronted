@@ -172,9 +172,16 @@ export async function POST(request: NextRequest) {
         lineItem.variation_id = item.variation_id;
       }
       
-      // NOTE: We don't send variation_attributes as meta_data anymore
-      // WooCommerce automatically displays them when variation_id is set
-      // This prevents duplicate attributes in order display
+      // Add variation attributes for "Any" type attributes that WooCommerce doesn't include
+      // Use clean Hebrew names directly (not bellano_attr_ prefix)
+      if (item.variation_attributes && item.variation_attributes.length > 0) {
+        item.variation_attributes.forEach((attr) => {
+          lineItem.meta_data.push({ 
+            key: attr.name,
+            value: attr.value
+          });
+        });
+      }
       
       // If admin fields are present, add them as meta data and override price
       if (item.admin_fields) {
