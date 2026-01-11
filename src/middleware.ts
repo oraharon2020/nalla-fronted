@@ -175,7 +175,7 @@ export function middleware(request: NextRequest) {
       /-העתק-?\d*$/,                 // -העתק or -העתק-2
       /-סייל$/,                      // -סייל
       /-מבצע$/,                      // -מבצע
-      /-2$|-3$|-4$/,                 // trailing numbers (duplicates)
+      // Removed /-2$|-3$|-4$/ pattern - it was breaking real products like tomas-2
     ];
     
     let cleanSlug = productSlug;
