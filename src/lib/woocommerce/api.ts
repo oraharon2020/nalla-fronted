@@ -377,10 +377,44 @@ export async function getRelatedProducts(productId: number, limit = 4): Promise<
 }
 
 /**
- * Search products
+ * Search products using Bellano custom search endpoint (better Hebrew support)
  */
 export async function searchProducts(query: string, limit = 12): Promise<WooProduct[]> {
-  return getProducts({ search: query, per_page: limit });
+  try {
+    const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://admin.nalla.co.il';
+    const url = new URL(`${wpUrl}/wp-json/bellano/v1/search`);
+    url.searchParams.append('q', query);
+    url.searchParams.append('per_page', String(limit));
+    
+    const response = await fetch(url.toString(), {
+      headers: { 'Content-Type': 'application/json' },
+      next: { revalidate: 60 },
+    });
+    
+    if (!response.ok) {
+      console.error('Bellano search API error:', response.status);
+      // Fallback to WooCommerce search
+      return getProducts({ search: query, per_page: limit });
+    }
+    
+    const data = await response.json();
+    
+    // Transform Bellano search results to WooProduct format
+    return (data.products || []).map((p: { id: number; name: string; slug: string; image: string; price: string; regular_price: string; sale_price: string; on_sale: boolean }) => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      images: p.image ? [{ id: 0, src: p.image, alt: p.name }] : [],
+      price: p.price,
+      regular_price: p.regular_price,
+      sale_price: p.sale_price,
+      on_sale: p.on_sale,
+    }));
+  } catch (error) {
+    console.error('Search error:', error);
+    // Fallback to WooCommerce search
+    return getProducts({ search: query, per_page: limit });
+  }
 }
 
 /**
