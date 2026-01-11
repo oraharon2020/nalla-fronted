@@ -313,7 +313,7 @@ export const getFullProductData = cache(async (slug: string): Promise<FullProduc
     const response = await fetch(url, {
       next: { 
         revalidate: 600, // 10 minutes cache
-        tags: ['woocommerce', `product-${decodedSlug}`]
+        tags: ['woocommerce', `product-${normalizedSlug}`] // Use encoded slug for valid HTTP header
       }
     });
     
