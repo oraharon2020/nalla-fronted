@@ -1,4 +1,4 @@
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -24,6 +24,9 @@ export async function POST(request: NextRequest) {
   }
   
   try {
+    // Revalidate the fetch cache tag (this clears WooCommerce API cache)
+    revalidateTag('woocommerce');
+    
     // Revalidate the specified path
     revalidatePath(path);
     
