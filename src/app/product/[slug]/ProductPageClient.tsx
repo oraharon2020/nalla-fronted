@@ -317,6 +317,8 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
   const addToCartRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const [showFloatingButton, setShowFloatingButton] = useState(false);
+  const [colorTooltip, setColorTooltip] = useState<string | null>(null);
+  const colorTooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   
   const setCurrentProduct = useAdminStore((state) => state.setCurrentProduct);
   
@@ -952,16 +954,24 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                             const hasSwatchImage = swatch?.image;
                             
                             return (
+                              <div key={option} className="relative">
                               <button
-                                key={option}
-                                onClick={() => setSelectedAttributes(prev => ({ ...prev, [attr.name]: option }))}
+                                onClick={() => {
+                                  setSelectedAttributes(prev => ({ ...prev, [attr.name]: option }));
+                                  // Clear previous timeout
+                                  if (colorTooltipTimeout.current) {
+                                    clearTimeout(colorTooltipTimeout.current);
+                                  }
+                                  setColorTooltip(option);
+                                  colorTooltipTimeout.current = setTimeout(() => setColorTooltip(null), 1500);
+                                }}
                                 className={`w-10 h-10 rounded-full transition overflow-hidden ${
                                   selectedAttributes[attr.name] === option
                                     ? 'ring-2 ring-offset-2 ring-black'
                                     : 'ring-1 ring-gray-300 hover:ring-gray-400'
                                 }`}
                                 style={hasSwatchImage ? undefined : getColorStyle(option)}
-                                title={option}
+                                aria-label={option}
                               >
                                 {hasSwatchImage && (
                                   <Image
@@ -973,6 +983,14 @@ export function ProductPageClient({ product, variations = [], faqs = [], video =
                                   />
                                 )}
                               </button>
+                              {/* Color name tooltip */}
+                              {colorTooltip === option && (
+                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap animate-in fade-in zoom-in duration-200 z-10">
+                                  {option}
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black"></div>
+                                </div>
+                              )}
+                            </div>
                             );
                           })}
                         </div>
