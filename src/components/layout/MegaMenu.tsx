@@ -99,13 +99,25 @@ export function MegaMenu() {
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 overflow-hidden">
                   {item.icon_url ? (
-                    <Image
-                      src={item.icon_url}
-                      alt={item.name}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-contain"
-                    />
+                    // Use img tag for SVG files, Image component for other formats
+                    item.icon_url.endsWith('.svg') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.icon_url}
+                        alt={item.name}
+                        width={48}
+                        height={48}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Image
+                        src={item.icon_url}
+                        alt={item.name}
+                        width={48}
+                        height={48}
+                        className="w-full h-full object-contain"
+                      />
+                    )
                   ) : (
                     getEmoji(item.name)
                   )}
@@ -132,12 +144,21 @@ export function MegaMenu() {
                   style={{ backgroundColor: section.bg_color || '#4a7c59' }}
                 >
                   {section.image_url && (
-                    <Image
-                      src={section.image_url}
-                      alt={section.title}
-                      fill
-                      className="object-cover opacity-50"
-                    />
+                    section.image_url.endsWith('.svg') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={section.image_url}
+                        alt={section.title}
+                        className="absolute inset-0 w-full h-full object-cover opacity-50"
+                      />
+                    ) : (
+                      <Image
+                        src={section.image_url}
+                        alt={section.title}
+                        fill
+                        className="object-cover opacity-50"
+                      />
+                    )
                   )}
                   <div className={`absolute bottom-0 left-0 right-0 p-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
                     <p className="font-semibold leading-tight">{section.title}</p>
