@@ -292,9 +292,22 @@ export interface FullProductData {
  */
 export const getFullProductData = cache(async (slug: string): Promise<FullProductData | null> => {
   try {
-    // Decode then re-encode slug to handle Hebrew characters correctly
-    // Next.js sometimes passes lowercase encoded slugs (%d7) instead of uppercase (%D7)
-    const normalizedSlug = encodeURIComponent(decodeURIComponent(slug));
+    // Fully decode slug - Next.js sometimes passes double-encoded slugs
+    // e.g., %25d7%25a9 instead of %d7%a9 (where %25 is encoded %)
+    let decodedSlug = slug;
+    try {
+      // Keep decoding until no more changes (handles double/triple encoding)
+      let prev = '';
+      while (prev !== decodedSlug) {
+        prev = decodedSlug;
+        decodedSlug = decodeURIComponent(decodedSlug);
+      }
+    } catch {
+      // If decoding fails, use original slug
+      decodedSlug = slug;
+    }
+    // Re-encode once for the API URL
+    const normalizedSlug = encodeURIComponent(decodedSlug);
     const url = getApiEndpoint(`product-full/${normalizedSlug}`);
     
     const response = await fetch(url, {
