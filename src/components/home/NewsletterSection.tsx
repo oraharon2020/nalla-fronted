@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { track } from '@vercel/analytics';
+import { useNewsletterSubscribe } from '@/hooks/useNewsletterSubscribe';
 
 export function NewsletterSection() {
   const [formData, setFormData] = useState({
@@ -10,57 +10,14 @@ export function NewsletterSection() {
     email: '',
     marketingConsent: false,
   });
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  
+  const { subscribe, status, errorMessage } = useNewsletterSubscribe();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.phone || !formData.email) {
-      setErrorMessage('נא למלא את כל השדות');
-      setStatus('error');
-      return;
-    }
-
-    if (!formData.marketingConsent) {
-      setErrorMessage('נא לאשר קבלת חומר פרסומי');
-      setStatus('error');
-      return;
-    }
-    
-    setStatus('loading');
-    setErrorMessage('');
-    
-    try {
-      const response = await fetch('/api/newsletter/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      
-      if (!response.ok) {
-        throw new Error('שגיאה בשליחת הטופס');
-      }
-      
-      // Track newsletter signup
-      track('newsletter_signup', {
-        source: 'homepage',
-        has_marketing_consent: formData.marketingConsent,
-      });
-      
-      // Facebook Pixel - Lead
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'Lead', {
-          content_name: 'Newsletter Signup',
-          content_category: 'Newsletter',
-        });
-      }
-      
-      setStatus('success');
+    const success = await subscribe(formData);
+    if (success) {
       setFormData({ name: '', phone: '', email: '', marketingConsent: false });
-    } catch (error) {
-      setErrorMessage('אירעה שגיאה, נסו שוב מאוחר יותר');
-      setStatus('error');
     }
   };
 

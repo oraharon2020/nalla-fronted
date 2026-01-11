@@ -57,6 +57,9 @@ export default function CheckoutPage() {
   // Terms agreement
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   
+  // Newsletter subscription
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
+  
   const [customerData, setCustomerData] = useState<CustomerData>({
     firstName: '',
     lastName: '',
@@ -269,6 +272,8 @@ export default function CheckoutPage() {
           payment_method: paymentMethod,
           // Include coupon if applied
           coupon_code: appliedCoupon?.code || null,
+          // Newsletter subscription
+          subscribe_newsletter: subscribeNewsletter,
           // Include UTM tracking data
           utm_data: getStoredUtmParams(),
         }),
@@ -1109,6 +1114,21 @@ export default function CheckoutPage() {
                       >
                         תקנון האתר ומדיניות הפרטיות
                       </Link>
+                    </span>
+                  </label>
+                </div>
+
+                {/* Newsletter Subscription Checkbox */}
+                <div className="mt-3">
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={subscribeNewsletter}
+                      onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-600 group-hover:text-gray-800">
+                      אני מאשר/ת לקבל עדכונים ומבצעים באימייל
                     </span>
                   </label>
                 </div>

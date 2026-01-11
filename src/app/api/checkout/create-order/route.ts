@@ -71,6 +71,7 @@ interface CreateOrderRequest {
   shipping_method: string;
   payment_method?: 'credit_card' | 'phone_order';
   coupon_code?: string | null;
+  subscribe_newsletter?: boolean;
   utm_data?: UtmData | null;
 }
 
@@ -128,7 +129,7 @@ function getTrafficSourceLabel(utm: UtmData | null | undefined): string {
 export async function POST(request: NextRequest) {
   try {
     const body: CreateOrderRequest = await request.json();
-    const { customer, items, shipping_method, payment_method = 'credit_card', coupon_code, utm_data } = body;
+    const { customer, items, shipping_method, payment_method = 'credit_card', coupon_code, subscribe_newsletter, utm_data } = body;
 
     if (!WC_KEY || !WC_SECRET) {
       return NextResponse.json(
@@ -328,6 +329,11 @@ export async function POST(request: NextRequest) {
         ...(utm_data?.gclid ? [{ key: '_gclid', value: utm_data.gclid }] : []),
         ...(utm_data?.fbclid ? [{ key: '_fbclid', value: utm_data.fbclid }] : []),
         ...(utm_data?.landing_page ? [{ key: '_landing_page', value: utm_data.landing_page }] : []),
+        // Newsletter subscription status
+        {
+          key: 'סטטוס דיוור',
+          value: subscribe_newsletter ? 'מנוי' : 'לא מנוי',
+        },
       ],
     };
 
@@ -353,6 +359,40 @@ export async function POST(request: NextRequest) {
         },
         { status: response.status }
       );
+    }
+
+    // If customer opted in to newsletter, subscribe them to InfoRU
+    if (subscribe_newsletter) {
+      try {
+        const nameParts = `${customer.firstName} ${customer.lastName}`.trim().split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        await fetch('https://capi.inforu.co.il/api/v2/Automation/Trigger', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': 'Basic bmFsbGFUTEQ6OGFmZjI0OTEtZWNhYy00OTcwLTkwZGEtYmYwMmJhYTlkZjli',
+          },
+          body: JSON.stringify({
+            Data: {
+              ApiEventName: 'NewReg',
+              Contacts: [
+                {
+                  Email: customer.email.toLowerCase().trim(),
+                  PhoneNumber: customer.phone.replace(/\D/g, ''),
+                  FirstName: firstName,
+                  LastName: lastName,
+                }
+              ]
+            }
+          }),
+        });
+        console.log(`Newsletter subscription sent to InfoRU for: ${customer.email}`);
+      } catch (inforuError) {
+        // Don't fail the order if InfoRU fails
+        console.error('InfoRU subscription error:', inforuError);
+      }
     }
 
     return NextResponse.json({
