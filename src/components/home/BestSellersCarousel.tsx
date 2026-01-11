@@ -136,7 +136,7 @@ export function BestSellersCarousel({ products, title = 'OUR BEST SELLERS' }: Be
                         alt={product.name}
                         fill
                         className="object-cover transition-all duration-500 group-hover:scale-105"
-                        sizes="300px"
+                        sizes="280px"
                         quality={75}
                       />
                     )}

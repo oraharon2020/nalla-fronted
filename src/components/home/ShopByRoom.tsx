@@ -80,7 +80,7 @@ export function ShopByRoom() {
                 alt={activeRoom.nameHe}
                 fill
                 className="object-cover transition-opacity duration-500"
-                sizes="(max-width: 768px) 100vw, 60vw"
+                sizes="(max-width: 768px) 100vw, 450px"
                 priority
               />
               

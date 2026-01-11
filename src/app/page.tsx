@@ -142,7 +142,7 @@ async function HeroSection() {
             autoPlay
             muted
             playsInline
-            poster={getOptimizedImageUrl(videoPoster || mobileImageUrl, 750)}
+            poster={getOptimizedImageUrl(videoPoster || mobileImageUrl, 480)}
             className="w-full h-full object-cover md:hidden"
             width={750}
             height={422}
@@ -273,7 +273,7 @@ async function CategoriesSection() {
                       alt={category.name}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 768px) 50vw, 420px"
+                      sizes="(max-width: 768px) 45vw, 200px"
                       quality={75}
                     />
                   )}
